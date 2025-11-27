@@ -35,16 +35,19 @@ else()
 	set(PLAYDATE_GAME_DEVICE corgo_engine_DEVICE)
 endif()
 
+# External libraries
+file(GLOB EXT_LIBS "src/external/*.c" "src/external/*.h" "src/external/**/*.c" "src/external/**/*.h")
+
 if (TOOLCHAIN STREQUAL "armgcc")
 	add_compile_options(-Wdouble-promotion -Werror)
 	if (CMAKE_BUILD_TYPE STREQUAL "Release")
-		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c)
+		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS})
 	else()
-		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c)
+		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS})
 	endif()
 else()
 	add_compile_options(-WX)
-	add_library(${PLAYDATE_GAME_NAME} SHARED src/main.c )
+	add_library(${PLAYDATE_GAME_NAME} SHARED src/main.c ${EXT_LIBS})
 endif()
 
 include(${SDK}/C_API/buildsupport/playdate_game.cmake)
