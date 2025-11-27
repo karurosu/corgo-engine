@@ -1,0 +1,5 @@
+name=Corgo Engine
+author=Carlos Camacho
+description=A small ECS based engine for the playdate
+bundleID=com.karurosu.corgoengine
+imagePath=
