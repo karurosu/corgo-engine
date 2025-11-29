@@ -24,13 +24,18 @@ A minimalistic ECS (Entity Component System) engine for the Panic Playdate handh
 - `BuildDeviceRetail.bat` - Build device release version
 
 ### Debugging
+Build and run in VS Code
 Open `build.vs2022/corgo_engine.sln` in Visual Studio 2022 and press F5 to build and launch the Playdate Simulator.
 
-## Credits
+## 3rd Party Credits
 
-Uses Convenient Containers by JacksonAllan.
+Convenient Containers by JacksonAllan.
 MIT License
 https://github.com/JacksonAllan/CC?tab=readme-ov-file
+
+Unity Test by ThrowInTheSwitch
+MIT License
+https://github.com/ThrowTheSwitch/Unity?tab=readme-ov-file
 
 ## License
 

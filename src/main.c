@@ -10,7 +10,7 @@
 #include "pd_api.h"
 
 #define CC_NO_SHORT_NAMES
-#include "external/cc/cc.h"
+#include "cc.h"
 
 static int update(void* userdata);
 const char* fontpath = "/System/Fonts/Asheville-Sans-14-Bold.pft";

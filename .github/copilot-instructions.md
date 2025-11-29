@@ -3,6 +3,11 @@
 ## Project Overview
 This is an ECS (Entity Component System) engine for the Panic Playdate handheld console, written in C11.
 
+## Copilot Context
+- Session summary and latest working notes: see `.github/copilot-session.md`.
+- Review that file before making build/tooling changes to stay aligned with current workflows.
+- Notes should be concise, focusing on a high level description of the changes and not the full details.
+
 ## Playdate API Documentation
 The Playdate C API is accessed through a `PlaydateAPI*` pointer provided to the event handler. All functionality (graphics, system, file, sound, sprite, display, etc.) is accessed through this pointer's subsystem fields.
 
@@ -19,6 +24,12 @@ Key API patterns:
 
 ### CMake-Only Build System
 The project uses **CMake exclusively** via `CMakeLists.txt` which includes `$(SDK)/C_API/buildsupport/playdate_game.cmake`.
+
+### Third-Party Dependencies (FetchContent)
+- Dependencies are fetched at configure time using CMake `FetchContent` and stored in the repo under `3rdParty/`:
+    - CC (Convenient Containers): `https://github.com/JacksonAllan/CC` → `3rdParty/cc`
+    - Unity (Test framework): `https://github.com/ThrowTheSwitch/Unity` → `3rdParty/unity`
+- Include paths are added to all targets; Unity builds as `unity_lib` for tests. Downloads persist across builds and only re-fetch if the folder/tag changes.
 
 ### Build Configurations (4 Total)
 1. **build.vs2022/** - Visual Studio 2022 solution for Windows simulator (for debugging)
@@ -49,6 +60,15 @@ PLAYDATE_GAME_DEVICE = corgo_engine_RELEASE # Device release builds
 - `TOOLCHAIN=armgcc` (default) → `corgo_engine_DEVICE.elf`
 - Otherwise → Simulator `.dll`
 
+### VS Code CMake Integration
+- Use the CMake Tools extension (already configured in `.vscode/settings.json`).
+- Key settings:
+    - `cmake.buildDirectory`: `${workspaceFolder}/build.nmake`
+    - `cmake.sourceDirectory`: `${workspaceFolder}`
+    - `cmake.configureOnOpen`: `false`
+- Build via Command Palette: `CMake: Configure`, `CMake: Build`.
+- Debug/Run simulator via `launch.json`: launches `${env:PLAYDATE_SDK_PATH}/bin/PlaydateSimulator.exe` with `${workspaceFolder}/corgo_engine.pdx`.
+
 ## Key Developer Workflows
 
 ### Regenerating CMake Solutions
@@ -65,6 +85,11 @@ BuildDeviceRetail.bat    # Build device release
 ```
 All batch files auto-configure VS dev environment and pause only on errors.
 
+### Building/Running in VS Code
+- Press F7 or use `CMake: Build` to build with CMake Tools (uses `build.nmake`).
+- Press F5 to launch Playdate Simulator with the generated PDX at the repo root (`corgo_engine.pdx`).
+- The CMake build task is used as the preLaunch task instead of batch files.
+
 ### Debugging in Visual Studio
 1. Open `build.vs2022/corgo_engine.sln` in Visual Studio 2022
 2. Build and run (F5) - pre-configured to launch Playdate Simulator
@@ -78,6 +103,8 @@ The VS project is pre-configured with:
 - **Device Debug**: `corgo_engine_DEVICE.elf` → packaged into `corgo_engine_DEVICE.pdx/`
 - **Device Release**: `corgo_engine_RELEASE.elf` → packaged into `corgo_engine_RELEASE.pdx/`
 - **PDX metadata**: `Source/pdxinfo` contains game name, author, bundle ID
+
+Note: We no longer relocate PDX folders after build; they remain at the repo root (e.g., `corgo_engine.pdx/`). Moving them in CMake interferes with `clean`.
 
 ## Code Patterns & Conventions
 
@@ -110,6 +137,13 @@ static int update(void* userdata) {
 ### Compiler Flags
 - **Device builds** (ARM): `-Wdouble-promotion -Werror` (fail on warnings, warn on float→double promotion)
 - **Simulator builds** (Windows): `-WX` (treat warnings as errors)
+
+### Testing (Unity + CTest)
+- Unity is integrated via `unity_lib` (from `3rdParty/unity/src/unity.c`).
+- Host-only tests (excluded for `TOOLCHAIN=armgcc`).
+- Test target: `coretests` (sources: `src/tests/core.c` + core engine sources).
+- CTest is enabled; run tests with `ctest --output-on-failure` in `build.nmake`.
+- MSVC warning C5045 is disabled for Unity and the `coretests` target.
 
 ## Project Metadata
 **From `Source/pdxinfo`:**

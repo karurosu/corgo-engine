@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 set(CMAKE_C_STANDARD 11)
 
+# Fetch third-party dependencies
+include(FetchContent)
+
 set(ENVSDK $ENV{PLAYDATE_SDK_PATH})
 
 if (NOT ${ENVSDK} STREQUAL "")
@@ -20,6 +23,22 @@ if (NOT EXISTS ${SDK})
 	message(FATAL_ERROR "SDK Path not found; set ENV value PLAYDATE_SDK_PATH")
 	return()
 endif()
+
+FetchContent_Declare(
+  cc
+  GIT_REPOSITORY https://github.com/JacksonAllan/CC.git
+  GIT_TAG main
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdParty/cc
+)
+FetchContent_MakeAvailable(cc)
+
+FetchContent_Declare(
+  unity
+  GIT_REPOSITORY https://github.com/ThrowTheSwitch/Unity.git
+  GIT_TAG master
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdParty/unity
+)
+FetchContent_MakeAvailable(unity)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
@@ -44,6 +63,39 @@ file(GLOB TESTS "src/tests/*.c" "src/tests/*.h" "src/tests/**/*.c" "src/tests/**
 # External libraries
 file(GLOB EXT_LIBS "src/external/*.c" "src/external/*.h" "src/external/**/*.c" "src/external/**/*.h")
 
+# Test executable (only build for simulator/host, not device)
+if (NOT TOOLCHAIN STREQUAL "armgcc")
+	enable_testing()
+	
+	# Unity test framework library
+	add_library(unity_lib STATIC ${unity_SOURCE_DIR}/src/unity.c)
+	target_include_directories(unity_lib PUBLIC ${unity_SOURCE_DIR}/src)
+	
+	# Disable warnings for Unity (third-party code)
+	if(MSVC)
+		target_compile_options(unity_lib PRIVATE /wd5045)
+	endif()
+	
+	# Core tests executable
+	add_executable(coretests 
+		src/tests/core.c
+		${CORE}
+	)
+	target_include_directories(coretests PRIVATE 
+		${cc_SOURCE_DIR}
+		${unity_SOURCE_DIR}/src
+	)
+	target_link_libraries(coretests PRIVATE unity_lib)
+	
+	# Disable warnings for test executable
+	if(MSVC)
+		target_compile_options(coretests PRIVATE /wd5045)
+	endif()
+	
+	# Register test with CTest
+	add_test(NAME CoreTests COMMAND coretests)
+endif()
+
 if (TOOLCHAIN STREQUAL "armgcc")
 	add_compile_options(-Wdouble-promotion -Werror)
 	if (CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -51,10 +103,22 @@ if (TOOLCHAIN STREQUAL "armgcc")
 	else()
 		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE})
 	endif()
+	target_include_directories(${PLAYDATE_GAME_DEVICE} PRIVATE ${cc_SOURCE_DIR})
 else()
 	add_compile_options(-WX)
 	add_library(${PLAYDATE_GAME_NAME} SHARED src/main.c ${EXT_LIBS} ${CORE})
+	target_include_directories(${PLAYDATE_GAME_NAME} PRIVATE ${cc_SOURCE_DIR})
 endif()
 
 include(${SDK}/C_API/buildsupport/playdate_game.cmake)
 
+# Convenience target to launch the Playdate Simulator (simulator builds only)
+if (NOT TOOLCHAIN STREQUAL "armgcc")
+	add_custom_target(run
+		COMMAND "${SDK}/bin/PlaydateSimulator.exe" "${CMAKE_SOURCE_DIR}/${PLAYDATE_GAME_NAME}.pdx"
+		DEPENDS ${PLAYDATE_GAME_NAME}
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+		COMMENT "Launching Playdate Simulator with ${PLAYDATE_GAME_NAME}.pdx"
+		VERBATIM
+	)
+endif()

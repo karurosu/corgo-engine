@@ -1,5 +1,10 @@
 {
     "files.associations": {
         "pd_api.h": "c"
-    }
+    },
+    "cmake.buildDirectory": "${workspaceFolder}/build.nmake",
+    "cmake.configureOnOpen": false,
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.buildBeforeRun": true,
+    "cmake.parallelJobs": 0
 }
