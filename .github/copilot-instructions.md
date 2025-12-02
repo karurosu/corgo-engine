@@ -108,6 +108,11 @@ Note: We no longer relocate PDX folders after build; they remain at the repo roo
 
 ## Code Patterns & Conventions
 
+### Naming Conventions
+- **Engine Prefix**: All engine variables, functions, types, and macros must use the `CE_` prefix (Corgo Engine).
+- Examples: `CE_ECS_Context`, `CE_ECS_Init()`, `CE_CORE_DEBUG_COMPONENT`, `CE_MAX_COMPONENT_TYPES`
+- This prevents namespace collisions with Playdate SDK and third-party libraries.
+
 ### Playdate C API Usage Pattern
 All Playdate functionality accessed through `PlaydateAPI*` pointer:
 ```c
@@ -144,6 +149,116 @@ static int update(void* userdata) {
 - Test target: `coretests` (sources: `src/tests/core.c` + core engine sources).
 - CTest is enabled; run tests with `ctest --output-on-failure` in `build.nmake`.
 - MSVC warning C5045 is disabled for Unity and the `coretests` target.
+- Use `#define CE_CORE_TEST_MODE` before including ECS headers to isolate core components only (excludes engine/game components in tests).
+
+### Include Path Configuration
+- `src/` is added to include directories for all targets (simulator, device, tests).
+- Headers can be included using absolute paths from `src/`, e.g., `#include "ecs/ecs.h"`.
+- Primary ECS entry point: `#include "ecs/ecs.h"` aggregates all ECS types, components, and storage.
+
+## ECS Component System
+
+### Component Architecture
+The ECS uses an X-macro pattern for extensible component registration. Components are organized into three categories:
+
+#### Component Types
+1. **Core Components** (`src/ecs/core/core_components.h`)
+   - Essential ECS infrastructure components
+   - UIDs 0-10 reserved
+   - Example: `CE_CORE_DEBUG_COMPONENT` (UID 0)
+   - Always included in builds
+
+2. **Engine Components** (`src/engine/components.h`)
+   - Reusable engine-level components (rendering, physics, input, etc.)
+   - UIDs 11-99 recommended
+   - Examples: Transform, Sprite, Physics
+   - Excluded in `CE_CORE_TEST_MODE`
+
+3. **Game Components** (`src/game/components.h`)
+   - Project-specific gameplay components
+   - UIDs 100+ recommended
+   - Examples: Health, AI, Inventory
+   - Excluded in `CE_CORE_TEST_MODE`
+
+### Component Definition Pattern
+Each component requires:
+
+**1. Header Declaration** (e.g., `src/ecs/core/core_components.h`):
+```c
+// Define the component data structure
+typedef struct CE_Core_DebugComponent {
+    bool enabled;
+} CE_Core_DebugComponent;
+
+// Add to the component descriptor list (X-macro)
+#define CE_COMPONENT_DESC_CORE(X) \
+    X(CE_CORE_DEBUG_COMPONENT, 0, CE_Core_DebugComponent)
+```
+
+**2. Implementation File** (e.g., `src/ecs/core/core_components.c`):
+```c
+#include "ecs/components.h"
+
+// Implement init function
+void CE_CORE_DEBUG_COMPONENT_init(OUT CE_Core_DebugComponent* component) {
+    component->enabled = false;
+}
+
+// Implement cleanup function
+void CE_CORE_DEBUG_COMPONENT_cleanup(OUT CE_Core_DebugComponent* component) {
+    // Free any dynamic resources
+}
+
+// Generate component descriptor registration
+CE_GENERATE_COMPONENT_IMP(CE_CORE_DEBUG_COMPONENT, 0, CE_Core_DebugComponent)
+```
+
+### Adding a New Component
+
+**Step 1**: Choose the appropriate category (core/engine/game) and assign a unique UID.
+
+**Step 2**: Define the struct and add to the X-macro list in the corresponding header:
+```c
+// In src/engine/components.h (for engine components)
+typedef struct CE_Engine_HealthComponent {
+    int currentHealth;
+    int maxHealth;
+} CE_Engine_HealthComponent;
+
+#define CE_COMPONENT_DESC_ENGINE(X) \
+    X(CE_ENGINE_HEALTH, 20, CE_Engine_HealthComponent) \
+    /* other engine components... */
+```
+
+**Step 3**: Create implementation file with init, cleanup, and descriptor generation:
+```c
+// In src/engine/components/health.c
+#include "ecs/components.h"
+
+void CE_ENGINE_HEALTH_init(OUT CE_Engine_HealthComponent* component) {
+    component->currentHealth = 100;
+    component->maxHealth = 100;
+}
+
+void CE_ENGINE_HEALTH_cleanup(OUT CE_Engine_HealthComponent* component) {
+    // Cleanup if needed
+}
+
+CE_GENERATE_COMPONENT_IMP(CE_ENGINE_HEALTH, 20, CE_Engine_HealthComponent)
+```
+
+**Step 4**: Rebuild. The component enum value, descriptor registration, and init/cleanup functions are automatically generated via X-macros. The `.c` file is automatically picked up by CMake's `file(GLOB ...)` patterns.
+
+### Component Registration Details
+- **Enum Generation**: `CE_ComponentTypesEnum` in `src/ecs/components.h` contains all component types.
+- **Descriptor Array**: `CE_ECS_Context.componentDefinitions[]` holds static metadata (UID, type, bitmask).
+- **Init Function**: `CE_ECS_Init()` populates descriptors by calling each component's `_description()` function.
+- **Bitmask**: Each component gets a unique bit `(1ULL << componentType)` for efficient entity queries.
+- **UID Immutability**: Component UIDs must never change after initial use (breaks serialization).
+
+### Component Limits
+- Maximum 64 component types (`CE_MAX_COMPONENT_TYPES`) to fit in a 64-bit bitmask.
+- Compile-time assertion enforces this limit in `src/ecs/components.h`.
 
 ## Project Metadata
 **From `Source/pdxinfo`:**

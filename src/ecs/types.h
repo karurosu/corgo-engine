@@ -37,7 +37,7 @@ typedef uint8_t CE_ComponentTypeId;
 #define CE_MAX_COMPONENT_TYPES 64
 
 // Invalid entity id constant
-#define INVALID_ENTITY 0
+#define CE_INVALID_ENTITY 0
 
 // Invalid component id constant
 #define CE_INVALID_COMPONENT 0x0
