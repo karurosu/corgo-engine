@@ -1,4 +1,6 @@
 #include "unity.h"
+#include "ecs/ecs.h"
+
 
 void setUp(void) {
     // Set up test fixtures

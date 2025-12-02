@@ -1,16 +1,19 @@
 //
 //  main.c
-//  Extension
 //  Copyright (c) 2025 Carlos Camacho. All rights reserved.
 //
 
 #include <stdio.h>
 #include <stdlib.h>
 
+// Include Playdate API
 #include "pd_api.h"
 
-#define CC_NO_SHORT_NAMES
-#include "cc.h"
+// Include main ECS header
+#include "ecs/ecs.h"
+
+// Global ECS context
+CE_ECS_Context ecsContext;
 
 static int update(void* userdata);
 const char* fontpath = "/System/Fonts/Asheville-Sans-14-Bold.pft";
@@ -32,6 +35,9 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 			pd->system->error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath, err);
 
 		pd->system->setUpdateCallback(update, pd);
+		
+		// Initialize ECS
+		CE_ECS_Init(&ecsContext);
 	}
 	
 	return 0;

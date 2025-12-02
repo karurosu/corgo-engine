@@ -55,13 +55,21 @@ else()
 endif()
 
 # Core Files
-file(GLOB CORE "src/core/*.c" "src/core/*.h" "src/core/**/*.c" "src/core/**/*.h")
+file(GLOB CORE "src/ecs/*.c" "src/ecs/*.h" "src/ecs/**/*.c" "src/ecs/**/*.h")
+
+# Engine Files
+file(GLOB ENGINE "src/engine/*.c" "src/engine/*.h" "src/engine/**/*.c" "src/engine/**/*.h")
+
+# Game Files
+file(GLOB GAME "src/game/*.c" "src/game/*.h" "src/game/**/*.c" "src/game/**/*.h")
 
 # Tests Files
 file(GLOB TESTS "src/tests/*.c" "src/tests/*.h" "src/tests/**/*.c" "src/tests/**/*.h")
 
 # External libraries
 file(GLOB EXT_LIBS "src/external/*.c" "src/external/*.h" "src/external/**/*.c" "src/external/**/*.h")
+
+
 
 # Test executable (only build for simulator/host, not device)
 if (NOT TOOLCHAIN STREQUAL "armgcc")
@@ -84,6 +92,7 @@ if (NOT TOOLCHAIN STREQUAL "armgcc")
 	target_include_directories(coretests PRIVATE 
 		${cc_SOURCE_DIR}
 		${unity_SOURCE_DIR}/src
+		${CMAKE_SOURCE_DIR}/src
 	)
 	target_link_libraries(coretests PRIVATE unity_lib)
 	
@@ -92,6 +101,8 @@ if (NOT TOOLCHAIN STREQUAL "armgcc")
 		target_compile_options(coretests PRIVATE /wd5045)
 	endif()
 	
+	target_compile_definitions(coretests PRIVATE CE_CORE_TEST_MODE)
+
 	# Register test with CTest
 	add_test(NAME CoreTests COMMAND coretests)
 endif()
@@ -99,15 +110,15 @@ endif()
 if (TOOLCHAIN STREQUAL "armgcc")
 	add_compile_options(-Wdouble-promotion -Werror)
 	if (CMAKE_BUILD_TYPE STREQUAL "Release")
-		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE})
+		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE} ${ENGINE} ${GAME})
 	else()
-		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE})
+		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE} ${ENGINE} ${GAME})
 	endif()
-	target_include_directories(${PLAYDATE_GAME_DEVICE} PRIVATE ${cc_SOURCE_DIR})
+	target_include_directories(${PLAYDATE_GAME_DEVICE} PRIVATE ${cc_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 else()
 	add_compile_options(-WX)
-	add_library(${PLAYDATE_GAME_NAME} SHARED src/main.c ${EXT_LIBS} ${CORE})
-	target_include_directories(${PLAYDATE_GAME_NAME} PRIVATE ${cc_SOURCE_DIR})
+	add_library(${PLAYDATE_GAME_NAME} SHARED src/main.c ${EXT_LIBS} ${CORE} ${ENGINE} ${GAME})
+	target_include_directories(${PLAYDATE_GAME_NAME} PRIVATE ${cc_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 endif()
 
 include(${SDK}/C_API/buildsupport/playdate_game.cmake)

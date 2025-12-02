@@ -1,6 +1,10 @@
 {
     "files.associations": {
-        "pd_api.h": "c"
+        "pd_api.h": "c",
+        "stdbool.h": "c",
+        "system_error": "c",
+        "xlocale": "c",
+        "components.h": "c"
     },
     "cmake.buildDirectory": "${workspaceFolder}/build.nmake",
     "cmake.configureOnOpen": false,
