@@ -1,15 +1,28 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "CMake: build",
-            "type": "cmake",
-            "command": "build",
-            "problemMatcher": [],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        }
-    ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "CMake: build",
+			"type": "cmake",
+			"command": "build",
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "ctest-core",
+			"type": "shell",
+			"command": "ctest",
+			"args": [
+				"--output-on-failure"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		}
+	]
 }

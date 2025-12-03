@@ -10,5 +10,11 @@
     "cmake.configureOnOpen": false,
     "cmake.sourceDirectory": "${workspaceFolder}",
     "cmake.buildBeforeRun": true,
-    "cmake.parallelJobs": 0
+    "cmake.parallelJobs": 0,
+    "files.exclude": {
+        "**/*.rpyc": true,
+        "**/*.rpa": true,
+        "**/*.rpymc": true,
+        "**/cache/": true
+    }
 }

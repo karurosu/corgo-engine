@@ -60,3 +60,4 @@ dkms.conf
 /.sentry-native
 /3rdParty
 .github/copilot-session.md
+/Testing

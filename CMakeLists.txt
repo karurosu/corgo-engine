@@ -69,7 +69,8 @@ file(GLOB TESTS "src/tests/*.c" "src/tests/*.h" "src/tests/**/*.c" "src/tests/**
 # External libraries
 file(GLOB EXT_LIBS "src/external/*.c" "src/external/*.h" "src/external/**/*.c" "src/external/**/*.h")
 
-
+# Preserve directory structure in Visual Studio solution
+source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${ENGINE} ${GAME} ${EXT_LIBS})
 
 # Test executable (only build for simulator/host, not device)
 if (NOT TOOLCHAIN STREQUAL "armgcc")
@@ -89,6 +90,10 @@ if (NOT TOOLCHAIN STREQUAL "armgcc")
 		src/tests/core.c
 		${CORE}
 	)
+	
+	# Preserve directory structure for test project
+	source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} src/tests/core.c)
+	
 	target_include_directories(coretests PRIVATE 
 		${cc_SOURCE_DIR}
 		${unity_SOURCE_DIR}/src
