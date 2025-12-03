@@ -4,7 +4,8 @@
         "stdbool.h": "c",
         "system_error": "c",
         "xlocale": "c",
-        "components.h": "c"
+        "components.h": "c",
+        "ecs.h": "c"
     },
     "cmake.buildDirectory": "${workspaceFolder}/build.nmake",
     "cmake.configureOnOpen": false,

@@ -16,8 +16,8 @@
 #include "cc.h"
 
 //// Generic macros
-#define IN  // Marks input parameters
-#define OUT // Marks output parameters
+#define IN  // Marks input pointer parameters
+#define OUT // Marks output pointer parameters
 #define CE_OK 0 // Generic success code
 #define CE_ERROR -1 // Generic error code
 
@@ -44,14 +44,15 @@ typedef uint8_t CE_TypeId;
 //// CE_Id kind
 // Different kinds of Ids.
 typedef enum CE_IdKind {
-    CE_ID_ENTITY_REFERENCE = 0,
-    CE_ID_COMPONENT_REFERENCE = 1,
-    CE_ID_ENTITY_RELATIONSHIP = 2,
+    CE_ID_ENTITY_REFERENCE_KIND = 0,
+    CE_ID_COMPONENT_REFERENCE_KIND = 1,
+    CE_ID_ENTITY_RELATIONSHIP_KIND = 2,
     CE_ID_INVALID_KIND = 3
 } CE_IdKind;
 
-// Invalid entity id constant
+// Invalid econtants
 #define CE_INVALID_ID 0
+#define CE_INVALID_TYPE_ID 0xFF
 
 //// Bit layout helpers
 // Flags (bits 31 and 30 in 0-indexed from MSB, described as 32 and 31 in comments)
@@ -67,37 +68,37 @@ typedef enum CE_IdKind {
 #define CE_ID_MASK_UNIQUE         0xFFFFu // 16 bits
 
 //// Inline flag tests
-static inline bool CE_Id_isComponent(IN CE_Id id) { return (id & CE_ID_FLAG_COMPONENT) != 0; }
+static inline bool CE_Id_isComponent(IN CE_Id id) { return (id != CE_INVALID_ID && (id & CE_ID_FLAG_COMPONENT) != 0); }
 static inline bool CE_Id_isRelationship(IN CE_Id id) { return (!CE_Id_isComponent(id)) && ((id & CE_ID_FLAG_RELATIONSHIP) != 0); }
-static inline bool CE_Id_isEntity(IN CE_Id id) { return (id & CE_ID_FLAG_COMPONENT) == 0; }
+static inline bool CE_Id_isEntity(IN CE_Id id) { return (id != CE_INVALID_ID && (id & CE_ID_FLAG_COMPONENT) == 0); }
 
 static inline CE_IdKind CE_Id_getKind(IN CE_Id id) {
     if (id == CE_INVALID_ID) return CE_ID_INVALID_KIND;
-    if (CE_Id_isComponent(id)) return CE_ID_COMPONENT_REFERENCE;
-    if (CE_Id_isRelationship(id)) return CE_ID_ENTITY_RELATIONSHIP;
-    return CE_ID_ENTITY_REFERENCE;
+    if (CE_Id_isComponent(id)) return CE_ID_COMPONENT_REFERENCE_KIND;
+    if (CE_Id_isRelationship(id)) return CE_ID_ENTITY_RELATIONSHIP_KIND;
+    return CE_ID_ENTITY_REFERENCE_KIND;
 }
 
 //// Inline extractors
 static inline uint32_t CE_Id_getUniqueId(IN CE_Id id) { return (id >> CE_ID_SHIFT_UNIQUE) & CE_ID_MASK_UNIQUE; }
 
 static inline uint32_t CE_Id_getGeneration(IN CE_Id id) {
-    if (!CE_Id_isEntity(id)) return CE_INVALID_ID;
+    if (!CE_Id_isEntity(id)) return 0;
     return (id >> CE_ID_SHIFT_GENERATION) & CE_ID_MASK_GENERATION;
 }
 
 static inline CE_TypeId CE_Id_getComponentTypeId(IN CE_Id id) {
-    if (!CE_Id_isComponent(id)) return (CE_TypeId)CE_INVALID_ID;
+    if (!CE_Id_isComponent(id)) return (CE_TypeId)CE_INVALID_TYPE_ID;
     return (CE_TypeId)((id >> CE_ID_SHIFT_TYPE) & CE_ID_MASK_TYPE6);
 }
 
 static inline CE_TypeId CE_Id_getRelationshipTypeId(IN CE_Id id) {
-    if (!CE_Id_isRelationship(id)) return (CE_TypeId)CE_INVALID_ID;
+    if (!CE_Id_isRelationship(id)) return (CE_TypeId)CE_INVALID_TYPE_ID;
     return (CE_TypeId)((id >> CE_ID_SHIFT_TYPE) & CE_ID_MASK_TYPE6);
 }
 
 //// Mutators and utilities (implemented in core/types.c)
-int CE_Id_setFlags(OUT CE_Id* id, CE_IdKind kind);
+int CE_Id_setKind(OUT CE_Id* id, CE_IdKind kind);
 int CE_Id_setUniqueId(OUT CE_Id* id, uint32_t uniqueId);
 int CE_Id_setGeneration(OUT CE_Id* id, uint32_t generation);
 int CE_Id_setComponentTypeId(OUT CE_Id* id, CE_TypeId typeId);
