@@ -9,18 +9,19 @@
 #define CORGO_ECS_ECS_H
 
 #include "types.h"
+#include "core/id.h"
 #include "components.h"
 #include "core/storage.h"
 
 // Main ECS Context.
 // All ECS definitions and data is stored here. 
 
-typedef struct CE_ECS_Context {
-    CE_ComponentStaticData componentDefinitions[CE_COMPONENT_TYPE_COUNT];
-    CE_ECS_MainStorage storage;
-   
-} CE_ECS_Context;
+struct CE_ECS_Context {
+    CE_ECS_ComponentStaticData m_componentDefinitions[CE_COMPONENT_TYPE_COUNT];
+    CE_ECS_MainStorage m_storage;
+};
 
-void CE_ECS_Init(OUT CE_ECS_Context* context);
+CE_Result CE_ECS_Init(OUT CE_ECS_Context* context, OUT CE_ERROR_CODE *errorCode);
+CE_Result CE_ECS_Cleanup(OUT CE_ECS_Context* context, OUT CE_ERROR_CODE* errorCode);
 
 #endif // CORGO_ECS_ECS_H

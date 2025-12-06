@@ -3,12 +3,12 @@
 //  CE_Id utilities implementation
 //
 
-#include "../types.h"
+#include "id.h"
 
 static inline uint32_t clamp6(uint32_t v) { return v & CE_ID_MASK_TYPE6; }
 static inline uint32_t clamp16(uint32_t v) { return v & CE_ID_MASK_UNIQUE; }
 
-int CE_Id_setKind(OUT CE_Id* id, CE_IdKind kind)
+CE_Result CE_Id_setKind(OUT CE_Id* id, CE_IdKind kind)
 {
     if (!id) return CE_ERROR;
     CE_Id cur = *id;
@@ -30,7 +30,7 @@ int CE_Id_setKind(OUT CE_Id* id, CE_IdKind kind)
     }
 }
 
-int CE_Id_setUniqueId(OUT CE_Id* id, uint32_t uniqueId)
+CE_Result CE_Id_setUniqueId(OUT CE_Id* id, uint32_t uniqueId)
 {
     if (!id) return CE_ERROR;
     if (uniqueId > CE_ID_MASK_UNIQUE) return CE_ERROR;
@@ -40,7 +40,7 @@ int CE_Id_setUniqueId(OUT CE_Id* id, uint32_t uniqueId)
     return CE_OK;
 }
 
-int CE_Id_setGeneration(OUT CE_Id* id, uint32_t generation)
+CE_Result CE_Id_setGeneration(OUT CE_Id* id, uint32_t generation)
 {
     if (!id) return CE_ERROR;
     if (generation > CE_ID_MASK_GENERATION) return CE_ERROR;
@@ -52,7 +52,7 @@ int CE_Id_setGeneration(OUT CE_Id* id, uint32_t generation)
     return CE_OK;
 }
 
-int CE_Id_setComponentTypeId(OUT CE_Id* id, CE_TypeId typeId)
+CE_Result CE_Id_setComponentTypeId(OUT CE_Id* id, CE_TypeId typeId)
 {
     if (!id) return CE_ERROR;
     if (!CE_Id_isComponent(*id)) return CE_ERROR;
@@ -64,7 +64,7 @@ int CE_Id_setComponentTypeId(OUT CE_Id* id, CE_TypeId typeId)
     return CE_OK;
 }
 
-int CE_Id_setRelationshipTypeId(OUT CE_Id* id, CE_TypeId typeId)
+CE_Result CE_Id_setRelationshipTypeId(OUT CE_Id* id, CE_TypeId typeId)
 {
     if (!id) return CE_ERROR;
     if (!CE_Id_isRelationship(*id)) return CE_ERROR;
@@ -76,7 +76,7 @@ int CE_Id_setRelationshipTypeId(OUT CE_Id* id, CE_TypeId typeId)
     return CE_OK;
 }
 
-int CE_Id_make(CE_IdKind kind, CE_TypeId typeId, uint32_t generation, uint32_t uniqueId, OUT CE_Id* out)
+CE_Result CE_Id_make(CE_IdKind kind, CE_TypeId typeId, uint32_t generation, uint32_t uniqueId, OUT CE_Id* out)
 {
     if (!out) return CE_ERROR;
     

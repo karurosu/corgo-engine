@@ -34,10 +34,14 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 		if ( font == NULL )
 			pd->system->error("%s:%i Couldn't load font %s: %s", __FILE__, __LINE__, fontpath, err);
 
-		pd->system->setUpdateCallback(update, pd);
-		
 		// Initialize ECS
-		CE_ECS_Init(&ecsContext);
+		CE_ERROR_CODE errorCode;
+		if (CE_ECS_Init(&ecsContext, &errorCode) != CE_OK) {
+			pd->system->error("ECS Initialization failed with error code: %s", CE_GetErrorMessage(errorCode));
+			return -1;
+		}
+
+		pd->system->setUpdateCallback(update, pd);
 	}
 	
 	return 0;

@@ -10,6 +10,14 @@
 
 #include "../types.h"
 
+struct CE_ECS_ComponentStaticData {
+    bool m_isValid;
+    CE_TypeId m_type;
+    uint32_t m_uid;
+    uint64_t m_bitmask;
+    size_t m_storageSizeOf;
+};
+
 //// Component macros
 
 // Main component declaration, declares all methods and storage for a component.
@@ -19,17 +27,19 @@
 #define CE_DECLARE_COMPONENT(name, c_uid, storage) \
 void name##_init(OUT storage* component); \
 void name##_cleanup(OUT storage* component);\
-void name##_description(OUT CE_ComponentStaticData *data);
+void name##_description(OUT CE_ECS_ComponentStaticData *data);\
+typedef storage name##_StorageType;
 
 // Component method implementation generator
 // Must be called in the component's .c file
 #define CE_GENERATE_COMPONENT_IMP(name, c_uid, storage) \
-void name##_description(OUT CE_ComponentStaticData *data) \
+void name##_description(OUT CE_ECS_ComponentStaticData *data) \
 { \
-    data->isValid = true; \
-    data->type = name; \
-    data->uid = c_uid; \
-    data->bitmask = ((uint64_t)1 << name); \
+    data->m_isValid = true; \
+    data->m_type = name; \
+    data->m_uid = c_uid; \
+    data->m_bitmask = ((uint64_t)1 << name); \
+    data->m_storageSizeOf = sizeof(storage); \
 }
 
 // Component method declaration

@@ -72,6 +72,9 @@ file(GLOB EXT_LIBS "src/external/*.c" "src/external/*.h" "src/external/**/*.c" "
 # Preserve directory structure in Visual Studio solution
 source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${ENGINE} ${GAME} ${EXT_LIBS})
 
+# global compile definitions
+add_compile_definitions(CC_NO_SHORT_NAMES)
+
 # Test executable (only build for simulator/host, not device)
 if (NOT TOOLCHAIN STREQUAL "armgcc")
 	enable_testing()

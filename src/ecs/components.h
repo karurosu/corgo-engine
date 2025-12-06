@@ -31,7 +31,7 @@
 #endif
 
 //// Generate component Types Enum
-typedef enum CE_ComponentTypesEnum {
+typedef enum CE_COMPONENT_TYPES_ENUM {
 #define X(name, uid, storage) name,
 	CE_COMPONENT_DESC_CORE(X)
 #ifndef CE_CORE_TEST_MODE
@@ -40,7 +40,7 @@ typedef enum CE_ComponentTypesEnum {
 #endif
 #undef X
 	CE_COMPONENT_TYPE_COUNT //Invalid component count
-} CE_ComponentTypesEnum;
+} CE_COMPONENT_TYPES;
 
 // Sanity check: ensure we don't exceed the bitmask capacity.
 static_assert(CE_COMPONENT_TYPE_COUNT <= CE_MAX_COMPONENT_TYPES, "Too many component types: exceeds MAX_COMPONENT_TYPES");
