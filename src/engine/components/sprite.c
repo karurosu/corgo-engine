@@ -16,4 +16,4 @@ void CE_SPRITE_COMPONENT_cleanup(OUT CE_SpriteComponent* component)
     // No dynamic resources to clean up for CE_SpriteComponent
 }
 
-CE_GENERATE_COMPONENT_IMP(CE_SPRITE_COMPONENT, 11, CE_SpriteComponent)
+CE_GENERATE_COMPONENT_IMP(CE_SPRITE_COMPONENT)

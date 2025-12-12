@@ -19,7 +19,7 @@ void ECSContextSetupTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     
     // Verify we have exactly 1 component type (CE_CORE_DEBUG_COMPONENT)
-    TEST_ASSERT_EQUAL_UINT32(1, CE_COMPONENT_TYPE_COUNT);
+    TEST_ASSERT_EQUAL_UINT32(1, CE_COMPONENT_TYPES_COUNT);
     
     // Verify the debug component descriptor is valid
     CE_ECS_ComponentStaticData* debugDesc = &context.m_componentDefinitions[CE_CORE_DEBUG_COMPONENT];
@@ -29,6 +29,7 @@ void ECSContextSetupTest(void) {
     TEST_ASSERT_EQUAL_UINT64((uint64_t)1 << CE_CORE_DEBUG_COMPONENT, debugDesc->m_bitmask);
     TEST_ASSERT_EQUAL_size_t(sizeof(CE_Core_DebugComponent), debugDesc->m_storageSizeOf);
     TEST_ASSERT_EQUAL_size_t(sizeof(CE_Core_DebugComponent), sizeof(CE_CORE_DEBUG_COMPONENT_StorageType));
+    TEST_ASSERT_EQUAL_size_t(CE_DEFAULT_COMPONENT_CAPACITY, debugDesc->m_initialCapacity);
 
     // Verify cleanup
 	result = CE_ECS_Cleanup(&context, &errorCode);

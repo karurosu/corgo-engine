@@ -17,11 +17,11 @@
 // All ECS definitions and data is stored here. 
 
 struct CE_ECS_Context {
-    CE_ECS_ComponentStaticData m_componentDefinitions[CE_COMPONENT_TYPE_COUNT];
+    CE_ECS_ComponentStaticData m_componentDefinitions[CE_COMPONENT_TYPES_COUNT];
     CE_ECS_MainStorage m_storage;
 };
 
-CE_Result CE_ECS_Init(OUT CE_ECS_Context* context, OUT CE_ERROR_CODE *errorCode);
-CE_Result CE_ECS_Cleanup(OUT CE_ECS_Context* context, OUT CE_ERROR_CODE* errorCode);
+CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *errorCode);
+CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* errorCode);
 
 #endif // CORGO_ECS_ECS_H

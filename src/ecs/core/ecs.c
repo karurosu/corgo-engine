@@ -8,15 +8,15 @@
 
 #include "../ecs.h"
 
-CE_Result CE_ECS_Init(OUT CE_ECS_Context* context, OUT CE_ERROR_CODE *errorCode)
+CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *errorCode)
 {
     // Clear all component definitions
-    for (uint32_t i = 0; i < CE_COMPONENT_TYPE_COUNT; i++) {
+    for (uint32_t i = 0; i < CE_COMPONENT_TYPES_COUNT; i++) {
         context->m_componentDefinitions[i] = (CE_ECS_ComponentStaticData){ .m_bitmask = 0, .m_isValid = false, .m_type = 0, .m_uid = 0 };
     }
 
     // Gather component descriptions into the context
-#define X(name, uid, storage) name##_description(&context->m_componentDefinitions[name]);
+#define X(name, uid, storage, initial_capacity) name##_description(&context->m_componentDefinitions[name]);
     CE_COMPONENT_DESC_CORE(X)
     #ifndef CE_CORE_TEST_MODE
     CE_COMPONENT_DESC_ENGINE(X)
@@ -36,7 +36,7 @@ CE_Result CE_ECS_Init(OUT CE_ECS_Context* context, OUT CE_ERROR_CODE *errorCode)
     return CE_OK;
 }
 
-CE_Result CE_ECS_Cleanup(OUT CE_ECS_Context* context, OUT CE_ERROR_CODE* errorCode)
+CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     if (CE_ECS_MainStorage_cleanup(&context->m_storage, errorCode) != CE_OK) {
         return CE_ERROR;

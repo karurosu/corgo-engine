@@ -16,4 +16,4 @@ void CE_CORE_DEBUG_COMPONENT_cleanup(OUT CE_Core_DebugComponent* component)
     // No dynamic resources to clean up for CE_Core_DebugComponent
 }
 
-CE_GENERATE_COMPONENT_IMP(CE_CORE_DEBUG_COMPONENT, 0, CE_Core_DebugComponent)
+CE_GENERATE_COMPONENT_IMP(CE_CORE_DEBUG_COMPONENT)

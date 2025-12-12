@@ -17,4 +17,4 @@ void CE_TRANSFORM_COMPONENT_cleanup(OUT CE_TransformComponent* component)
     // No dynamic resources to clean up for CE_TransformComponent
 }
 
-CE_GENERATE_COMPONENT_IMP(CE_TRANSFORM_COMPONENT, 10, CE_TransformComponent)
+CE_GENERATE_COMPONENT_IMP(CE_TRANSFORM_COMPONENT)

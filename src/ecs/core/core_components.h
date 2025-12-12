@@ -14,6 +14,6 @@ typedef struct CE_Core_DebugComponent {
 } CE_Core_DebugComponent;
 
 #define CE_COMPONENT_DESC_CORE(X) \
-	X(CE_CORE_DEBUG_COMPONENT, 0, CE_Core_DebugComponent)
+	X(CE_CORE_DEBUG_COMPONENT, 0, CE_Core_DebugComponent, CE_DEFAULT_COMPONENT_CAPACITY)
 
 #endif // CORGO_ECS_CORE_COMPONENTS_H

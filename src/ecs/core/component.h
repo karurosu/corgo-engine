@@ -16,6 +16,7 @@ struct CE_ECS_ComponentStaticData {
     uint32_t m_uid;
     uint64_t m_bitmask;
     size_t m_storageSizeOf;
+    size_t m_initialCapacity;
 };
 
 //// Component macros
@@ -24,22 +25,26 @@ struct CE_ECS_ComponentStaticData {
 // UID is a unique int32 identifier for the component type, it must be unique across all components and hardcoded.
 // Changing of uuid is not allowed once a component is in use, as it will break serialization.
 // UIDs 0-10 are reserved for core components.
-#define CE_DECLARE_COMPONENT(name, c_uid, storage) \
+#define CE_DECLARE_COMPONENT(name, c_uid, storage, initial_capacity) \
 void name##_init(OUT storage* component); \
 void name##_cleanup(OUT storage* component);\
 void name##_description(OUT CE_ECS_ComponentStaticData *data);\
-typedef storage name##_StorageType;
+typedef storage name##_StorageType;\
+static const uint32_t name##_UID = c_uid;\
+static const size_t name##_StorageSize = sizeof(storage);\
+static const size_t name##_InitialCapacity = initial_capacity;
 
 // Component method implementation generator
 // Must be called in the component's .c file
-#define CE_GENERATE_COMPONENT_IMP(name, c_uid, storage) \
+#define CE_GENERATE_COMPONENT_IMP(name) \
 void name##_description(OUT CE_ECS_ComponentStaticData *data) \
 { \
     data->m_isValid = true; \
     data->m_type = name; \
-    data->m_uid = c_uid; \
+    data->m_uid = name##_UID; \
     data->m_bitmask = ((uint64_t)1 << name); \
-    data->m_storageSizeOf = sizeof(storage); \
+    data->m_storageSizeOf = name##_StorageSize; \
+    data->m_initialCapacity = name##_InitialCapacity; \
 }
 
 // Component method declaration

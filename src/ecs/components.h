@@ -32,21 +32,21 @@
 
 //// Generate component Types Enum
 typedef enum CE_COMPONENT_TYPES_ENUM {
-#define X(name, uid, storage) name,
+#define X(name, uid, storage, initial_capacity) name,
 	CE_COMPONENT_DESC_CORE(X)
 #ifndef CE_CORE_TEST_MODE
 	CE_COMPONENT_DESC_ENGINE(X)
 	CE_COMPONENT_DESC_GAME(X)
 #endif
 #undef X
-	CE_COMPONENT_TYPE_COUNT //Invalid component count
+	CE_COMPONENT_TYPES_COUNT //Invalid component count
 } CE_COMPONENT_TYPES;
 
 // Sanity check: ensure we don't exceed the bitmask capacity.
-static_assert(CE_COMPONENT_TYPE_COUNT <= CE_MAX_COMPONENT_TYPES, "Too many component types: exceeds MAX_COMPONENT_TYPES");
+_Static_assert(CE_COMPONENT_TYPES_COUNT <= CE_MAX_COMPONENT_TYPES, "Too many component types: exceeds MAX_COMPONENT_TYPES");
 
 //// Declare component global functions
-#define X(name, uuid, storage) CE_DECLARE_COMPONENT(name, uid, storage)
+#define X(name, uuid, storage, initial_capacity) CE_DECLARE_COMPONENT(name, uuid, storage, initial_capacity)
 	CE_COMPONENT_DESC_CORE(X)
 #ifndef CE_CORE_TEST_MODE
 	CE_COMPONENT_DESC_ENGINE(X)

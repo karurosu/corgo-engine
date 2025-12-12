@@ -21,7 +21,7 @@ typedef struct CESpriteComponent {
 } CE_SpriteComponent;
 
 #define CE_COMPONENT_DESC_ENGINE(X) \
-	X(CE_TRANSFORM_COMPONENT, 10, CE_TransformComponent)      \
-	X(CE_SPRITE_COMPONENT, 11, CE_SpriteComponent)
+	X(CE_TRANSFORM_COMPONENT, 10, CE_TransformComponent, CE_DEFAULT_COMPONENT_CAPACITY)\
+	X(CE_SPRITE_COMPONENT, 11, CE_SpriteComponent, 32)
 
 #endif // CORGO_ENGINE_COMPONENTS_H

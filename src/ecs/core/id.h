@@ -40,13 +40,13 @@ static inline CE_TypeId CE_Id_getRelationshipTypeId(IN CE_Id id) {
 }
 
 //// Mutators and utilities (implemented in core/types.c)
-CE_Result CE_Id_setKind(OUT CE_Id* id, CE_IdKind kind);
-CE_Result CE_Id_setUniqueId(OUT CE_Id* id, uint32_t uniqueId);
-CE_Result CE_Id_setGeneration(OUT CE_Id* id, uint32_t generation);
-CE_Result CE_Id_setComponentTypeId(OUT CE_Id* id, CE_TypeId typeId);
-CE_Result CE_Id_setRelationshipTypeId(OUT CE_Id* id, CE_TypeId typeId);
+CE_Result CE_Id_setKind(INOUT CE_Id* id, CE_IdKind kind);
+CE_Result CE_Id_setUniqueId(INOUT CE_Id* id, uint32_t uniqueId);
+CE_Result CE_Id_setGeneration(INOUT CE_Id* id, uint32_t generation);
+CE_Result CE_Id_setComponentTypeId(INOUT CE_Id* id, CE_TypeId typeId);
+CE_Result CE_Id_setRelationshipTypeId(INOUT CE_Id* id, CE_TypeId typeId);
 
-CE_Result CE_Id_make(CE_IdKind kind, CE_TypeId typeId, uint32_t generation, uint32_t uniqueId, OUT CE_Id* out);
+CE_Result CE_Id_make(IN CE_IdKind kind, IN CE_TypeId typeId, IN uint32_t generation, IN uint32_t uniqueId, OUT CE_Id* out);
 bool CE_Id_compare(IN CE_Id a, IN CE_Id b);
 
 #endif

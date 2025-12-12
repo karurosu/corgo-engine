@@ -7,14 +7,26 @@
 #ifndef CORGO_ECS_TYPES_H
 #define CORGO_ECS_TYPES_H
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-//// Generic macros
-// Marks input pointer parameters
+//// Helper macros to support static analysis annotations in the ARM compiler
+#ifdef _In_
+#define IN _In_
+#define OUT _Out_
+#define INOUT _Inout_
+#define IN_OPT _In_opt_
+#define OUT_OPT _Out_opt_
+#define INOUT_OPT _Inout_opt_
+#else
 #define IN
-// Marks output pointer parameters
 #define OUT
+#define INOUT
+#define IN_OPT
+#define OUT_OPT
+#define INOUT_OPT
+#endif
 
 //// Id types
 /*
@@ -75,5 +87,6 @@ typedef struct CE_ECS_Context CE_ECS_Context;
 
 // Adding this for convenience
 #include "core/error.h"
+#include "core/config.h"
 
 #endif // CORGO_ECS_TYPES_H
