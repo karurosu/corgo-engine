@@ -1,6 +1,6 @@
 # Corgo Engine
 
-A minimalistic ECS (Entity Component System) engine for the Panic Playdate handheld console, written in pure C.
+A minimalist ECS (Entity Component System) engine for the Panic Playdate handheld console, written in pure C.
 
 **Status**: Early development
 
