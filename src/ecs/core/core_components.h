@@ -10,7 +10,7 @@
 #include "component.h"
 
 typedef struct CE_Core_DebugComponent {
-    bool enabled;
+    bool m_enabled;
 } CE_Core_DebugComponent;
 
 #define CE_COMPONENT_DESC_CORE(X) \

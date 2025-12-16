@@ -6,14 +6,16 @@
 
 #include "ecs/components.h"
 
-void CE_CORE_DEBUG_COMPONENT_init(OUT CE_Core_DebugComponent* component)
+CE_DEFINE_COMPONENT_INIT(CE_CORE_DEBUG_COMPONENT)
 {
-    component->enabled = false;
+    component->m_enabled = false;
+    return CE_OK;
 }
 
-void CE_CORE_DEBUG_COMPONENT_cleanup(OUT CE_Core_DebugComponent* component)
+CE_DEFINE_COMPONENT_CLEANUP(CE_CORE_DEBUG_COMPONENT)
 {
     // No dynamic resources to clean up for CE_Core_DebugComponent
+    return CE_OK;
 }
 
 CE_GENERATE_COMPONENT_IMP(CE_CORE_DEBUG_COMPONENT)

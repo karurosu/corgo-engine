@@ -14,7 +14,10 @@
 
 // Helper const to set a defined initial capacity, simplifies increasing or decreasing capacity in the future
 // Only use if the component will be in every entity as it will always be allocated
-#define CE_DEFAULT_COMPONENT_CAPACITY 64
+#define CE_DEFAULT_COMPONENT_CAPACITY 128
 
+//// Entity related
+// Maximum number of entities that can exist at the same time
+#define CE_MAX_ENTITIES 128
 
 #endif // CORGO_ECS_CORE_CONFIG_H

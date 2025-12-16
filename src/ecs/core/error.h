@@ -16,11 +16,20 @@ typedef int CE_Result;
 
 // X-macro pattern for error code definitions
 // Format: X(EnumName, ErrorCode, ErrorMessage)
+// Enum names must be in the form of SYSTEM_SUBSYSTEM_DESCRIPTION
+// Enums 0-9: General errors
+// Enums 10-19: Main Storage related errors
+// Enums 20-29: Component Storage related errors
 #define CE_ERROR_CODE_LIST(X) \
     X(NONE, 0, "No error") \
-    X(STORAGE_ALREADY_INITIALIZED, 1, "Storage already initialized") \
-    X(STORAGE_MAIN_ALLOCATION_FAILED, 2, "Storage main allocation failed") \
-    X(STORAGE_COMPONENT_DATA_POOL_ALLOCATION_FAILED, 3, "Storage component data pool allocation failed") \
+    X(UNSUPPORTED_OPERATION, 1, "Unsupported operation") \
+    X(STORAGE_MAIN_NOT_INITIALIZED, 10, "Main Storage already initialized") \
+    X(STORAGE_MAIN_ALREADY_INITIALIZED, 11, "Main Storage already initialized") \
+    X(STORAGE_MAIN_ALLOCATION_FAILED, 12, "Main storage allocation failed") \
+    X(STORAGE_COMPONENT_NOT_INITIALIZED, 20, "Component storage not initialized") \
+    X(STORAGE_COMPONENT_ALREADY_INITIALIZED, 21, "Component storage already initialized") \
+    X(STORAGE_COMPONENT_ALLOCATION_FAILED, 22, "Component storage allocation failed") \
+    X(STORAGE_COMPONENT_INIT_FAILED, 23, "Component storage initialization failed") \
     /* Add new error codes here */
 
 // Generate enum values

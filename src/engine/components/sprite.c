@@ -6,14 +6,16 @@
 
 #include "ecs/components.h"
 
-void CE_SPRITE_COMPONENT_init(OUT CE_SpriteComponent* component)
+CE_DEFINE_COMPONENT_INIT(CE_SPRITE_COMPONENT)
 {
     component->visible = true;
+    return CE_OK;
 }
 
-void CE_SPRITE_COMPONENT_cleanup(OUT CE_SpriteComponent* component)
+CE_DEFINE_COMPONENT_CLEANUP(CE_SPRITE_COMPONENT)
 {
     // No dynamic resources to clean up for CE_SpriteComponent
+    return CE_OK;
 }
 
 CE_GENERATE_COMPONENT_IMP(CE_SPRITE_COMPONENT)

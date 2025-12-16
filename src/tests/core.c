@@ -133,9 +133,26 @@ static void CEIdHelpersTest(void) {
     TEST_ASSERT_FALSE(CE_Id_isRelationship(invalidId));
 }
 
+static void ComponentStorageTest(void) {
+    CE_ECS_Context context;
+    CE_ERROR_CODE errorCode;
+    CE_Result result = CE_ECS_Init(&context, &errorCode);
+    CE_Id id;
+
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    CE_ECS_ComponentStaticData* debugDesc = &context.m_componentDefinitions[CE_CORE_DEBUG_COMPONENT];
+
+    CE_ECS_MainStorage_createComponent(&context.m_storage, debugDesc, &id, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(ECSContextSetupTest);
     RUN_TEST(CEIdHelpersTest);
+    RUN_TEST(ComponentStorageTest);
     return UNITY_END();
 }

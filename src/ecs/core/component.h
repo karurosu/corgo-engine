@@ -17,6 +17,10 @@ struct CE_ECS_ComponentStaticData {
     uint64_t m_bitmask;
     size_t m_storageSizeOf;
     size_t m_initialCapacity;
+
+    // Component methods
+    CE_Result (*m_initFunction)(OUT void* component);
+    CE_Result (*m_cleanupFunction)(OUT void* component);
 };
 
 //// Component macros
@@ -26,17 +30,29 @@ struct CE_ECS_ComponentStaticData {
 // Changing of uuid is not allowed once a component is in use, as it will break serialization.
 // UIDs 0-10 are reserved for core components.
 #define CE_DECLARE_COMPONENT(name, c_uid, storage, initial_capacity) \
-void name##_init(OUT storage* component); \
-void name##_cleanup(OUT storage* component);\
+CE_Result name##_init(OUT storage* component); \
+CE_Result name##_cleanup(OUT storage* component);\
 void name##_description(OUT CE_ECS_ComponentStaticData *data);\
 typedef storage name##_StorageType;\
 static const uint32_t name##_UID = c_uid;\
 static const size_t name##_StorageSize = sizeof(storage);\
-static const size_t name##_InitialCapacity = initial_capacity;
+static const size_t name##_InitialCapacity = initial_capacity;\
+CE_Result name##_init_wrapper(OUT void* component);\
+CE_Result name##_cleanup_wrapper(OUT void* component);
 
 // Component method implementation generator
 // Must be called in the component's .c file
 #define CE_GENERATE_COMPONENT_IMP(name) \
+CE_Result name##_init_wrapper(OUT void* component) \
+{ \
+    if (!component) return CE_ERROR; \
+    return name##_init((name##_StorageType*)component); \
+} \
+CE_Result name##_cleanup_wrapper(OUT void* component) \
+{ \
+    if (!component) return CE_ERROR; \
+    return name##_cleanup((name##_StorageType*)component); \
+} \
 void name##_description(OUT CE_ECS_ComponentStaticData *data) \
 { \
     data->m_isValid = true; \
@@ -45,11 +61,15 @@ void name##_description(OUT CE_ECS_ComponentStaticData *data) \
     data->m_bitmask = ((uint64_t)1 << name); \
     data->m_storageSizeOf = name##_StorageSize; \
     data->m_initialCapacity = name##_InitialCapacity; \
-}
+    data->m_initFunction = name##_init_wrapper; \
+    data->m_cleanupFunction = name##_cleanup_wrapper; \
+} \
 
-// Component method declaration
-#define CE_DEFINE_COMPONENT_INIT(name, storage) void name##_init(OUT storage* component);
-#define CE_DEFINE_COMPONENT_CLEANUP(name, storage) void name##_cleanup(OUT storage* component);
+
+
+// Component method shortcuts
+#define CE_DEFINE_COMPONENT_INIT(name) CE_Result name##_init(OUT name##_StorageType* component)
+#define CE_DEFINE_COMPONENT_CLEANUP(name) CE_Result name##_cleanup(OUT name##_StorageType* component)
 
 
 #endif // CORGO_ECS_CORE_COMPONENT_H
