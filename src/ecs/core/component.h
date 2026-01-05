@@ -38,7 +38,8 @@ static const uint32_t name##_UID = c_uid;\
 static const size_t name##_StorageSize = sizeof(storage);\
 static const size_t name##_InitialCapacity = initial_capacity;\
 CE_Result name##_init_wrapper(OUT void* component);\
-CE_Result name##_cleanup_wrapper(OUT void* component);
+CE_Result name##_cleanup_wrapper(OUT void* component);\
+_Static_assert(initial_capacity <= CE_BITSET_MAX_BITS, #name ": Component initial capacity exceeds bitset max bits, increase CE_BITSET_MAX_BITS or reduce initial capacity.");
 
 // Component method implementation generator
 // Must be called in the component's .c file
@@ -63,8 +64,7 @@ void name##_description(OUT CE_ECS_ComponentStaticData *data) \
     data->m_initialCapacity = name##_InitialCapacity; \
     data->m_initFunction = name##_init_wrapper; \
     data->m_cleanupFunction = name##_cleanup_wrapper; \
-} \
-
+}
 
 
 // Component method shortcuts

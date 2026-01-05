@@ -57,6 +57,9 @@ endif()
 # Core Files
 file(GLOB CORE "src/ecs/*.c" "src/ecs/*.h" "src/ecs/**/*.c" "src/ecs/**/*.h")
 
+# Utils Files
+file(GLOB UTILS "src/utils/*.c" "src/utils/*.h")
+
 # Engine Files
 file(GLOB ENGINE "src/engine/*.c" "src/engine/*.h" "src/engine/**/*.c" "src/engine/**/*.h")
 
@@ -70,7 +73,7 @@ file(GLOB TESTS "src/tests/*.c" "src/tests/*.h" "src/tests/**/*.c" "src/tests/**
 file(GLOB EXT_LIBS "src/external/*.c" "src/external/*.h" "src/external/**/*.c" "src/external/**/*.h")
 
 # Preserve directory structure in Visual Studio solution
-source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${ENGINE} ${GAME} ${EXT_LIBS})
+source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${UTILS} ${ENGINE} ${GAME} ${EXT_LIBS})
 
 # global compile definitions
 add_compile_definitions(CC_NO_SHORT_NAMES)
@@ -92,10 +95,11 @@ if (NOT TOOLCHAIN STREQUAL "armgcc")
 	add_executable(coretests 
 		src/tests/core.c
 		${CORE}
+		${UTILS}
 	)
 	
 	# Preserve directory structure for test project
-	source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} src/tests/core.c)
+	source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${UTILS} src/tests/core.c)
 	
 	target_include_directories(coretests PRIVATE 
 		${cc_SOURCE_DIR}
@@ -118,14 +122,14 @@ endif()
 if (TOOLCHAIN STREQUAL "armgcc")
 	add_compile_options(-Wdouble-promotion -Werror)
 	if (CMAKE_BUILD_TYPE STREQUAL "Release")
-		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE} ${ENGINE} ${GAME})
+		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE} ${UTILS} ${ENGINE} ${GAME})
 	else()
-		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE} ${ENGINE} ${GAME})
+		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE} ${UTILS} ${ENGINE} ${GAME})
 	endif()
 	target_include_directories(${PLAYDATE_GAME_DEVICE} PRIVATE ${cc_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 else()
 	add_compile_options(-WX)
-	add_library(${PLAYDATE_GAME_NAME} SHARED src/main.c ${EXT_LIBS} ${CORE} ${ENGINE} ${GAME})
+	add_library(${PLAYDATE_GAME_NAME} SHARED src/main.c ${EXT_LIBS} ${CORE} ${UTILS} ${ENGINE} ${GAME})
 	target_include_directories(${PLAYDATE_GAME_NAME} PRIVATE ${cc_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 endif()
 

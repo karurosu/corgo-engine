@@ -19,6 +19,7 @@ typedef struct CE_ECS_ComponentStorage {
     size_t m_capacity;
     size_t m_count;
     void *m_componentDataPool;
+    CE_Bitset m_componentIndexBitset; // Bitset to track used indices                   
     CE_ECS_ComponentStorageHeader m_componentHeader[];
 } CE_ECS_ComponentStorage;
 
@@ -29,17 +30,15 @@ typedef struct CE_ECS_MainStorage {
 
 // Initialization and cleanup functions
 CE_Result CE_ECS_MainStorage_init(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_Context *context, OUT_OPT CE_ERROR_CODE* errorCode);
-CE_Result CE_ECS_MainStorage_cleanup(INOUT CE_ECS_MainStorage* storage, OUT_OPT CE_ERROR_CODE *errorCode);
+CE_Result CE_ECS_MainStorage_cleanup(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_Context *context, OUT_OPT CE_ERROR_CODE *errorCode);
 
 // Component creation and management functions
 CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, OUT CE_Id* id, OUT_OPT CE_ERROR_CODE* errorCode);
-CE_Result CE_ECS_MainStorage_destroyComponent(INOUT CE_ECS_MainStorage* storage, IN CE_Id id, OUT_OPT CE_ERROR_CODE* errorCode);
+CE_Result CE_ECS_MainStorage_destroyComponent(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_Id id, OUT_OPT CE_ERROR_CODE* errorCode);
 CE_Result CE_ECS_MainStorage_growStorageForComponent(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, OUT_OPT CE_ERROR_CODE* errorCode);
 
-// Component retrieval functions
-CE_Result CE_ECS_MainStorage_getComponentDataPointerById(INOUT CE_ECS_MainStorage* storage, IN CE_Id id, OUT void* component, OUT_OPT CE_ERROR_CODE* errorCode);
-
-// Internal helper functions
-void* CE_ECS_MainStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, size_t index);
+// Component data access
+void* CE_ECS_MainStorage_getComponentDataPointerById(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_Id id);
+void* CE_ECS_MainStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN size_t index);
 
 #endif // CORGO_ECS_CORE_STORAGE_H
