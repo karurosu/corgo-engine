@@ -7,6 +7,7 @@
 //
 
 #include "../ecs.h"
+#include "engine/core/platform.h"
 
 CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *errorCode)
 {
@@ -18,12 +19,22 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
     // Gather component descriptions into the context
 #define X(name, uid, storage, initial_capacity) name##_description(&context->m_componentDefinitions[name]);
     CE_COMPONENT_DESC_CORE(X)
-    #ifndef CE_CORE_TEST_MODE
     CE_COMPONENT_DESC_ENGINE(X)
+    #ifndef CE_CORE_TEST_MODE
     CE_COMPONENT_DESC_GAME(X)
     #endif
 #undef X
 
+#ifdef CE_DEBUG_BUILD
+    #define X(name, uid, storage, initial_capacity) CE_Debug("Registered component: %s (Type: %d, UID: %d, Initial Capacity: %zu)", #name, name, name##_UID, name##_InitialCapacity);
+        CE_COMPONENT_DESC_CORE(X)
+        CE_COMPONENT_DESC_ENGINE(X)
+        #ifndef CE_CORE_TEST_MODE
+        CE_COMPONENT_DESC_GAME(X)
+        #endif
+    #undef X
+#endif
+    
 	// Initialize storage structure
 	context->m_storage = (CE_ECS_MainStorage){ .m_initialized = false };
 

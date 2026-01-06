@@ -1,4 +1,5 @@
 #include "unity.h"
+
 #include "ecs/types.h"
 #include "ecs/ecs.h"
 #include "utils/bitset.h"
@@ -11,6 +12,7 @@ void tearDown(void) {
     // Clean up test fixtures
 }
 
+
 void ECSContextSetupTest(void) {
     CE_ECS_Context context;
     CE_ERROR_CODE errorCode;
@@ -19,8 +21,8 @@ void ECSContextSetupTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     
-    // Verify we have exactly 1 component type (CE_CORE_DEBUG_COMPONENT)
-    TEST_ASSERT_EQUAL_UINT32(1, CE_COMPONENT_TYPES_COUNT);
+    // Verify we have at least 1 component type (CE_CORE_DEBUG_COMPONENT)
+    TEST_ASSERT_GREATER_OR_EQUAL_UINT8(1, CE_COMPONENT_TYPES_COUNT);
     
     // Verify the debug component descriptor is valid
     CE_ECS_ComponentStaticData* debugDesc = &context.m_componentDefinitions[CE_CORE_DEBUG_COMPONENT];

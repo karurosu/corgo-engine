@@ -6,6 +6,8 @@
 
 #include <stdlib.h>
 
+#include "engine/core/memory.h"
+
 #include "storage.h"
 #include "../ecs.h"
 
@@ -29,11 +31,13 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
 
         // Initialize each component type storage
         storage->m_componentTypeStorage[x] = NULL;
-        CE_ECS_ComponentStorage *storageEntry = malloc(sizeof(CE_ECS_ComponentStorage) + sizeof(CE_ECS_ComponentStorageHeader) * initialCapacity);
+        CE_ECS_ComponentStorage *storageEntry = CE_realloc(NULL, sizeof(CE_ECS_ComponentStorage) + sizeof(CE_ECS_ComponentStorageHeader) * initialCapacity);
         if (!storageEntry) {
             CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_MAIN_ALLOCATION_FAILED);
             return CE_ERROR;
         }
+
+        CE_Debug("Component storage allocated at %p for type %d", storageEntry, x);
 
         storageEntry->m_typeId = (CE_TypeId)x;
         storageEntry->m_capacity = initialCapacity;
@@ -46,11 +50,13 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
         }
 
         // Initialize component data pool
-        storageEntry->m_componentDataPool = calloc(initialCapacity, componentSize);
+        storageEntry->m_componentDataPool = CE_realloc(NULL, initialCapacity * componentSize);
         if (!storageEntry->m_componentDataPool) {
             CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_ALLOCATION_FAILED);
             return CE_ERROR;
         }
+
+        CE_Debug("Component data pool allocated at %p for type %d", storageEntry->m_componentDataPool, x);
 
         // Initialize component headers
         for (int i = 0; i < initialCapacity; i++) {
@@ -87,8 +93,8 @@ CE_Result CE_ECS_MainStorage_cleanup(OUT CE_ECS_MainStorage* storage, IN const C
                 }
                 
                 // Bulk free memory
-                free(storageEntry->m_componentDataPool);
-                free(storageEntry);
+                CE_free(storageEntry->m_componentDataPool);
+                CE_free(storageEntry);
                 storage->m_componentTypeStorage[x] = NULL;
             }
         }

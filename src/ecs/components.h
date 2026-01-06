@@ -34,8 +34,8 @@
 typedef enum CE_COMPONENT_TYPES_ENUM {
 #define X(name, uid, storage, initial_capacity) name,
 	CE_COMPONENT_DESC_CORE(X)
-#ifndef CE_CORE_TEST_MODE
 	CE_COMPONENT_DESC_ENGINE(X)
+#ifndef CE_CORE_TEST_MODE
 	CE_COMPONENT_DESC_GAME(X)
 #endif
 #undef X
@@ -48,8 +48,8 @@ _Static_assert(CE_COMPONENT_TYPES_COUNT <= CE_MAX_COMPONENT_TYPES, "Too many com
 //// Declare component global functions
 #define X(name, uuid, storage, initial_capacity) CE_DECLARE_COMPONENT(name, uuid, storage, initial_capacity)
 	CE_COMPONENT_DESC_CORE(X)
-#ifndef CE_CORE_TEST_MODE
 	CE_COMPONENT_DESC_ENGINE(X)
+#ifndef CE_CORE_TEST_MODE
 	CE_COMPONENT_DESC_GAME(X)
 #endif
 #undef X

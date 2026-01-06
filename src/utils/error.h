@@ -7,12 +7,14 @@
 #ifndef CORGO_ECS_CORE_ERROR_H
 #define CORGO_ECS_CORE_ERROR_H
 
+typedef int CE_Result;
+
 //// Result codes
 // Generic success code
 #define CE_OK 0
 // Generic error code
 #define CE_ERROR -1
-typedef int CE_Result;
+
 
 // X-macro pattern for error code definitions
 // Format: X(EnumName, ErrorCode, ErrorMessage)
@@ -26,7 +28,7 @@ typedef int CE_Result;
     X(NONE, 0, "No error") \
     X(UNSUPPORTED_OPERATION, 1, "Unsupported operation") \
     \
-    X(STORAGE_MAIN_NOT_INITIALIZED, 10, "Main Storage already initialized") \
+    X(STORAGE_MAIN_NOT_INITIALIZED, 10, "Main Storage not initialized") \
     X(STORAGE_MAIN_ALREADY_INITIALIZED, 11, "Main Storage already initialized") \
     X(STORAGE_MAIN_ALLOCATION_FAILED, 12, "Main storage allocation failed") \
     \

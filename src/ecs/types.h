@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <cc.h>
 
 // General helpers
 #include "utils/helpers.h"
@@ -45,7 +46,7 @@ typedef enum CE_IdKind {
     CE_ID_INVALID_KIND = 3
 } CE_IdKind;
 
-// Invalid econtants
+// Invalid constants
 #define CE_INVALID_ID 0
 #define CE_INVALID_TYPE_ID 0xFF
 
@@ -62,10 +63,13 @@ typedef enum CE_IdKind {
 #define CE_ID_SHIFT_UNIQUE        0
 #define CE_ID_MASK_UNIQUE         0xFFFFu // 16 bits
 
+// Container types
+#define CE_Id_Vector cc_vec(CE_Id)
+
 //// Component types
 
 // Maximum number of component types
-// Currently limited to 64 so we can use a 64-bit bitmask to track which components an entity has.
+// Currently limited to 64 due to id size.
 #define CE_MAX_COMPONENT_TYPES 64
 
 //// Exposed structures

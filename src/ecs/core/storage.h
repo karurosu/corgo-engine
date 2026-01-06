@@ -10,6 +10,7 @@
 #include "../types.h"
 #include "../components.h"
 
+// Component storage structures
 typedef struct CE_ECS_ComponentStorageHeader {
     bool m_isValid;
 } CE_ECS_ComponentStorageHeader;
@@ -23,9 +24,25 @@ typedef struct CE_ECS_ComponentStorage {
     CE_ECS_ComponentStorageHeader m_componentHeader[];
 } CE_ECS_ComponentStorage;
 
+// Entity storage definitions
+typedef struct CE_ECS_EntityData {
+    bool m_isValid;
+    CE_Id m_entityId;
+    CE_Bitset m_entityComponentBitset; // Bitset to track which components are attached to the entity
+    CE_Id_Vector m_components; // Vector of component ids attached to the entity
+    CE_Id_Vector m_relationships; // Vector of relationship ids attached to the entity
+} CE_ECS_EntityData;
+
+typedef struct CE_ECS_EntityStorage {
+    size_t m_count;
+    CE_ECS_EntityData m_entityDataArray[CE_MAX_ENTITIES];
+} CE_ECS_EntityStorage;
+
+// Main storage structure
 typedef struct CE_ECS_MainStorage {
     bool m_initialized;
     CE_ECS_ComponentStorage *m_componentTypeStorage[CE_COMPONENT_TYPES_COUNT]; // Array of component storages indexed by component type
+    CE_ECS_EntityStorage m_entityStorage;
 } CE_ECS_MainStorage;
 
 // Initialization and cleanup functions
@@ -40,5 +57,7 @@ CE_Result CE_ECS_MainStorage_growStorageForComponent(INOUT CE_ECS_MainStorage* s
 // Component data access
 void* CE_ECS_MainStorage_getComponentDataPointerById(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_Id id);
 void* CE_ECS_MainStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN size_t index);
+
+
 
 #endif // CORGO_ECS_CORE_STORAGE_H

@@ -78,6 +78,11 @@ source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} 
 # global compile definitions
 add_compile_definitions(CC_NO_SHORT_NAMES)
 
+# debug build
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_compile_definitions(CE_DEBUG_BUILD)
+endif()
+
 # Test executable (only build for simulator/host, not device)
 if (NOT TOOLCHAIN STREQUAL "armgcc")
 	enable_testing()
@@ -93,13 +98,15 @@ if (NOT TOOLCHAIN STREQUAL "armgcc")
 	
 	# Core tests executable
 	add_executable(coretests 
-		src/tests/core.c
+		src/tests/ecs.c
 		${CORE}
 		${UTILS}
+		${ENGINE}
+		${EXT_LIBS}
 	)
 	
 	# Preserve directory structure for test project
-	source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${UTILS} src/tests/core.c)
+	source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${ENGINE} ${UTILS} ${EXT_LIBS} src/tests/ecs.c)
 	
 	target_include_directories(coretests PRIVATE 
 		${cc_SOURCE_DIR}
@@ -121,16 +128,14 @@ endif()
 
 if (TOOLCHAIN STREQUAL "armgcc")
 	add_compile_options(-Wdouble-promotion -Werror)
-	if (CMAKE_BUILD_TYPE STREQUAL "Release")
-		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE} ${UTILS} ${ENGINE} ${GAME})
-	else()
-		add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE} ${UTILS} ${ENGINE} ${GAME})
-	endif()
+	add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE} ${UTILS} ${ENGINE} ${GAME})
 	target_include_directories(${PLAYDATE_GAME_DEVICE} PRIVATE ${cc_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
+	target_compile_definitions(${PLAYDATE_GAME_DEVICE} PRIVATE CE_BACKEND_PLAYDATE)
 else()
 	add_compile_options(-WX)
 	add_library(${PLAYDATE_GAME_NAME} SHARED src/main.c ${EXT_LIBS} ${CORE} ${UTILS} ${ENGINE} ${GAME})
 	target_include_directories(${PLAYDATE_GAME_NAME} PRIVATE ${cc_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
+	target_compile_definitions(${PLAYDATE_GAME_NAME} PRIVATE CE_BACKEND_PLAYDATE)
 endif()
 
 include(${SDK}/C_API/buildsupport/playdate_game.cmake)
