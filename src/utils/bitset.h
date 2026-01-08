@@ -10,12 +10,13 @@
 #include "helpers.h"
 #include "error.h"
 
-#define CE_BITSET_MAX_BITS 128
-#define CE_BITSET_ARRAY_SIZE ((CE_BITSET_MAX_BITS + 7) / 8) // Number of bytes needed
+#define CE_BITSET_MAX_BITS 256
+#define CE_BITSET_STORAGE_TYPE uint32_t
+#define CE_BITSET_ARRAY_SIZE ((CE_BITSET_MAX_BITS + sizeof(CE_BITSET_STORAGE_TYPE) * 8 - 1) / (sizeof(CE_BITSET_STORAGE_TYPE) * 8)) // Number of 32-bit integers needed
 
 typedef struct CE_Bitset {
     size_t m_size;      // Number of bits in the bitset < = CE_BITSET_MAX_BITS
-    uint8_t m_bits[CE_BITSET_ARRAY_SIZE];    // Pointer to the bit array
+    CE_BITSET_STORAGE_TYPE m_bits[CE_BITSET_ARRAY_SIZE];    // Pointer to the bit array
 } CE_Bitset;
 
 CE_Result CE_Bitset_init(OUT CE_Bitset* bitset, IN size_t size);

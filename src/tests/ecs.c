@@ -62,22 +62,19 @@ static void CEIdHelpersTest(void) {
     TEST_ASSERT_EQUAL_UINT8(CE_INVALID_TYPE_ID, CE_Id_getComponentTypeId(id));
     TEST_ASSERT_EQUAL_UINT8(CE_INVALID_TYPE_ID, CE_Id_getRelationshipTypeId(id));
 
-    // Build relationship entity id
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)9, 15, 555, &id));
+    // Build relationship entity id (generation unused for relationships)
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)9, 0, 555, &id));
     TEST_ASSERT_TRUE(CE_Id_isRelationship(id));
-    TEST_ASSERT_TRUE(CE_Id_isEntity(id));
+    TEST_ASSERT_FALSE(CE_Id_isEntity(id));
     TEST_ASSERT_EQUAL_UINT32(555, CE_Id_getUniqueId(id));
-    TEST_ASSERT_EQUAL_UINT32(15, CE_Id_getGeneration(id));
+    TEST_ASSERT_EQUAL_UINT32(0, CE_Id_getGeneration(id));
     TEST_ASSERT_EQUAL_UINT8(9, CE_Id_getRelationshipTypeId(id));
     TEST_ASSERT_EQUAL_UINT8(CE_INVALID_TYPE_ID, CE_Id_getComponentTypeId(id));
 
     // Setters enforcement
     CE_Id original = id;
-    // Invalid type (>6 bits)
-    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_setRelationshipTypeId(&id, (CE_TypeId)0xFF));
-    TEST_ASSERT_EQUAL_UINT32(original, id);
-    // Invalid generation (>6 bits)
-    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_setGeneration(&id, 0xFF));
+    // Invalid: generation not allowed for relationships
+    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_setGeneration(&id, 1));
     TEST_ASSERT_EQUAL_UINT32(original, id);
     // Invalid unique (>16 bits)
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_setUniqueId(&id, 0x1FFFF));
@@ -86,8 +83,6 @@ static void CEIdHelpersTest(void) {
     // Valid modifications
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_setUniqueId(&id, 123));
     TEST_ASSERT_EQUAL_UINT32(123, CE_Id_getUniqueId(id));
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_setGeneration(&id, 22));
-    TEST_ASSERT_EQUAL_UINT32(22, CE_Id_getGeneration(id));
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_setRelationshipTypeId(&id, (CE_TypeId)12));
     TEST_ASSERT_EQUAL_UINT8(12, CE_Id_getRelationshipTypeId(id));
 
@@ -105,15 +100,17 @@ static void CEIdHelpersTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 6, 42, &entB));
     TEST_ASSERT_FALSE(CE_Id_compare(entA, entB));
 
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)3, 9, 77, &relA));
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)4, 9, 77, &relB));
-    TEST_ASSERT_TRUE(CE_Id_compare(relA, relB)); // type ignored
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)3, 10, 77, &relB));
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)3, 0, 77, &relA));
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)4, 0, 77, &relB));
+    TEST_ASSERT_TRUE(CE_Id_compare(relA, relB)); // type ignored, generation unused
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)3, 0, 78, &relB));
     TEST_ASSERT_FALSE(CE_Id_compare(relA, relB));
 
     // Constructor failures set invalid id
     CE_Id out;
-    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, (CE_TypeId)0xFF, 0, 10, &out));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_make(CE_ID_INVALID_KIND, (CE_TypeId)0, 0, 10, &out));
+    TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, out);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_make(CE_ID_KIND_COUNT, (CE_TypeId)0, 0, 10, &out));
     TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, out);
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 0xFF, 10, &out));
     TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, out);
@@ -268,21 +265,21 @@ static void CE_Bitset_ToggleBitTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_toggleBit(&bitset, 15));
     TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&bitset, 15));
     
-    // Test across byte boundaries
+    // Test across int32 boundaries
     CE_Bitset_init(&bitset, CE_BITSET_MAX_BITS);
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_toggleBit(&bitset, 7));   // Last bit of byte 0
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_toggleBit(&bitset, 8));   // First bit of byte 1
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_toggleBit(&bitset, 63));  // Last bit of byte 7
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_toggleBit(&bitset, 64));  // First bit of byte 8
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_toggleBit(&bitset, 31));   // Last bit of int32 0
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_toggleBit(&bitset, 32));   // First bit of int32 1
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_toggleBit(&bitset, 63));  // Last bit of int32 1
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_toggleBit(&bitset, 64));  // First bit of int32 2
     
-    TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&bitset, 7));
-    TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&bitset, 8));
+    TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&bitset, 31));
+    TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&bitset, 32));
     TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&bitset, 63));
     TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&bitset, 64));
     
     // Test error: index out of bounds
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Bitset_toggleBit(&bitset, CE_BITSET_MAX_BITS));
-    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Bitset_toggleBit(&bitset, 200));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Bitset_toggleBit(&bitset, 400));
 }
 
 static void CE_Bitset_IsBitSetTest(void) {
@@ -324,26 +321,26 @@ static void CE_Bitset_ByteBoundariesTest(void) {
     CE_Bitset_init(&bitset, CE_BITSET_MAX_BITS);
     
     // Set bits at byte boundaries
-    for (size_t i = 0; i < 16; i++) {
-        TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_setBit(&bitset, i * 8));  // First bit of each byte
-        TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_setBit(&bitset, i * 8 + 7));  // Last bit of each byte
+    for (size_t i = 0; i < CE_BITSET_MAX_BITS/32; i++) {
+        TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_setBit(&bitset, i * 32));  // First bit of each int32
+        TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_setBit(&bitset, i * 32 + 31));  // Last bit of each int32
     }
     
     // Verify set bits
-    for (size_t i = 0; i < 16; i++) {
-        TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&bitset, i * 8));
-        TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&bitset, i * 8 + 7));
+    for (size_t i = 0; i < CE_BITSET_MAX_BITS/32; i++) {
+        TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&bitset, i * 32));
+        TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&bitset, i * 32 + 31));
         
         // Verify middle bits are clear
-        if (i * 8 + 3 < CE_BITSET_MAX_BITS) {
-            TEST_ASSERT_FALSE(CE_Bitset_isBitSet(&bitset, i * 8 + 3));
+        if (i * 32 + 3 < CE_BITSET_MAX_BITS) {
+            TEST_ASSERT_FALSE(CE_Bitset_isBitSet(&bitset, i * 32 + 3));
         }
     }
     
     // Clear all boundary bits
-    for (size_t i = 0; i < 16; i++) {
-        TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_clearBit(&bitset, i * 8));
-        TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_clearBit(&bitset, i * 8 + 7));
+    for (size_t i = 0; i < CE_BITSET_MAX_BITS/32; i++) {
+        TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_clearBit(&bitset, i * 32));
+        TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_clearBit(&bitset, i * 32 + 31));
     }
     
     // Verify all cleared

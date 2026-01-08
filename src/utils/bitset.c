@@ -23,7 +23,7 @@ CE_Result CE_Bitset_setBit(INOUT CE_Bitset* bitset, IN size_t index)
     if (index >= bitset->m_size) {
         return CE_ERROR;
     }
-    bitset->m_bits[index / 8] |= (1 << (index % 8));
+    bitset->m_bits[index / (sizeof(CE_BITSET_STORAGE_TYPE) * 8)] |= (1 << (index % (sizeof(CE_BITSET_STORAGE_TYPE) * 8)));
     return CE_OK;
 }
 
@@ -32,7 +32,7 @@ CE_Result CE_Bitset_clearBit(INOUT CE_Bitset* bitset, IN size_t index)
     if (index >= bitset->m_size) {
         return CE_ERROR;
     }
-    bitset->m_bits[index / 8] &= ~(1 << (index % 8));
+    bitset->m_bits[index / (sizeof(CE_BITSET_STORAGE_TYPE) * 8)] &= ~(1 << (index % (sizeof(CE_BITSET_STORAGE_TYPE) * 8)));
     return CE_OK;
 }
 
@@ -41,7 +41,7 @@ CE_Result CE_Bitset_toggleBit(INOUT CE_Bitset* bitset, IN size_t index)
     if (index >= bitset->m_size) {
         return CE_ERROR;
     }
-    bitset->m_bits[index / 8] ^= (1 << (index % 8));
+    bitset->m_bits[index / (sizeof(CE_BITSET_STORAGE_TYPE) * 8)] ^= (1 << (index % (sizeof(CE_BITSET_STORAGE_TYPE) * 8)));
     return CE_OK;
 }
 
@@ -50,5 +50,5 @@ bool CE_Bitset_isBitSet(IN const CE_Bitset* bitset, IN size_t index)
     if (index >= bitset->m_size) {
         return false;
     }
-    return (bitset->m_bits[index / 8] & (1 << (index % 8))) != 0;
+    return (bitset->m_bits[index / (sizeof(CE_BITSET_STORAGE_TYPE) * 8)] & (1 << (index % (sizeof(CE_BITSET_STORAGE_TYPE) * 8)))) != 0;
 }

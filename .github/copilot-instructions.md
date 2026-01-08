@@ -41,7 +41,7 @@ The project uses **CMake exclusively** via `CMakeLists.txt` which includes `$(SD
 **Critical**: Project requires `PLAYDATE_SDK_PATH` environment variable set. The SDK provides:
 - C API headers at `$SDK/C_API/pd_api.h`
 - Build support at `$SDK/C_API/buildsupport/`
-- ARM cross-compiler toolchain (arm-none-eabi-gcc 12.2)
+     Press F7 or use `CMake: Build` to build with CMake Tools (uses `build.nmake`).
 - `pdc` compiler tool for creating .pdx bundles
 - Simulator at `$SDK/bin/PlaydateSimulator.exe`
 
@@ -50,19 +50,12 @@ The project uses **CMake exclusively** via `CMakeLists.txt` which includes `$(SD
 ```cmake
 PLAYDATE_GAME_NAME = corgo_engine          # Simulator builds
 PLAYDATE_GAME_DEVICE = corgo_engine_DEVICE # Device debug builds
-PLAYDATE_GAME_DEVICE = corgo_engine_RELEASE # Device release builds
-```
-
-**CRITICAL**: `PLAYDATE_GAME_DEVICE` variable name must be used for device builds as it's referenced by the Playdate SDK's `playdate_game.cmake`. The value assigned to it changes based on `CMAKE_BUILD_TYPE` (Debug → `corgo_engine_DEVICE`, Release → `corgo_engine_RELEASE`).
 
 **Toolchain detection**: CMake checks `TOOLCHAIN` variable:
 - `TOOLCHAIN=armgcc` + `CMAKE_BUILD_TYPE=Release` → `corgo_engine_RELEASE.elf`
 - `TOOLCHAIN=armgcc` (default) → `corgo_engine_DEVICE.elf`
 - Otherwise → Simulator `.dll`
 
-### VS Code CMake Integration
-- Use the CMake Tools extension (already configured in `.vscode/settings.json`).
-- Key settings:
     - `cmake.buildDirectory`: `${workspaceFolder}/build.nmake`
     - `cmake.sourceDirectory`: `${workspaceFolder}`
     - `cmake.configureOnOpen`: `false`
@@ -230,17 +223,36 @@ typedef struct CE_Engine_HealthComponent {
     /* other engine components... */
 ```
 
+    ### CE_Id Schema
+    - Kind field: bits 32–29 (4 bits) encode `CE_IdKind`.
+      - 0: invalid, 1: entity reference, 2: relationship, 3: component, 4–15 reserved.
+    - Entity reference fields:
+      - Generation: bits 28–25 (4 bits), values 0–15.
+      - Unique id: bits 16–1 (16 bits), values 0–65535.
+    - Relationship fields:
+      - Type: bits 24–17 (8 bits), values 0–255.
+      - Unique id: bits 16–1 (16 bits).
+    - Component fields:
+      - Type: bits 24–17 (8 bits), values 0–255.
+      - Unique id: bits 16–1 (16 bits).
+
+    Notes:
+    - Relationships no longer carry a generation value.
+    - `CE_TypeId` is 8-bit.
+
 **Step 3**: Create implementation file with init, cleanup, and descriptor generation:
 ```c
 // In src/engine/components/health.c
-#include "ecs/components.h"
-
+    - Test target: `coretests` (sources under `src/tests/` + core engine sources).
+    - Preferred run: execute the test binary directly: `build.nmake/coretests.exe`.
+    - CTest may not list tests in some configs; if registered, `ctest --output-on-failure` works from `build.nmake`.
 void CE_ENGINE_HEALTH_init(OUT CE_Engine_HealthComponent* component) {
     component->currentHealth = 100;
     component->maxHealth = 100;
 }
-
-void CE_ENGINE_HEALTH_cleanup(OUT CE_Engine_HealthComponent* component) {
+    - Id schema supports up to 256 component type ids (8-bit `CE_TypeId`).
+    - Current query bitmask is 64-bit; practical concurrent typed-bit queries are limited to 64 types.
+    - A compile-time assertion in `src/ecs/components.h` may enforce the 64-type mask limit even if ids allow more.
     // Cleanup if needed
 }
 

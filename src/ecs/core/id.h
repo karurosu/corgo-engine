@@ -9,17 +9,26 @@
 
 #include "ecs/types.h"
 
-//// Inline flag tests
-static inline bool CE_Id_isComponent(IN CE_Id id) { return (id != CE_INVALID_ID && (id & CE_ID_FLAG_COMPONENT) != 0); }
-static inline bool CE_Id_isRelationship(IN CE_Id id) { return (!CE_Id_isComponent(id)) && ((id & CE_ID_FLAG_RELATIONSHIP) != 0); }
-static inline bool CE_Id_isEntity(IN CE_Id id) { return (id != CE_INVALID_ID && (id & CE_ID_FLAG_COMPONENT) == 0); }
+//// Bit layout helpers
+// Field shifts and masks (0-indexed from LSB)
+#define CE_ID_SHIFT_KIND          28
+#define CE_ID_MASK_KIND           0xFu    // 4 bits
+#define CE_ID_SHIFT_GENERATION    24
+#define CE_ID_MASK_GENERATION     0xFu    // 4 bits
+#define CE_ID_SHIFT_TYPE          16
+#define CE_ID_MASK_TYPE8          0xFFu   // 8 bits
+#define CE_ID_SHIFT_UNIQUE        0
+#define CE_ID_MASK_UNIQUE         0xFFFFu // 16 bits
 
+//// Inline kind tests
 static inline CE_IdKind CE_Id_getKind(IN CE_Id id) {
     if (id == CE_INVALID_ID) return CE_ID_INVALID_KIND;
-    if (CE_Id_isComponent(id)) return CE_ID_COMPONENT_REFERENCE_KIND;
-    if (CE_Id_isRelationship(id)) return CE_ID_ENTITY_RELATIONSHIP_KIND;
-    return CE_ID_ENTITY_REFERENCE_KIND;
+    return (CE_IdKind)(((id >> CE_ID_SHIFT_KIND) & CE_ID_MASK_KIND));
 }
+
+static inline bool CE_Id_isComponent(IN CE_Id id) { return CE_Id_getKind(id) == CE_ID_COMPONENT_REFERENCE_KIND; }
+static inline bool CE_Id_isRelationship(IN CE_Id id) { return CE_Id_getKind(id) == CE_ID_ENTITY_RELATIONSHIP_KIND; }
+static inline bool CE_Id_isEntity(IN CE_Id id) { return CE_Id_getKind(id) == CE_ID_ENTITY_REFERENCE_KIND; }
 
 //// Inline extractors
 static inline uint32_t CE_Id_getUniqueId(IN CE_Id id) { return (id >> CE_ID_SHIFT_UNIQUE) & CE_ID_MASK_UNIQUE; }
@@ -31,12 +40,12 @@ static inline uint32_t CE_Id_getGeneration(IN CE_Id id) {
 
 static inline CE_TypeId CE_Id_getComponentTypeId(IN CE_Id id) {
     if (!CE_Id_isComponent(id)) return (CE_TypeId)CE_INVALID_TYPE_ID;
-    return (CE_TypeId)((id >> CE_ID_SHIFT_TYPE) & CE_ID_MASK_TYPE6);
+    return (CE_TypeId)((id >> CE_ID_SHIFT_TYPE) & CE_ID_MASK_TYPE8);
 }
 
 static inline CE_TypeId CE_Id_getRelationshipTypeId(IN CE_Id id) {
     if (!CE_Id_isRelationship(id)) return (CE_TypeId)CE_INVALID_TYPE_ID;
-    return (CE_TypeId)((id >> CE_ID_SHIFT_TYPE) & CE_ID_MASK_TYPE6);
+    return (CE_TypeId)((id >> CE_ID_SHIFT_TYPE) & CE_ID_MASK_TYPE8);
 }
 
 //// Mutators and utilities (implemented in core/types.c)

@@ -18,19 +18,21 @@
 
 //// Id types
 /*
- * Id is a 32-bit unsigned integer that identifies a unique object in CC ECS, either a component, entity or relationship.
- * It is a bitset that can store different things depending on some data.
- * Bits 32-29 (4 bits): Reference Type Component and flags.
- * - Bit 32: Is Entity Reference (0) or Component Reference (1).
- * - Bit 31: If Entity Reference, Direct Reference (0) or Relationship Reference (1).
- * - Bits 30-29: Reserved for future use.
- * Bits 28-23 (6 bits):
- * - For entity reference: Generation count (0-63).
- * - For Component Reference: Unused.
- * Bits 22-17 (6 bits):
- * - For Entity Reference: Relationship type in decimal (0-63). Only for relationship references, ignored otherwise.
- * - For Component Reference: Component type in decimal (0-63).
- * Bits 16-1 (16 bits): Unique id within the type (0-65535).
+ * Id is a 32-bit unsigned integer that identifies a unique object in CC ECS, either a component, entity, or relationship.
+ * New bit schema:
+ * For all types:
+ * - Bits 32-29 (4 bits): Id Type enum value (0-15)
+ *   0 -> invalid, 1 -> entity reference, 2 -> relationship, 3 -> component, 4-15 reserved
+ * For entity references and relationships:
+ * - Bits 28-25 (4 bits): Generation count (0-15).
+ * - Bits 24-17 (8 bits):
+ *   - For relationships: Relationship type in decimal (0-255).
+ *   - For entity reference: unused.
+ * - Bits 16-1 (16 bits): Unique id within the type (0-65535).
+ * For components:
+ * - Bits 28-25 (4 bits): Unused.
+ * - Bits 24-17 (8 bits): Component type (0-255).
+ * - Bits 16-1 (16 bits): Unique id within the type (0-65535).
  */
 typedef uint32_t CE_Id;
 
@@ -38,30 +40,18 @@ typedef uint32_t CE_Id;
 typedef uint8_t CE_TypeId;
 
 //// CE_Id kind
-// Different kinds of Ids.
+// Different kinds of Ids stored in the top 4 bits.
 typedef enum CE_IdKind {
-    CE_ID_ENTITY_REFERENCE_KIND = 0,
-    CE_ID_COMPONENT_REFERENCE_KIND = 1,
+    CE_ID_INVALID_KIND = 0,
+    CE_ID_ENTITY_REFERENCE_KIND = 1,
     CE_ID_ENTITY_RELATIONSHIP_KIND = 2,
-    CE_ID_INVALID_KIND = 3
+    CE_ID_COMPONENT_REFERENCE_KIND = 3,
+    CE_ID_KIND_COUNT
 } CE_IdKind;
 
 // Invalid constants
 #define CE_INVALID_ID 0
 #define CE_INVALID_TYPE_ID 0xFF
-
-//// Bit layout helpers
-// Flags (bits 31 and 30 in 0-indexed from MSB, described as 32 and 31 in comments)
-#define CE_ID_FLAG_COMPONENT      (1u << 31)
-#define CE_ID_FLAG_RELATIONSHIP   (1u << 30)
-
-// Field shifts and masks
-#define CE_ID_SHIFT_GENERATION    23
-#define CE_ID_MASK_GENERATION     0x3Fu   // 6 bits
-#define CE_ID_SHIFT_TYPE          17
-#define CE_ID_MASK_TYPE6          0x3Fu   // 6 bits
-#define CE_ID_SHIFT_UNIQUE        0
-#define CE_ID_MASK_UNIQUE         0xFFFFu // 16 bits
 
 // Container types
 #define CE_Id_Vector cc_vec(CE_Id)
@@ -69,8 +59,8 @@ typedef enum CE_IdKind {
 //// Component types
 
 // Maximum number of component types
-// Currently limited to 64 due to id size.
-#define CE_MAX_COMPONENT_TYPES 64
+// Limited to 256 due to 8-bit type field.
+#define CE_MAX_COMPONENT_TYPES 256
 
 //// Exposed structures
 typedef struct CE_ECS_ComponentStaticData CE_ECS_ComponentStaticData;
