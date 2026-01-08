@@ -108,18 +108,26 @@ static void CEIdHelpersTest(void) {
 
     // Constructor failures set invalid id
     CE_Id out;
+    //// Invalid kind
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_make(CE_ID_INVALID_KIND, (CE_TypeId)0, 0, 10, &out));
     TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, out);
+    //// Invalid kind: CE_ID_KIND_COUNT
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_make(CE_ID_KIND_COUNT, (CE_TypeId)0, 0, 10, &out));
     TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, out);
+    //// Invalid generation for entity reference
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 0xFF, 10, &out));
     TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, out);
+    //// Invalid unique id for entity reference
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 0, 0x1FFFF, &out));
     TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, out);
 
     // Constructor corner cases
+    //// Generation is ignored for components
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, (CE_TypeId)0x1, 0xFF, 10, &out));
     TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, out);
+    //// Invalid component reference with invalid type
+    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, CE_INVALID_TYPE_ID, 0x1, 10, &out));
+    TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, out);
 
     // Invalid tests
     CE_Id invalidId = CE_INVALID_ID;
@@ -240,6 +248,15 @@ static void CE_Bitset_ClearBitTest(void) {
     // Test error: index out of bounds
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Bitset_clearBit(&bitset, 64));
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Bitset_clearBit(&bitset, 1000));
+
+    // Test clearing all bits
+    CE_Bitset_setBit(&bitset, 0);
+    CE_Bitset_setBit(&bitset, 5);
+    CE_Bitset_setBit(&bitset, 10);
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Bitset_clear(&bitset));
+    TEST_ASSERT_FALSE(CE_Bitset_isBitSet(&bitset, 0));
+    TEST_ASSERT_FALSE(CE_Bitset_isBitSet(&bitset, 5));
+    TEST_ASSERT_FALSE(CE_Bitset_isBitSet(&bitset, 10));
 }
 
 static void CE_Bitset_ToggleBitTest(void) {
@@ -375,6 +392,87 @@ static void CE_Bitset_AllBitsTest(void) {
     }
 }
 
+static void CE_EntityConstructionTest(void) {
+    CE_ECS_Context context;
+    CE_ERROR_CODE errorCode;
+    CE_Result result = CE_ECS_Init(&context, &errorCode);
+    CE_Id entityId = CE_INVALID_ID;
+    CE_ECS_EntityData* entityData = NULL;
+
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Construct one entity
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_createEntity(&context.m_storage, &entityId, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, entityId);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    TEST_ASSERT_EQUAL_size_t(1, context.m_storage.m_entityStorage.m_count);
+    
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_getEntityData(&context.m_storage, entityId, &entityData, &errorCode));
+    TEST_ASSERT_NOT_NULL(entityData);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    TEST_ASSERT_TRUE(entityData->m_isValid);
+    TEST_ASSERT_EQUAL_UINT32(entityId, entityData->m_entityId);
+    const size_t componentCount = cc_size(&entityData->m_components);
+    const size_t relationshipCount = cc_size(&entityData->m_relationships);
+    TEST_ASSERT_EQUAL_size_t(0, componentCount);
+    TEST_ASSERT_EQUAL_size_t(0, relationshipCount);
+
+    // Check components and relationships are empty
+    for (int i = 0; i < CE_COMPONENT_TYPES_COUNT; i++) {
+        TEST_ASSERT_FALSE(CE_Bitset_isBitSet(&entityData->m_entityComponentBitset, i));
+    }
+
+    // Delete entity
+    entityData = NULL;
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_destroyEntity(&context.m_storage, entityId, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    TEST_ASSERT_EQUAL_size_t(0, context.m_storage.m_entityStorage.m_count);  
+    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_ECS_MainStorage_getEntityData(&context.m_storage, entityId, &entityData, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_ENTITY_NOT_FOUND, errorCode);
+
+    // Use up all entity IDs
+    for (CE_Id i = 0; i < CE_MAX_ENTITIES; i++) {
+        TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_createEntity(&context.m_storage, &entityId, &errorCode));
+        TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    }
+
+    // Attempt to create one more entity should fail
+    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_ECS_MainStorage_createEntity(&context.m_storage, &entityId, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_MAX_ENTITIES_REACHED, errorCode);
+
+    // Delete one and create one
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_destroyEntity(&context.m_storage, entityId, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    CE_Id newEntityId; // Save to a new variable
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_createEntity(&context.m_storage, &newEntityId, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Verify generation count has incremented
+    TEST_ASSERT_EQUAL_UINT32(1, CE_Id_getGeneration(newEntityId));
+    
+    // entityID and newEntityId should have the same index but different generations
+    TEST_ASSERT_EQUAL_UINT32(CE_Id_getUniqueId(entityId), CE_Id_getUniqueId(newEntityId));
+    TEST_ASSERT_NOT_EQUAL(CE_Id_getGeneration(entityId), CE_Id_getGeneration(newEntityId));
+
+    // Attempting to use old entityId should fail
+    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_ECS_MainStorage_getEntityData(&context.m_storage, entityId, &entityData, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_STALE_ENTITY_ID, errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_ECS_MainStorage_destroyEntity(&context.m_storage, entityId, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_STALE_ENTITY_ID, errorCode);
+
+    // Verify newEntityId is valid
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_getEntityData(&context.m_storage, newEntityId, &entityData, &errorCode));
+    TEST_ASSERT_NOT_NULL(entityData);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_TRUE(entityData->m_isValid);
+    TEST_ASSERT_EQUAL_UINT32(newEntityId, entityData->m_entityId);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(ECSContextSetupTest);
@@ -387,5 +485,6 @@ int main(void) {
     RUN_TEST(CE_Bitset_IsBitSetTest);
     RUN_TEST(CE_Bitset_ByteBoundariesTest);
     RUN_TEST(CE_Bitset_AllBitsTest);
+    RUN_TEST(CE_EntityConstructionTest);
     return UNITY_END();
 }

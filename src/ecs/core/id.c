@@ -77,10 +77,10 @@ CE_Result CE_Id_make(IN CE_IdKind kind, IN CE_TypeId typeId, IN uint32_t generat
     if (kind == CE_ID_INVALID_KIND || kind >= CE_ID_KIND_COUNT) { *out = CE_INVALID_ID; return CE_ERROR; }
 
     // Validate generation for entity kind only
-    if (kind == CE_ID_ENTITY_REFERENCE_KIND && generation > CE_ID_MASK_GENERATION) { *out = CE_INVALID_ID; return CE_ERROR; }
+    if (kind == CE_ID_ENTITY_REFERENCE_KIND && generation > CE_MAX_GENERATION_COUNT) { *out = CE_INVALID_ID; return CE_ERROR; }
 
     // Validate 8-bit type for component/relationship kinds
-    if ((kind == CE_ID_COMPONENT_REFERENCE_KIND || kind == CE_ID_ENTITY_RELATIONSHIP_KIND) && (uint32_t)typeId > CE_ID_MASK_TYPE8) {
+    if ((kind == CE_ID_COMPONENT_REFERENCE_KIND || kind == CE_ID_ENTITY_RELATIONSHIP_KIND) && (uint32_t)typeId >= CE_INVALID_TYPE_ID) {
         *out = CE_INVALID_ID; return CE_ERROR;
     }
 

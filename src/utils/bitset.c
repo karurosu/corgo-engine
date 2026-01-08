@@ -52,3 +52,11 @@ bool CE_Bitset_isBitSet(IN const CE_Bitset* bitset, IN size_t index)
     }
     return (bitset->m_bits[index / (sizeof(CE_BITSET_STORAGE_TYPE) * 8)] & (1 << (index % (sizeof(CE_BITSET_STORAGE_TYPE) * 8)))) != 0;
 }
+
+CE_Result CE_Bitset_clear(INOUT CE_Bitset* bitset)
+{
+    for (size_t i = 0; i < CE_BITSET_ARRAY_SIZE; i++) {
+        bitset->m_bits[i] = 0;
+    }
+    return CE_OK;
+}

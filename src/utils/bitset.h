@@ -24,5 +24,6 @@ CE_Result CE_Bitset_setBit(INOUT CE_Bitset* bitset, IN size_t index);
 CE_Result CE_Bitset_clearBit(INOUT CE_Bitset* bitset, IN size_t index);
 CE_Result CE_Bitset_toggleBit(INOUT CE_Bitset* bitset, IN size_t index);
 bool CE_Bitset_isBitSet(IN const CE_Bitset* bitset, IN size_t index);
+CE_Result CE_Bitset_clear(INOUT CE_Bitset* bitset);
 
 #endif // CORGO_UTILS_BITSET_H

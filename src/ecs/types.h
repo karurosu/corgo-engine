@@ -14,6 +14,8 @@
 
 // General helpers
 #include "utils/helpers.h"
+
+typedef CE_Result;
 #include "utils/error.h"
 
 //// Id types
@@ -59,8 +61,11 @@ typedef enum CE_IdKind {
 //// Component types
 
 // Maximum number of component types
-// Limited to 256 due to 8-bit type field.
-#define CE_MAX_COMPONENT_TYPES 256
+// Limited to 255 due to 8-bit type field (0-254 are valid types, 255 is reserved for invalid type)
+#define CE_MAX_COMPONENT_TYPES 255
+
+// Maximum generation count for entities and relationships (4 bits: 0-15)
+#define CE_MAX_GENERATION_COUNT 15
 
 //// Exposed structures
 typedef struct CE_ECS_ComponentStaticData CE_ECS_ComponentStaticData;

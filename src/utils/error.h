@@ -39,6 +39,11 @@ typedef int CE_Result;
     X(STORAGE_COMPONENT_CLEANUP_FAILED, 24, "Component storage cleanup failed") \
     X(STORAGE_COMPONENT_BITSET_TOO_SMALL, 25, "Component storage bitset too small") \
     \
+    X(MAX_ENTITIES_REACHED, 30, "Maximum number of entities reached") \
+    X(INVALID_ENTITY_ID, 31, "Invalid entity ID") \
+    X(ENTITY_NOT_FOUND, 32, "Entity not found") \
+    X(STALE_ENTITY_ID, 33, "Entity ID references a deleted entity") \
+    \
     X(BITSET_INDEX_OUT_OF_BOUNDS, 60, "Bitset index out of bounds") \
     /* Add new error codes here */
 

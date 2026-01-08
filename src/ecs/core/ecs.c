@@ -63,3 +63,15 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
 }
+
+CE_Result CE_ECS_CreateEntity(INOUT CE_ECS_Context* context, OUT CE_Id* outId, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    // Just call create on storage
+    return CE_ECS_MainStorage_createEntity(&context->m_storage, outId, errorCode);
+}
+
+CE_Result CE_ECS_DestroyEntity(INOUT CE_ECS_Context* context, IN CE_Id entity, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    // Just call destroy on storage
+    return CE_ECS_MainStorage_destroyEntity(&context->m_storage, entity, errorCode);
+}
