@@ -70,6 +70,7 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
         storage->m_entityStorage.m_entityDataArray[i].m_isValid = false;
         storage->m_entityStorage.m_entityDataArray[i].m_entityId = CE_INVALID_ID;
         CE_Bitset_init(&storage->m_entityStorage.m_entityDataArray[i].m_entityComponentBitset, CE_COMPONENT_TYPES_COUNT);
+        
         cc_init(&storage->m_entityStorage.m_entityDataArray[i].m_components);
         cc_init(&storage->m_entityStorage.m_entityDataArray[i].m_relationships);
     }
@@ -92,7 +93,7 @@ CE_Result CE_ECS_MainStorage_cleanup(OUT CE_ECS_MainStorage* storage, IN const C
                 for (size_t i = 0; i < storageEntry->m_capacity; i++) {
                     if (CE_Bitset_isBitSet(&storageEntry->m_componentIndexBitset, i)) {
                         // Call cleanup function for each valid component
-                        void* componentPtr = CE_ECS_MainStorage_getComponentDataPointer(storageEntry, componentStaticData, i);
+                        void* componentPtr = CE_ECS_ComponentStorage_getComponentDataPointer(storageEntry, componentStaticData, i);
                         if (componentPtr) {
                             result = componentStaticData->m_cleanupFunction(componentPtr);
                             CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_CLEANUP_FAILED);
@@ -129,7 +130,7 @@ CE_Result CE_ECS_MainStorage_growStorageForComponent(INOUT CE_ECS_MainStorage* s
     return CE_ERROR;
 }
 
-void* CE_ECS_MainStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN size_t index)
+void* CE_ECS_ComponentStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN size_t index)
 {
     if (index >= storage->m_capacity || !CE_Bitset_isBitSet(&storage->m_componentIndexBitset, index)) {
         return NULL;
@@ -137,13 +138,13 @@ void* CE_ECS_MainStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* 
     return (uint8_t*)storage->m_componentDataPool + (index * componentStaticData->m_storageSizeOf);
 }
 
-void* CE_ECS_MainStorage_getComponentDataPointerById(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_Id id)
+void* CE_ECS_ComponentStorage_getComponentDataPointerById(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_Id id)
 {
     const size_t index = CE_Id_getUniqueId(id);
-    return CE_ECS_MainStorage_getComponentDataPointer(storage, componentStaticData, index);
+    return CE_ECS_ComponentStorage_getComponentDataPointer(storage, componentStaticData, index);
 }
 
-CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, OUT CE_Id* id, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, OUT CE_Id* id, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     CE_Result result = CE_OK;
 
@@ -171,9 +172,8 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
     for (index = 0; index < componentStorage->m_capacity; index++) {
         if (!CE_Bitset_isBitSet(&componentStorage->m_componentIndexBitset, index))
         {
+            // Set this here to reserve the space
             CE_Bitset_setBit(&componentStorage->m_componentIndexBitset, index);
-            componentStorage->m_componentHeader[index].m_isValid = true;
-            componentStorage->m_count++;
             break;
         }
     }
@@ -185,7 +185,7 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
     }
 
     // Initialize component
-    void* componentPtr = CE_ECS_MainStorage_getComponentDataPointer(componentStorage, componentStaticData, index);
+    void* componentPtr = CE_ECS_ComponentStorage_getComponentDataPointer(componentStorage, componentStaticData, index);
     if (!componentPtr) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_ALLOCATION_FAILED);
         return CE_ERROR;
@@ -194,6 +194,8 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
     result = componentStaticData->m_initFunction(componentPtr);
 
     if (result != CE_OK) {
+        // Init failed, free the slot
+        CE_Bitset_clearBit(&componentStorage->m_componentIndexBitset, index);
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_INIT_FAILED);
         return result;
     }
@@ -202,6 +204,11 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
     componentStorage->m_componentHeader[index].m_isValid = true;
     componentStorage->m_count++;
     CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, componentStaticData->m_type, 0, (uint32_t)index, id);
+
+    // If passed in a pointer for component data, set it
+    if (componentData) {
+        *componentData = componentPtr;
+    }
 
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
@@ -230,9 +237,9 @@ CE_Result CE_ECS_MainStorage_destroyComponent(INOUT CE_ECS_MainStorage* storage,
         return CE_OK; // Component already destroyed
     }
 
-    void* componentPtr = CE_ECS_MainStorage_getComponentDataPointer(componentStorage, componentStaticData, index);
+    void* componentPtr = CE_ECS_ComponentStorage_getComponentDataPointer(componentStorage, componentStaticData, index);
     if (!componentPtr) {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_ALLOCATION_FAILED);
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_COMPONENT_ID);
         return CE_ERROR;
     }
 
@@ -294,6 +301,14 @@ CE_Result CE_ECS_MainStorage_createEntity(INOUT CE_ECS_MainStorage* storage, OUT
     cc_clear(&entityData->m_components);
     cc_clear(&entityData->m_relationships);
 
+    // Initialize component and relationship arrays with initial capacity to prevent reallocations
+    if (!cc_reserve(&entityData->m_components, CE_INITIAL_ENTITY_COMPONENTS_CAPACITY)
+        || !cc_reserve(&entityData->m_relationships, CE_INITIAL_ENTITY_RELATIONSHIPS_CAPACITY))
+    {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
+        return CE_ERROR;
+    }
+
     storage->m_entityStorage.m_count++;
     *id = entityData->m_entityId;
 
@@ -329,6 +344,9 @@ CE_Result CE_ECS_MainStorage_destroyEntity(INOUT CE_ECS_MainStorage* storage, IN
 
     entityData->m_isValid = false;
     storage->m_entityStorage.m_count--;
+    CE_Bitset_clear(&entityData->m_entityComponentBitset);
+    cc_clear(&entityData->m_components);
+    cc_clear(&entityData->m_relationships);
 
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;

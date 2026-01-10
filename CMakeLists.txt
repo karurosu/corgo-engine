@@ -98,7 +98,7 @@ if (NOT TOOLCHAIN STREQUAL "armgcc")
 	
 	# Core tests executable
 	add_executable(coretests 
-		src/tests/ecs.c
+		src/tests/core.c
 		${CORE}
 		${UTILS}
 		${ENGINE}
@@ -106,7 +106,7 @@ if (NOT TOOLCHAIN STREQUAL "armgcc")
 	)
 	
 	# Preserve directory structure for test project
-	source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${ENGINE} ${UTILS} ${EXT_LIBS} src/tests/ecs.c)
+	source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${ENGINE} ${UTILS} ${EXT_LIBS} src/tests/core.c)
 	
 	target_include_directories(coretests PRIVATE 
 		${cc_SOURCE_DIR}

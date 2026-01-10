@@ -23,10 +23,12 @@ typedef int CE_Result;
 // Enums 10-19: Main Storage related errors
 // Enums 20-29: Component Storage related errors
 // Enums 30-39: Entity related errors
+// Enums 40-49: Component related errors
 // Enums 60-69: bitset errors
 #define CE_ERROR_CODE_LIST(X) \
     X(NONE, 0, "No error") \
     X(UNSUPPORTED_OPERATION, 1, "Unsupported operation") \
+    X(OUT_OF_MEMORY, 2, "Out of memory") \
     \
     X(STORAGE_MAIN_NOT_INITIALIZED, 10, "Main Storage not initialized") \
     X(STORAGE_MAIN_ALREADY_INITIALIZED, 11, "Main Storage already initialized") \
@@ -43,6 +45,10 @@ typedef int CE_Result;
     X(INVALID_ENTITY_ID, 31, "Invalid entity ID") \
     X(ENTITY_NOT_FOUND, 32, "Entity not found") \
     X(STALE_ENTITY_ID, 33, "Entity ID references a deleted entity") \
+    \
+    X(INVALID_COMPONENT_TYPE, 40, "Invalid component type") \
+    X(COMPONENT_NOT_FOUND_IN_ENTITY, 41, "Component not found in entity") \
+    X(INVALID_COMPONENT_ID, 42, "Invalid component ID") \
     \
     X(BITSET_INDEX_OUT_OF_BOUNDS, 60, "Bitset index out of bounds") \
     /* Add new error codes here */

@@ -144,15 +144,88 @@ static void CEIdHelpersTest(void) {
 static void ComponentStorageTest(void) {
     CE_ECS_Context context;
     CE_ERROR_CODE errorCode;
-    CE_Result result = CE_ECS_Init(&context, &errorCode);
+    CE_Result result;
     CE_Id id;
+    CE_Id anotherId;
+    void *componentData = NULL;
 
+    // Initialize ECS context
+    result = CE_ECS_Init(&context, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-
     CE_ECS_ComponentStaticData* debugDesc = &context.m_componentDefinitions[CE_CORE_DEBUG_COMPONENT];
+    CE_ECS_ComponentStorage* debugStorage = context.m_storage.m_componentTypeStorage[CE_CORE_DEBUG_COMPONENT];
 
-    CE_ECS_MainStorage_createComponent(&context.m_storage, debugDesc, &id, &errorCode);
+    // Create the first component
+    result = CE_ECS_MainStorage_createComponent(&context.m_storage, debugDesc, &id, &componentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(componentData);
+    TEST_ASSERT_EQUAL_size_t(1, debugStorage->m_count);
+    if (componentData) {
+        CE_CORE_DEBUG_COMPONENT_StorageType *debugComponentPtr = (CE_CORE_DEBUG_COMPONENT_StorageType*)componentData;
+        TEST_ASSERT_FALSE(debugComponentPtr->m_enabled);
+        debugComponentPtr->m_enabled = true; // Force change a value to test retrieval
+    }
+
+    // Create another component to muddle things up a bit
+    result = CE_ECS_MainStorage_createComponent(&context.m_storage, debugDesc, &anotherId, &componentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(componentData);
+    TEST_ASSERT_EQUAL_size_t(2, debugStorage->m_count);
+    
+    // Verify the first component is correct
+    componentData = NULL;
+    componentData = CE_ECS_ComponentStorage_getComponentDataPointerById(context.m_storage.m_componentTypeStorage[CE_CORE_DEBUG_COMPONENT], debugDesc, id);
+    TEST_ASSERT_NOT_NULL(componentData);
+    if (componentData) {
+        CE_CORE_DEBUG_COMPONENT_StorageType *debugComponentPtr = (CE_CORE_DEBUG_COMPONENT_StorageType*)componentData;
+        TEST_ASSERT_TRUE(debugComponentPtr->m_enabled);
+    }
+
+    // Verify the second component is correct
+    componentData = NULL;
+    componentData = CE_ECS_ComponentStorage_getComponentDataPointerById(context.m_storage.m_componentTypeStorage[CE_CORE_DEBUG_COMPONENT], debugDesc, anotherId);
+    TEST_ASSERT_NOT_NULL(componentData);
+    if (componentData) {
+        CE_CORE_DEBUG_COMPONENT_StorageType *debugComponentPtr = (CE_CORE_DEBUG_COMPONENT_StorageType*)componentData;
+        TEST_ASSERT_FALSE(debugComponentPtr->m_enabled);
+    }
+
+    // Test destroy the second component
+    result = CE_ECS_MainStorage_destroyComponent(&context.m_storage, debugDesc, anotherId, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_size_t(1, debugStorage->m_count); 
+    
+    // Verify the first component is still intact
+    componentData = NULL;
+    componentData = CE_ECS_ComponentStorage_getComponentDataPointerById(context.m_storage.m_componentTypeStorage[CE_CORE_DEBUG_COMPONENT], debugDesc, id);
+    TEST_ASSERT_NOT_NULL(componentData);
+    if (componentData) {
+        CE_CORE_DEBUG_COMPONENT_StorageType *debugComponentPtr = (CE_CORE_DEBUG_COMPONENT_StorageType*)componentData;
+        TEST_ASSERT_TRUE(debugComponentPtr->m_enabled);
+    }
+
+    // Verify the second component has been destroyed
+    componentData = NULL;
+    componentData = CE_ECS_ComponentStorage_getComponentDataPointerById(context.m_storage.m_componentTypeStorage[CE_CORE_DEBUG_COMPONENT], debugDesc, anotherId);
+    TEST_ASSERT_NULL(componentData);
+
+    // Destroy the first component
+    result = CE_ECS_MainStorage_destroyComponent(&context.m_storage, debugDesc, id, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_size_t(0, debugStorage->m_count);
+    
+    // Verify the first component has been destroyed
+    componentData = NULL;
+    componentData = CE_ECS_ComponentStorage_getComponentDataPointerById(context.m_storage.m_componentTypeStorage[CE_CORE_DEBUG_COMPONENT], debugDesc, id);
+    TEST_ASSERT_NULL(componentData);
+
+    // Cleanup
+    result = CE_ECS_Cleanup(&context, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 }

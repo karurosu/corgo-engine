@@ -72,4 +72,8 @@ void name##_description(OUT CE_ECS_ComponentStaticData *data) \
 #define CE_DEFINE_COMPONENT_CLEANUP(name) CE_Result name##_cleanup(OUT name##_StorageType* component)
 
 
+
+//// Component manipulation functions
+
+
 #endif // CORGO_ECS_CORE_COMPONENT_H
