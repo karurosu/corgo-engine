@@ -468,10 +468,11 @@ static void CE_Bitset_AllBitsTest(void) {
 static void CE_EntityConstructionTest(void) {
     CE_ECS_Context context;
     CE_ERROR_CODE errorCode;
-    CE_Result result = CE_ECS_Init(&context, &errorCode);
+    CE_Result result = CE_ERROR;
     CE_Id entityId = CE_INVALID_ID;
     CE_ECS_EntityData* entityData = NULL;
 
+    result = CE_ECS_Init(&context, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 
@@ -544,6 +545,11 @@ static void CE_EntityConstructionTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_TRUE(entityData->m_isValid);
     TEST_ASSERT_EQUAL_UINT32(newEntityId, entityData->m_entityId);
+
+    // Cleanup
+    result = CE_ECS_Cleanup(&context, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 }
 
 int main(void) {
