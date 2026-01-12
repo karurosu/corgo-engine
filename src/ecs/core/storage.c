@@ -31,7 +31,7 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
 
         // Initialize each component type storage
         storage->m_componentTypeStorage[x] = NULL;
-        CE_ECS_ComponentStorage *storageEntry = CE_realloc(NULL, sizeof(CE_ECS_ComponentStorage) + sizeof(CE_ECS_ComponentStorageHeader) * initialCapacity);
+        CE_ECS_ComponentStorage *storageEntry = CE_realloc(NULL, sizeof(CE_ECS_ComponentStorage));
         if (!storageEntry) {
             CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_MAIN_ALLOCATION_FAILED);
             return CE_ERROR;
@@ -42,6 +42,8 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
         storageEntry->m_typeId = (CE_TypeId)x;
         storageEntry->m_capacity = initialCapacity;
         storageEntry->m_count = 0;
+        cc_init(&storageEntry->m_componentMetadata);
+        cc_reserve(&storageEntry->m_componentMetadata, initialCapacity);
 
         CE_Result result = CE_Bitset_init(&storageEntry->m_componentIndexBitset, initialCapacity);
         if (result != CE_OK) {
@@ -59,8 +61,13 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
         CE_Debug("Component data pool allocated at %p for type %d", storageEntry->m_componentDataPool, x);
 
         // Initialize component headers
+        CE_ECS_ComponentStorageHeader header = { .m_isValid = false };
         for (int i = 0; i < initialCapacity; i++) {
-            storageEntry->m_componentHeader[i].m_isValid = false;
+            if (cc_push(&storageEntry->m_componentMetadata, header) == NULL)
+            {
+                CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_ALLOCATION_FAILED);
+                return CE_ERROR;
+            }
         }
 
         storage->m_componentTypeStorage[x] = storageEntry;
@@ -100,8 +107,8 @@ CE_Result CE_ECS_MainStorage_cleanup(OUT CE_ECS_MainStorage* storage, IN const C
                         }
                     }
                 }
-                
                 // Bulk free memory
+                cc_cleanup(&storageEntry->m_componentMetadata);
                 CE_free(storageEntry->m_componentDataPool);
                 CE_free(storageEntry);
                 storage->m_componentTypeStorage[x] = NULL;
@@ -180,14 +187,14 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
     
     if (index == componentStorage->m_capacity) {
         // No available slot found, should not happen due to previous checks
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_ALLOCATION_FAILED);
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
         return CE_ERROR;
     }
 
     // Initialize component
     void* componentPtr = CE_ECS_ComponentStorage_getComponentDataPointer(componentStorage, componentStaticData, index);
     if (!componentPtr) {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_ALLOCATION_FAILED);
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
         return CE_ERROR;
     }
 
@@ -201,7 +208,13 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
     }
 
     // Set header and generate id
-    componentStorage->m_componentHeader[index].m_isValid = true;
+    CE_ECS_ComponentStorageHeader* header = cc_get(&componentStorage->m_componentMetadata, index);
+    if (!header) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
+        return CE_ERROR;
+    }
+
+    header->m_isValid = true;
     componentStorage->m_count++;
     CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, componentStaticData->m_type, 0, (uint32_t)index, id);
 
@@ -249,9 +262,14 @@ CE_Result CE_ECS_MainStorage_destroyComponent(INOUT CE_ECS_MainStorage* storage,
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_CLEANUP_FAILED);
     }
 
-    // Call this anyway since the old component is probably corrupted, data may have leaked but whatever
+    // Continue cleanup even if cleanup function failed, we want to free memory
+    CE_ECS_ComponentStorageHeader* header = cc_get(&componentStorage->m_componentMetadata, index);
+    if (!header) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
+        return CE_ERROR;
+    }
+    header->m_isValid = false;
     CE_Bitset_clearBit(&componentStorage->m_componentIndexBitset, index);
-    componentStorage->m_componentHeader[index].m_isValid = false;
     componentStorage->m_count--;
 
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);

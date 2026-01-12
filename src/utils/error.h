@@ -29,6 +29,7 @@ typedef int CE_Result;
     X(NONE, 0, "No error") \
     X(UNSUPPORTED_OPERATION, 1, "Unsupported operation") \
     X(OUT_OF_MEMORY, 2, "Out of memory") \
+    X(INTERNAL_ERROR, 3, "Internal error") \
     \
     X(STORAGE_MAIN_NOT_INITIALIZED, 10, "Main Storage not initialized") \
     X(STORAGE_MAIN_ALREADY_INITIALIZED, 11, "Main Storage already initialized") \

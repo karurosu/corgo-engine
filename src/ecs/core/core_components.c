@@ -9,6 +9,7 @@
 CE_DEFINE_COMPONENT_INIT(CE_CORE_DEBUG_COMPONENT)
 {
     component->m_enabled = false;
+    component->m_debugValue = 0;
     return CE_OK;
 }
 

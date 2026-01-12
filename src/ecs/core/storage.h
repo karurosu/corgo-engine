@@ -12,6 +12,8 @@
 #include "../components.h"
 
 // Component storage structures
+
+// Component header is used to track metadata for each component instance in storage
 typedef struct CE_ECS_ComponentStorageHeader {
     bool m_isValid;
 } CE_ECS_ComponentStorageHeader;
@@ -21,8 +23,8 @@ typedef struct CE_ECS_ComponentStorage {
     size_t m_capacity;
     size_t m_count;
     void *m_componentDataPool;
-    CE_Bitset m_componentIndexBitset; // Bitset to track used indices                   
-    CE_ECS_ComponentStorageHeader m_componentHeader[];
+    CE_Bitset m_componentIndexBitset; // Bitset to track used indices
+    cc_vec(CE_ECS_ComponentStorageHeader) m_componentMetadata; // Metadata for each component instance
 } CE_ECS_ComponentStorage;
 
 // Entity storage definitions
@@ -30,8 +32,8 @@ typedef struct CE_ECS_EntityData {
     bool m_isValid;
     CE_Id m_entityId;
     CE_Bitset m_entityComponentBitset; // Bitset to track which components are attached to the entity
-    CE_Id_Vector m_components; // Vector of component ids attached to the entity
-    CE_Id_Vector m_relationships; // Vector of relationship ids attached to the entity
+    CE_Id_Set m_components; // Vector of component ids attached to the entity
+    CE_Id_Set m_relationships; // Vector of relationship ids attached to the entity
 } CE_ECS_EntityData;
 
 typedef struct CE_ECS_EntityStorage {

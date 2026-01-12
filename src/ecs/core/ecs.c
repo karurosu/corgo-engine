@@ -87,8 +87,10 @@ CE_Result CE_ECS_DestroyEntity(INOUT CE_ECS_Context* context, IN CE_Id entity, O
 
     bool success = true;
     // Cleanup components and relationships associated with this entity before destroying it
-    for (size_t i = 0; i < cc_size(&entityData->m_components); ++i) {
-        const CE_Id componentId = *cc_get(&entityData->m_components, i);
+    // Do this here since the storage functions do not automatically cleanup associated components and relationships
+    cc_for_each(&entityData->m_components, componentIdPtr) 
+    {
+        const CE_Id componentId = *componentIdPtr;
         const CE_ECS_ComponentStaticData *componentDataPtr = &context->m_componentDefinitions[CE_Id_getComponentTypeId(componentId)];
         if (CE_ECS_MainStorage_destroyComponent(&context->m_storage, componentDataPtr, componentId, &localErrorCode) != CE_OK) {
             // Just print and error and continue, its not ideal but we want to ensure cleanup continues
@@ -97,7 +99,10 @@ CE_Result CE_ECS_DestroyEntity(INOUT CE_ECS_Context* context, IN CE_Id entity, O
         }
     }
 
-    // TODO: cleanup relationships
+    cc_for_each(&entityData->m_relationships, relationshipIdPtr) 
+    {
+        const CE_Id relationshipId = *relationshipIdPtr;
+    }
 
     if (!success) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_CLEANUP_FAILED);
@@ -142,7 +147,7 @@ CE_Result CE_ECS_AddComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, CE
         return CE_ERROR;
     }
 
-    if (cc_push(&entityData->m_components, newComponentId) == NULL)
+    if (cc_insert(&entityData->m_components, newComponentId) == NULL)
     {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
         return CE_ERROR;
@@ -182,14 +187,7 @@ CE_Result CE_ECS_RemoveComponent(INOUT CE_ECS_Context* context, IN CE_Id entity,
         return CE_ERROR;
     }
 
-    // Then check the component vector
-    size_t componentIndex = 0;
-    for (componentIndex = 0; componentIndex < cc_size(&entityData->m_components); ++componentIndex) {
-        if ( *cc_get(&entityData->m_components, componentIndex) == componentId) {
-            break;
-        }
-    }
-    if (componentIndex == cc_size(&entityData->m_components)) {
+    if (cc_get(&entityData->m_components, componentId) == NULL) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_COMPONENT_NOT_FOUND_IN_ENTITY);
         return CE_ERROR;
     }
@@ -202,12 +200,16 @@ CE_Result CE_ECS_RemoveComponent(INOUT CE_ECS_Context* context, IN CE_Id entity,
         return CE_ERROR;
     }
 
-    cc_erase(&entityData->m_components, componentIndex);
+    if (!cc_erase(&entityData->m_components, componentId)) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
+        return CE_ERROR;
+    }
 
+    // Then check the component vector to see if this was the last component of its type
     bool lastComponent = true;
-    for (int i = 0; i < cc_size(&entityData->m_components); ++i) {
-        const CE_Id tmpId = *cc_get(&entityData->m_components, i);
-        if (CE_Id_getComponentTypeId(tmpId) == componentType) {
+    cc_for_each( &entityData->m_components, el )
+    {
+        if (CE_Id_getComponentTypeId(*el) == componentType) {
             lastComponent = false;
             break;
         }

@@ -11,6 +11,7 @@
 
 typedef struct CE_Core_DebugComponent {
     bool m_enabled;
+    uint8_t m_debugValue;
 } CE_Core_DebugComponent;
 
 #define CE_COMPONENT_DESC_CORE(X) \
