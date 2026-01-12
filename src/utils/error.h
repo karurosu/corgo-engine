@@ -41,6 +41,7 @@ typedef int CE_Result;
     X(STORAGE_COMPONENT_INIT_FAILED, 23, "Component storage initialization failed") \
     X(STORAGE_COMPONENT_CLEANUP_FAILED, 24, "Component storage cleanup failed") \
     X(STORAGE_COMPONENT_BITSET_TOO_SMALL, 25, "Component storage bitset too small") \
+    X(STORAGE_COMPONENT_NOT_FOUND, 26, "Component not found in storage") \
     \
     X(MAX_ENTITIES_REACHED, 30, "Maximum number of entities reached") \
     X(INVALID_ENTITY_ID, 31, "Invalid entity ID") \

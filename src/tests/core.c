@@ -4,22 +4,27 @@
 #include "ecs/ecs.h"
 #include "utils/bitset.h"
 
+static CE_ECS_Context context;
+
 void setUp(void) {
-    // Set up test fixtures
-}
-
-void tearDown(void) {
-    // Clean up test fixtures
-}
-
-
-void ECSContextSetupTest(void) {
-    CE_ECS_Context context;
     CE_ERROR_CODE errorCode;
     CE_Result result = CE_ECS_Init(&context, &errorCode);
 
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+}
+
+void tearDown(void) {
+    // Clean up test fixtures
+    CE_ERROR_CODE errorCode;
+    CE_Result result = CE_ECS_Cleanup(&context, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+}
+
+
+void test_ECSContextSetupTest(void) {
+    CE_ERROR_CODE errorCode;
     
     // Verify we have at least 1 component type (CE_CORE_DEBUG_COMPONENT)
     TEST_ASSERT_GREATER_OR_EQUAL_UINT8(1, CE_COMPONENT_TYPES_COUNT);
@@ -33,15 +38,9 @@ void ECSContextSetupTest(void) {
     TEST_ASSERT_EQUAL_size_t(sizeof(CE_Core_DebugComponent), debugDesc->m_storageSizeOf);
     TEST_ASSERT_EQUAL_size_t(sizeof(CE_Core_DebugComponent), sizeof(CE_CORE_DEBUG_COMPONENT_StorageType));
     TEST_ASSERT_EQUAL_size_t(CE_DEFAULT_COMPONENT_CAPACITY, debugDesc->m_initialCapacity);
-
-    // Verify cleanup
-	result = CE_ECS_Cleanup(&context, &errorCode);
-    TEST_ASSERT_EQUAL_INT(CE_OK, result);
-	TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-	TEST_ASSERT_NULL(context.m_storage.m_componentTypeStorage[CE_CORE_DEBUG_COMPONENT]);
 }
 
-static void CEIdHelpersTest(void) {
+static void test_CEIdHelpersTest(void) {
     CE_Id id;
     // Build component id
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, (CE_TypeId)5, 0, 1234, &id));
@@ -141,18 +140,13 @@ static void CEIdHelpersTest(void) {
     TEST_ASSERT_FALSE(CE_Id_isRelationship(invalidId));
 }
 
-static void ComponentStorageTest(void) {
-    CE_ECS_Context context;
+static void test_ComponentStorageTest(void) {
     CE_ERROR_CODE errorCode;
     CE_Result result;
     CE_Id id;
     CE_Id anotherId;
     void *componentData = NULL;
 
-    // Initialize ECS context
-    result = CE_ECS_Init(&context, &errorCode);
-    TEST_ASSERT_EQUAL_INT(CE_OK, result);
-    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     CE_ECS_ComponentStaticData* debugDesc = &context.m_componentDefinitions[CE_CORE_DEBUG_COMPONENT];
     CE_ECS_ComponentStorage* debugStorage = context.m_storage.m_componentTypeStorage[CE_CORE_DEBUG_COMPONENT];
 
@@ -167,6 +161,10 @@ static void ComponentStorageTest(void) {
         TEST_ASSERT_FALSE(debugComponentPtr->m_enabled);
         debugComponentPtr->m_enabled = true; // Force change a value to test retrieval
     }
+
+    // Check id fields
+    TEST_ASSERT_EQUAL_UINT32(CE_ID_COMPONENT_REFERENCE_KIND, CE_Id_getKind(id));
+    TEST_ASSERT_EQUAL_UINT32(CE_CORE_DEBUG_COMPONENT, CE_Id_getComponentTypeId(id));
 
     // Create another component to muddle things up a bit
     result = CE_ECS_MainStorage_createComponent(&context.m_storage, debugDesc, &anotherId, &componentData, &errorCode);
@@ -223,14 +221,9 @@ static void ComponentStorageTest(void) {
     componentData = NULL;
     componentData = CE_ECS_ComponentStorage_getComponentDataPointerById(context.m_storage.m_componentTypeStorage[CE_CORE_DEBUG_COMPONENT], debugDesc, id);
     TEST_ASSERT_NULL(componentData);
-
-    // Cleanup
-    result = CE_ECS_Cleanup(&context, &errorCode);
-    TEST_ASSERT_EQUAL_INT(CE_OK, result);
-    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 }
 
-static void CE_Bitset_InitTest(void) {
+static void test_CE_Bitset_InitTest(void) {
     CE_Bitset bitset;
     
     // Test valid initialization
@@ -257,7 +250,7 @@ static void CE_Bitset_InitTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Bitset_init(&bitset, 0));
 }
 
-static void CE_Bitset_SetBitTest(void) {
+static void test_CE_Bitset_SetBitTest(void) {
     CE_Bitset bitset;
     
     CE_Bitset_init(&bitset, 64);
@@ -290,7 +283,7 @@ static void CE_Bitset_SetBitTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Bitset_setBit(&bitset, 200));
 }
 
-static void CE_Bitset_ClearBitTest(void) {
+static void test_CE_Bitset_ClearBitTest(void) {
     CE_Bitset bitset;
     
     CE_Bitset_init(&bitset, 64);
@@ -332,7 +325,7 @@ static void CE_Bitset_ClearBitTest(void) {
     TEST_ASSERT_FALSE(CE_Bitset_isBitSet(&bitset, 10));
 }
 
-static void CE_Bitset_ToggleBitTest(void) {
+static void test_CE_Bitset_ToggleBitTest(void) {
     CE_Bitset bitset;
     
     CE_Bitset_init(&bitset, 64);
@@ -372,7 +365,7 @@ static void CE_Bitset_ToggleBitTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Bitset_toggleBit(&bitset, 400));
 }
 
-static void CE_Bitset_IsBitSetTest(void) {
+static void test_CE_Bitset_IsBitSetTest(void) {
     CE_Bitset bitset;
     
     CE_Bitset_init(&bitset, 64);
@@ -404,7 +397,7 @@ static void CE_Bitset_IsBitSetTest(void) {
     TEST_ASSERT_FALSE(CE_Bitset_isBitSet(&bitset, 500));
 }
 
-static void CE_Bitset_ByteBoundariesTest(void) {
+static void test_CE_Bitset_ByteBoundariesTest(void) {
     CE_Bitset bitset;
     
     // Test operations across byte boundaries
@@ -439,7 +432,7 @@ static void CE_Bitset_ByteBoundariesTest(void) {
     }
 }
 
-static void CE_Bitset_AllBitsTest(void) {
+static void test_CE_Bitset_AllBitsTest(void) {
     CE_Bitset bitset;
     
     CE_Bitset_init(&bitset, CE_BITSET_MAX_BITS);
@@ -465,21 +458,18 @@ static void CE_Bitset_AllBitsTest(void) {
     }
 }
 
-static void CE_EntityConstructionTest(void) {
-    CE_ECS_Context context;
+static void test_CE_EntityConstructionTest(void) {
     CE_ERROR_CODE errorCode;
     CE_Result result = CE_ERROR;
     CE_Id entityId = CE_INVALID_ID;
     CE_ECS_EntityData* entityData = NULL;
 
-    result = CE_ECS_Init(&context, &errorCode);
-    TEST_ASSERT_EQUAL_INT(CE_OK, result);
-    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-
     // Construct one entity
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_createEntity(&context.m_storage, &entityId, &errorCode));
     TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, entityId);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_UINT32(CE_ID_ENTITY_REFERENCE_KIND, CE_Id_getKind(entityId));
+    TEST_ASSERT_EQUAL_UINT32(0, CE_Id_getGeneration(entityId));
 
     TEST_ASSERT_EQUAL_size_t(1, context.m_storage.m_entityStorage.m_count);
     
@@ -545,25 +535,89 @@ static void CE_EntityConstructionTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_TRUE(entityData->m_isValid);
     TEST_ASSERT_EQUAL_UINT32(newEntityId, entityData->m_entityId);
+}
 
-    // Cleanup
-    result = CE_ECS_Cleanup(&context, &errorCode);
+void test_EntityComponentCreationTest(void) {
+    CE_ERROR_CODE errorCode;
+    CE_Result result = CE_ERROR;
+    CE_Id entity_1 = CE_INVALID_ID;
+    CE_Id entity_2 = CE_INVALID_ID;
+    CE_ECS_EntityData* entityData = NULL;
+    CE_Id componentId_1 = CE_INVALID_ID;
+    CE_Id componentId_2 = CE_INVALID_ID;
+    CE_Id foundComponentId = CE_INVALID_ID;
+    CE_CORE_DEBUG_COMPONENT_StorageType* componentData = NULL;
+    CE_SPRITE_COMPONENT_StorageType* spriteComponentData = NULL;
+
+    // Construct one entity
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_createEntity(&context.m_storage, &entity_1, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, entity_1);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Add a debug component to entity_1
+    result = CE_ECS_AddComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT, &componentId_1, &componentData, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(componentData);
+
+    componentData->m_enabled = true;
+    componentData->m_debugValue = 42;
+
+    // Test component access
+    componentData = NULL;
+    result = CE_ECS_GetComponent(&context, entity_1, componentId_1, &componentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(componentData);
+    TEST_ASSERT_TRUE(componentData->m_enabled);
+    TEST_ASSERT_EQUAL_INT(42, componentData->m_debugValue);
+
+    // Add a second component
+    result = CE_ECS_AddComponent(&context, entity_1, CE_SPRITE_COMPONENT, &componentId_2, &spriteComponentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(spriteComponentData);
+
+    // Test first component access again
+    componentData = NULL;
+    result = CE_ECS_GetComponent(&context, entity_1, componentId_1, &componentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(componentData);
+    TEST_ASSERT_TRUE(componentData->m_enabled);
+    TEST_ASSERT_EQUAL_INT(42, componentData->m_debugValue);
+
+    // Test second component access using FindFirstComponent
+    spriteComponentData = NULL;
+    result = CE_ECS_FindFirstComponent(&context, entity_1, CE_SPRITE_COMPONENT, &foundComponentId, &spriteComponentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(spriteComponentData);
+    TEST_ASSERT_EQUAL_UINT32(componentId_2, foundComponentId);
+
+    // Test FindAllComponents
+    CE_Id foundComponents[10];
+    size_t foundCount = 0;
+    result = CE_ECS_FindAllComponents(&context, entity_1, CE_SPRITE_COMPONENT, foundComponents, 10, &foundCount, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_UINT32(1, foundCount);
+    TEST_ASSERT_EQUAL_UINT32(componentId_2, foundComponents[0]);
 }
 
 int main(void) {
     UNITY_BEGIN();
-    RUN_TEST(ECSContextSetupTest);
-    RUN_TEST(CEIdHelpersTest);
-    RUN_TEST(ComponentStorageTest);
-    RUN_TEST(CE_Bitset_InitTest);
-    RUN_TEST(CE_Bitset_SetBitTest);
-    RUN_TEST(CE_Bitset_ClearBitTest);
-    RUN_TEST(CE_Bitset_ToggleBitTest);
-    RUN_TEST(CE_Bitset_IsBitSetTest);
-    RUN_TEST(CE_Bitset_ByteBoundariesTest);
-    RUN_TEST(CE_Bitset_AllBitsTest);
-    RUN_TEST(CE_EntityConstructionTest);
+    RUN_TEST(test_ECSContextSetupTest);
+    RUN_TEST(test_CEIdHelpersTest);
+    RUN_TEST(test_ComponentStorageTest);
+    RUN_TEST(test_CE_Bitset_InitTest);
+    RUN_TEST(test_CE_Bitset_SetBitTest);
+    RUN_TEST(test_CE_Bitset_ClearBitTest);
+    RUN_TEST(test_CE_Bitset_ToggleBitTest);
+    RUN_TEST(test_CE_Bitset_IsBitSetTest);
+    RUN_TEST(test_CE_Bitset_ByteBoundariesTest);
+    RUN_TEST(test_CE_Bitset_AllBitsTest);
+    RUN_TEST(test_CE_EntityConstructionTest);
+    RUN_TEST(test_EntityComponentCreationTest);
     return UNITY_END();
 }

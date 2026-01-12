@@ -142,18 +142,18 @@ CE_Result CE_ECS_RemoveComponent(INOUT CE_ECS_Context* context, IN CE_Id entity,
 /**
  * @brief Retrieve a component instance from an entity.
  * 
- * Looks up the component data for the specified component ID on the given entity.
+ * Looks up the component for the specified component ID on the given entity.
  * This access is very fast as it only involves a direct lookup and does not require iteration over all components.
  * 
  * @param[in,out] context The ECS context.
  * @param[in] entity The ID of the entity containing the component.
  * @param[in] componentId The ID of the component to retrieve.
- * @param[out] componentData Optional pointer to receive the address of the component data.
+ * @param[out] componentData Pointer to receive the address of the component data. Do not save or cache this pointer.
  * @param[out] errorCode Optional error code if retrieval fails.
  * 
  * @return CE_OK on success, CE_ERROR on failure (e.g., component not found).
  */
-CE_Result CE_ECS_GetComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, CE_Id componentId, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode);
+CE_Result CE_ECS_GetComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, CE_Id componentId, OUT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode);
 
 /**
  * @brief Find the first component of a specific type on an entity.
@@ -165,13 +165,14 @@ CE_Result CE_ECS_GetComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, CE
  * @param[in,out] context The ECS context.
  * @param[in] entity The ID of the entity to search.
  * @param[in] componentType The type ID of the component to find.
- * @param[out] componentData Optional pointer to receive the address of the component data.
+ * @param[out] componentId Pointer to receive the ID of the found component.
+ * @param[out] componentData Pointer to receive the address of the component data. Do not save or cache this pointer.
  * @param[out] errorCode Optional error code if search fails.
  * 
  * @return CE_OK on success, CE_ERROR on failure (e.g., component type not found).
  */
-CE_Result CE_ECS_FindFirstComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, CE_TypeId componentType, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode);
-
+CE_Result CE_ECS_FindFirstComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, CE_TypeId componentType, OUT CE_Id* componentId, OUT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode);
+    
 /**
  * @brief Find all components of a specific type on an entity.
  * 
@@ -191,6 +192,6 @@ CE_Result CE_ECS_FindFirstComponent(INOUT CE_ECS_Context* context, IN CE_Id enti
  * @note If the number of components exceeds bufsize, only bufsize results are returned
  *       and resultCount will contain the actual count found.
  */
-CE_Result CE_ECS_FindAllComponents(INOUT CE_ECS_Context* context, IN CE_Id entity, CE_TypeId componentType, OUT CE_Id *results[], IN size_t bufsize, OUT size_t *resultCount, OUT_OPT CE_ERROR_CODE* errorCode);
+CE_Result CE_ECS_FindAllComponents(INOUT CE_ECS_Context* context, IN CE_Id entity, CE_TypeId componentType, OUT CE_Id results[], IN size_t bufsize, OUT size_t *resultCount, OUT_OPT CE_ERROR_CODE* errorCode);
 
 #endif // CORGO_ECS_ECS_H
