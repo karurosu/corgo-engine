@@ -7,6 +7,8 @@
 #ifndef CORGO_ENGINE_CORE_PLATFORM_H
 #define CORGO_ENGINE_CORE_PLATFORM_H
 
+#include <stdbool.h>
+
 // PD API caching and access
 #ifdef CE_BACKEND_PLAYDATE
 
@@ -18,11 +20,17 @@ void CE_SetPlaydateAPI(PlaydateAPI* pd);
 #endif // CE_BACKEND_PLAYDATE
 
 // Logging functions
+
+// Utility function to pretty print to console
+static bool CE_Logging_enabled = true;
+void CE_Printf(const char* format, ...);
+void CE_SetLoggingEnabled(bool enabled);
+
 #ifdef CE_DEBUG_BUILD
     #ifdef CE_BACKEND_PLAYDATE
         #define CE_Debug(...) CE_GetPlaydateAPI()->system->logToConsole(__VA_ARGS__);
     #else
-        #define CE_Debug(...) printf(__VA_ARGS__);
+        #define CE_Debug(...) CE_Printf(__VA_ARGS__);
     #endif
 #else
     #define CE_Debug(...)
@@ -31,7 +39,7 @@ void CE_SetPlaydateAPI(PlaydateAPI* pd);
 #ifdef CE_BACKEND_PLAYDATE
     #define CE_Error(...) CE_GetPlaydateAPI()->system->error(__VA_ARGS__);
 #else
-    #define CE_Error(...) printf(__VA_ARGS__);
+    #define CE_Error(...) CE_Printf(__VA_ARGS__);
 #endif
 
 
