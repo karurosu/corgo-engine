@@ -53,4 +53,15 @@ size_t CE_Entity_GetComponentCount(INOUT CE_ECS_Context* context, IN CE_Id entit
  */
 size_t CE_Entity_GetRelationshipCount(INOUT CE_ECS_Context* context, IN CE_Id entity);
 
+/**
+ * @brief Check if an entity has at least one component of the specified type attached.
+ * 
+ * @param[in,out] context The ECS context.
+ * @param[in] entity The entity ID to query.
+ * @param[in] componentType The component type to check for.
+ * 
+ * @return true if the entity has the specified component type, false otherwise.
+ */
+bool CE_Entity_HasComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType);
+
 #endif // CORGO_ECS_CORE_ENTITY_H

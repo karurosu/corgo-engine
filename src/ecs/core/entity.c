@@ -43,3 +43,14 @@ size_t CE_Entity_GetRelationshipCount(INOUT CE_ECS_Context* context, IN CE_Id en
     }
     return cc_size(&entityData->m_relationships);
 }
+
+bool CE_Entity_HasComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType)
+{
+    CE_Result result;
+    CE_ECS_EntityData* entityData;
+    result = CE_ECS_MainStorage_getEntityData(&context->m_storage, entity, &entityData, NULL);
+    if (entityData == NULL || result != CE_OK) {
+        return 0;
+    }
+    return CE_Bitset_isBitSet(&entityData->m_entityComponentBitset, componentType);
+}

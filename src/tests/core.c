@@ -548,6 +548,7 @@ void test_EntityComponentCreationTest(void) {
     CE_Id foundComponentId = CE_INVALID_ID;
     CE_CORE_DEBUG_COMPONENT_StorageType* componentData = NULL;
     CE_SPRITE_COMPONENT_StorageType* spriteComponentData = NULL;
+    size_t count = 0;
 
     // Construct one entity
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_createEntity(&context.m_storage, &entity_1, &errorCode));
@@ -563,6 +564,11 @@ void test_EntityComponentCreationTest(void) {
     componentData->m_enabled = true;
     componentData->m_debugValue = 42;
 
+    count = CE_Entity_GetComponentCount(&context, entity_1);
+    TEST_ASSERT_EQUAL_UINT32(1, count);
+
+    TEST_ASSERT_TRUE(CE_Entity_HasComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT));
+
     // Test component access
     componentData = NULL;
     result = CE_ECS_GetComponent(&context, entity_1, componentId_1, &componentData, &errorCode);
@@ -577,6 +583,9 @@ void test_EntityComponentCreationTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_NOT_NULL(spriteComponentData);
+
+    count =CE_Entity_GetComponentCount(&context, entity_1);
+    TEST_ASSERT_EQUAL_UINT32(2, count);
 
     // Test first component access again
     componentData = NULL;
@@ -594,15 +603,6 @@ void test_EntityComponentCreationTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_NOT_NULL(spriteComponentData);
     TEST_ASSERT_EQUAL_UINT32(componentId_2, foundComponentId);
-
-    // Test FindAllComponents
-    CE_Id foundComponents[10];
-    size_t foundCount = 0;
-    result = CE_ECS_FindAllComponents(&context, entity_1, CE_SPRITE_COMPONENT, foundComponents, 10, &foundCount, &errorCode);
-    TEST_ASSERT_EQUAL_INT(CE_OK, result);
-    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_EQUAL_UINT32(1, foundCount);
-    TEST_ASSERT_EQUAL_UINT32(componentId_2, foundComponents[0]);
 }
 
 void test_EntityComponentDeletionTest(void) {
@@ -614,6 +614,7 @@ void test_EntityComponentDeletionTest(void) {
     CE_Id componentId_2 = CE_INVALID_ID;
     CE_CORE_DEBUG_COMPONENT_StorageType* componentData = NULL;
     CE_CORE_DEBUG_COMPONENT_StorageType* componentData_2 = NULL;
+    size_t count = 0;
 
     // Create entity
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_createEntity(&context.m_storage, &entity_1, &errorCode));
@@ -625,6 +626,10 @@ void test_EntityComponentDeletionTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_NOT_NULL(componentData);
+
+    count = CE_Entity_GetComponentCount(&context, entity_1);
+    TEST_ASSERT_EQUAL_UINT32(1, count);
+    TEST_ASSERT_TRUE(CE_Entity_HasComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT));
 
     // Create a second entity
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_createEntity(&context.m_storage, &entity_2, &errorCode));
@@ -648,12 +653,21 @@ void test_EntityComponentDeletionTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 
+    count = CE_Entity_GetComponentCount(&context, entity_1);
+    TEST_ASSERT_EQUAL_UINT32(0, count);
+    TEST_ASSERT_FALSE(CE_Entity_HasComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT));
+
     // Verify first component has been deleted
     CE_CORE_DEBUG_COMPONENT_StorageType* deletedComponentData = NULL;
     result = CE_ECS_GetComponent(&context, entity_1, componentId_1, &deletedComponentData, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_ERROR, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_COMPONENT_NOT_FOUND_IN_ENTITY, errorCode);
     TEST_ASSERT_NULL(deletedComponentData);
+
+    // Attempt to delete again should fail
+    result = CE_ECS_RemoveComponent(&context, entity_1, componentId_1, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_COMPONENT_NOT_FOUND_IN_ENTITY, errorCode);
 
     // Verify second component still exists and has correct data
     CE_CORE_DEBUG_COMPONENT_StorageType* verifyComponentData = NULL;
@@ -677,6 +691,99 @@ void test_EntityComponentDeletionTest(void) {
     TEST_ASSERT_NULL(deletedComponentData_2);
 }
 
+void test_EntityDeletionTest(void) {
+    CE_ERROR_CODE errorCode;
+    CE_Result result = CE_ERROR;
+    CE_Id entity_1 = CE_INVALID_ID;
+    CE_Id componentId_1 = CE_INVALID_ID;
+    CE_CORE_DEBUG_COMPONENT_StorageType* componentData = NULL;
+    
+    // Create entity
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_createEntity(&context.m_storage, &entity_1, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, entity_1);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // create a component for the entity
+    result = CE_ECS_AddComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT, &componentId_1, &componentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(componentData);
+
+    // Delete entity
+    result = CE_ECS_DestroyEntity(&context, entity_1, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Attempt to get the component of the deleted entity
+    componentData = NULL;
+    result = CE_ECS_GetComponent(&context, entity_1, componentId_1, &componentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_ENTITY_NOT_FOUND, errorCode);
+    TEST_ASSERT_NULL(componentData);
+
+    // Attempt to access component directly fails too
+    componentData = CE_ECS_ComponentStorage_getComponentDataPointerById(context.m_storage.m_componentTypeStorage[CE_CORE_DEBUG_COMPONENT], &context.m_componentDefinitions[CE_CORE_DEBUG_COMPONENT], componentId_1);
+    TEST_ASSERT_NULL(componentData);
+}
+
+void test_EntityMultipleComponents(void) {
+    CE_ERROR_CODE errorCode;
+    CE_Result result = CE_ERROR;
+    CE_Id entity_1 = CE_INVALID_ID;
+    CE_Id componentId_1 = CE_INVALID_ID;
+    CE_Id componentId_2 = CE_INVALID_ID;
+    CE_CORE_DEBUG_COMPONENT_StorageType* componentData = NULL;
+    size_t count = 0;
+    
+    // Create entity
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_createEntity(&context.m_storage, &entity_1, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, entity_1);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Create two debug components
+    result = CE_ECS_AddComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT, &componentId_1, &componentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(componentData);
+
+    result = CE_ECS_AddComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT, &componentId_2, &componentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(componentData);
+
+    count = CE_Entity_GetComponentCount(&context, entity_1);
+    TEST_ASSERT_EQUAL_UINT32(2, count);
+    TEST_ASSERT_TRUE(CE_Entity_HasComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT));
+
+    // Test FindAllComponents
+    CE_Id foundComponents[10];
+    size_t foundCount = 0;
+    result = CE_ECS_FindAllComponents(&context, entity_1, CE_CORE_DEBUG_COMPONENT, foundComponents, 10, &foundCount, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_UINT32(2, foundCount);
+    TEST_ASSERT_TRUE(foundComponents[0] == componentId_1 || foundComponents[1] == componentId_1);
+    TEST_ASSERT_TRUE(foundComponents[0] == componentId_2 || foundComponents[1] == componentId_2);
+    
+    // Delete one component
+    result = CE_ECS_RemoveComponent(&context, entity_1, componentId_1, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    count = CE_Entity_GetComponentCount(&context, entity_1);
+    TEST_ASSERT_EQUAL_UINT32(1, count);
+    TEST_ASSERT_TRUE(CE_Entity_HasComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT));
+
+    // Delete the remaining component
+    result = CE_ECS_RemoveComponent(&context, entity_1, componentId_2, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    count = CE_Entity_GetComponentCount(&context, entity_1);
+    TEST_ASSERT_EQUAL_UINT32(0, count);
+    TEST_ASSERT_FALSE(CE_Entity_HasComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT));
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_ECSContextSetupTest);
@@ -692,5 +799,7 @@ int main(void) {
     RUN_TEST(test_CE_EntityConstructionTest);
     RUN_TEST(test_EntityComponentCreationTest);
     RUN_TEST(test_EntityComponentDeletionTest);
+    RUN_TEST(test_EntityDeletionTest);
+    RUN_TEST(test_EntityMultipleComponents);
     return UNITY_END();
 }
