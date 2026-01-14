@@ -35,7 +35,10 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 	{
 		// Initialize Engine
 #ifdef CE_BACKEND_PLAYDATE
+		pd->system->logToConsole("Received handler");
 		CE_SetPlaydateAPI(pd);
+		pd->system->logToConsole("Playdate API: %p", pd);
+		pd->system->logToConsole("Playdate API cached: %p", CE_GetPlaydateAPI());
 #endif
 		const char* err;
 		font = pd->graphics->loadFont(fontpath, &err);
@@ -45,6 +48,7 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 
 		pd->system->resetElapsedTime();
 		
+		CE_Debug("Creating ECS Context");
 		CE_ERROR_CODE errorCode;
 		ecsContext = CE_realloc(NULL, sizeof(CE_ECS_Context));
 		CE_Debug("ECS Context allocated at %p", ecsContext);
@@ -59,7 +63,7 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 			return -1;
 		}
 		
-		CE_Debug("Engine Initialized in %f seconds", pd->system->getElapsedTime());
+		CE_Debug("Engine Initialized in %f seconds", (double) pd->system->getElapsedTime());
 
 		// Initialize timer
 		pd->system->resetElapsedTime();

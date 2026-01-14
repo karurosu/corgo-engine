@@ -130,7 +130,6 @@ if (NOT TOOLCHAIN STREQUAL "armgcc")
 endif()
 
 if (TOOLCHAIN STREQUAL "armgcc")
-	add_compile_options(-Wdouble-promotion)
 	add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE} ${UTILS} ${ENGINE} ${GAME})
 	target_include_directories(${PLAYDATE_GAME_DEVICE} PRIVATE ${cc_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 	target_compile_definitions(${PLAYDATE_GAME_DEVICE} PRIVATE CE_BACKEND_PLAYDATE)

@@ -16,7 +16,7 @@ echo.
 echo Rebuilding build.pd...
 mkdir build.pd
 cd build.pd
-cmake .. -G "NMake Makefiles" --toolchain=c:/PlaydateSDK/C_API/buildsupport/arm.cmake
+cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug --toolchain=c:/PlaydateSDK/C_API/buildsupport/arm.cmake
 cd ..
 echo.
 
