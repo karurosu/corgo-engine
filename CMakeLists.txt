@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.24)
 set(CMAKE_C_STANDARD 11)
 
 # Fetch third-party dependencies
@@ -83,6 +83,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_compile_definitions(CE_DEBUG_BUILD)
 endif()
 
+# enable warnings as errors
+set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+
 # Test executable (only build for simulator/host, not device)
 if (NOT TOOLCHAIN STREQUAL "armgcc")
 	enable_testing()
@@ -127,12 +130,12 @@ if (NOT TOOLCHAIN STREQUAL "armgcc")
 endif()
 
 if (TOOLCHAIN STREQUAL "armgcc")
-	add_compile_options(-Wdouble-promotion -Werror)
+	add_compile_options(-Wdouble-promotion)
 	add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE} ${UTILS} ${ENGINE} ${GAME})
 	target_include_directories(${PLAYDATE_GAME_DEVICE} PRIVATE ${cc_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 	target_compile_definitions(${PLAYDATE_GAME_DEVICE} PRIVATE CE_BACKEND_PLAYDATE)
+	target_compile_definitions(${PLAYDATE_GAME_DEVICE} PRIVATE CE_ARM_BUILD)
 else()
-	add_compile_options(-WX)
 	add_library(${PLAYDATE_GAME_NAME} SHARED src/main.c ${EXT_LIBS} ${CORE} ${UTILS} ${ENGINE} ${GAME})
 	target_include_directories(${PLAYDATE_GAME_NAME} PRIVATE ${cc_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 	target_compile_definitions(${PLAYDATE_GAME_NAME} PRIVATE CE_BACKEND_PLAYDATE)
