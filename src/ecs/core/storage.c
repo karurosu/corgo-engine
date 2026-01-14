@@ -313,6 +313,11 @@ CE_Result CE_ECS_MainStorage_createEntity(INOUT CE_ECS_MainStorage* storage, OUT
     
     CE_Id newId = CE_INVALID_ID;
     CE_Result result = CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, generation, (uint32_t)index, &newId);
+    if (result != CE_OK) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
+        return CE_ERROR;
+    }
+    
     entityData->m_entityId = newId;
     entityData->m_isValid = true;
     CE_Bitset_clear(&entityData->m_entityComponentBitset);
@@ -354,7 +359,7 @@ CE_Result CE_ECS_MainStorage_destroyEntity(INOUT CE_ECS_MainStorage* storage, IN
     }
 
     // Detect if the passed id is stale (references a deleted entity)
-    const int8_t generation = CE_Id_getGeneration(entityData->m_entityId);
+    const uint32_t generation = CE_Id_getGeneration(entityData->m_entityId);
     if (generation != CE_Id_getGeneration(id)) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STALE_ENTITY_ID);
         return CE_ERROR;
@@ -390,7 +395,7 @@ CE_Result CE_ECS_MainStorage_getEntityData(INOUT CE_ECS_MainStorage* storage, IN
     }
 
     // Detect if the passed id is stale (references a deleted entity)
-    const int8_t generation = CE_Id_getGeneration(entityData->m_entityId);
+    const uint32_t generation = CE_Id_getGeneration(entityData->m_entityId);
     if (generation != CE_Id_getGeneration(id)) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STALE_ENTITY_ID);
         return CE_ERROR;

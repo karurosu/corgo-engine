@@ -3,7 +3,6 @@
 //  Copyright (c) 2025 Carlos Camacho. All rights reserved.
 //
 
-#include <stdio.h>
 #include <stdlib.h>
 
 // Include Playdate API

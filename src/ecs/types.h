@@ -7,15 +7,24 @@
 #ifndef CORGO_ECS_TYPES_H
 #define CORGO_ECS_TYPES_H
 
-#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+
+// Include CC but ignore some warnings
+#ifdef _MSC_VER
+#pragma warning(disable: 5045)
+#endif
+
 #include <cc.h>
+
+#ifdef _MSC_VER
+#pragma warning(default: 5045)
+#endif
 
 // General helpers
 #include "utils/helpers.h"
 
-typedef CE_Result;
+typedef int CE_Result;
 #include "utils/error.h"
 
 //// Id types

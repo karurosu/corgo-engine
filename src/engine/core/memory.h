@@ -7,7 +7,6 @@
 #ifndef CORGO_ENGINE_CORE_MEMORY_H
 #define CORGO_ENGINE_CORE_MEMORY_H
 
-#include <stddef.h>
 #include <stdint.h>
 
 #include "platform.h"

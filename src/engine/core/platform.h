@@ -13,7 +13,6 @@
 #ifdef CE_BACKEND_PLAYDATE
 
 #include "pd_api.h"
-static PlaydateAPI* CE_pd = NULL;
 PlaydateAPI* CE_GetPlaydateAPI();
 void CE_SetPlaydateAPI(PlaydateAPI* pd);
 
@@ -22,7 +21,6 @@ void CE_SetPlaydateAPI(PlaydateAPI* pd);
 // Logging functions
 
 // Utility function to pretty print to console
-static bool CE_Logging_enabled = true;
 void CE_Printf(const char* format, ...);
 void CE_SetLoggingEnabled(bool enabled);
 
