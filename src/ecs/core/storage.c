@@ -43,7 +43,11 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
         storageEntry->m_capacity = initialCapacity;
         storageEntry->m_count = 0;
         cc_init(&storageEntry->m_componentMetadata);
-        cc_reserve(&storageEntry->m_componentMetadata, initialCapacity);
+        if (!cc_reserve(&storageEntry->m_componentMetadata, initialCapacity))
+        {
+            CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_ALLOCATION_FAILED);
+            return CE_ERROR;
+        }
 
         CE_Result result = CE_Bitset_init(&storageEntry->m_componentIndexBitset, initialCapacity);
         if (result != CE_OK) {
@@ -317,7 +321,7 @@ CE_Result CE_ECS_MainStorage_createEntity(INOUT CE_ECS_MainStorage* storage, OUT
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
         return CE_ERROR;
     }
-    
+
     entityData->m_entityId = newId;
     entityData->m_isValid = true;
     CE_Bitset_clear(&entityData->m_entityComponentBitset);
