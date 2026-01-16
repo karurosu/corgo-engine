@@ -73,6 +73,7 @@ typedef enum CE_IdKind {
 // Maximum number of component types
 // Limited to 255 due to 8-bit type field (0-254 are valid types, 255 is reserved for invalid type)
 #define CE_MAX_COMPONENT_TYPES 255
+#define CE_MAX_RELATIONSHIP_TYPES 255
 
 // Maximum generation count for entities and relationships (4 bits: 0-15)
 #define CE_MAX_GENERATION_COUNT 15
