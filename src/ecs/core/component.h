@@ -2,7 +2,7 @@
 //  ecs/core/component.h
 //  Main include file for ECS core component definitions.
 //  Not to be confused with components.h which is a helper with all component types.
-//  Copyright (c) 2025 Carlos Camacho. All rights reserved.
+//  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
 #ifndef CORGO_ECS_CORE_COMPONENT_H
@@ -66,14 +66,9 @@ void name##_description(OUT CE_ECS_ComponentStaticData *data) \
     data->m_cleanupFunction = name##_cleanup_wrapper; \
 }
 
-
 // Component method shortcuts
 #define CE_DEFINE_COMPONENT_INIT(name) CE_Result name##_init(OUT name##_StorageType* component)
 #define CE_DEFINE_COMPONENT_CLEANUP(name) CE_Result name##_cleanup(OUT name##_StorageType* component)
-
-
-
-//// Component manipulation functions
 
 
 #endif // CORGO_ECS_CORE_COMPONENT_H

@@ -57,7 +57,7 @@ CE_Result CE_Entity_AddComponent(INOUT CE_ECS_Context* context, IN CE_Id entity,
     return result;
 }
 
-CE_Result CE_Entity_RemoveComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, CE_Id componentId, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_Entity_RemoveComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_Id componentId, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     CE_Result result;
     const CE_TypeId componentType = CE_Id_getComponentTypeId(componentId);
@@ -160,7 +160,7 @@ bool CE_Entity_HasComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN C
     return CE_Bitset_isBitSet(&entityData->m_entityComponentBitset, componentType);
 }
 
-CE_Result CE_Entity_GetComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, CE_Id componentId, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_Entity_GetComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_Id componentId, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     CE_Result result;
     const CE_TypeId componentType = CE_Id_getComponentTypeId(componentId);
@@ -208,7 +208,7 @@ CE_Result CE_Entity_GetComponent(INOUT CE_ECS_Context* context, IN CE_Id entity,
     return CE_OK;
 }
 
-CE_Result CE_Entity_FindFirstComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, CE_TypeId componentType, OUT CE_Id* componentId, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_Entity_FindFirstComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType, OUT CE_Id* componentId, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     CE_Result result = CE_OK;
     
@@ -259,7 +259,7 @@ CE_Result CE_Entity_FindFirstComponent(INOUT CE_ECS_Context* context, IN CE_Id e
     return result;
 }
 
-CE_Result CE_Entity_FindAllComponents(INOUT CE_ECS_Context* context, IN CE_Id entity, CE_TypeId componentType, OUT CE_Id results[], IN size_t bufsize, OUT size_t *resultCount, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_Entity_FindAllComponents(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType, OUT CE_Id results[], IN size_t bufsize, OUT size_t *resultCount, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     CE_Result result = CE_OK;
     
@@ -304,7 +304,7 @@ CE_Result CE_Entity_FindAllComponents(INOUT CE_ECS_Context* context, IN CE_Id en
 }
 
 
-CE_Result CE_Entity_GetAllComponentsIter(INOUT CE_ECS_Context* context, IN CE_Id entity, CE_TypeId componentType, OUT CE_Id_Set **components, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_Entity_GetAllComponentsIter(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType, OUT CE_Id_Set **components, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     CE_Result result = CE_OK;
     

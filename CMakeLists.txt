@@ -55,7 +55,7 @@ else()
 endif()
 
 # Core Files
-file(GLOB CORE "src/ecs/*.c" "src/ecs/*.h" "src/ecs/**/*.c" "src/ecs/**/*.h")
+file(GLOB CORE "src/ecs/*.c" "src/ecs/*.h" "src/ecs/**/*.c" "src/ecs/**/*.h" "src/ecs/**/**/*.c" "src/ecs/**/**/*.h")
 
 # Utils Files
 file(GLOB UTILS "src/utils/*.c" "src/utils/*.h")

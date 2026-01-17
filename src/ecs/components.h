@@ -2,7 +2,7 @@
 //  ecs/components.h
 //  Components.h is a header file that includes the list of all component types, including core, engine, and game-defined components.
 //  Gameplay code should only use this
-//  Copyright (c) 2025 Carlos Camacho. All rights reserved.
+//  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
 #ifndef CORGO_ECS_COMPONENTS_H

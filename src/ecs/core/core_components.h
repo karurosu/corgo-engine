@@ -1,7 +1,8 @@
 //
 //  ecs/core/core_components.h
-//  List of core ECS components
-//  Copyright (c) 2025 Carlos Camacho. All rights reserved.
+//  List of core components for the ECS.
+//  Not to be confused with components.h which is a helper with all component types
+//  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
 #ifndef CORGO_ECS_CORE_COMPONENTS_H

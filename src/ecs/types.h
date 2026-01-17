@@ -1,7 +1,7 @@
 //
 //  ecs/core/types.h
 //  Main include file for ECS core types.
-//  Copyright (c) 2025 Carlos Camacho. All rights reserved.
+//  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
 #ifndef CORGO_ECS_TYPES_H
@@ -10,16 +10,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// Include CC but ignore some warnings
-#ifdef _MSC_VER
-#pragma warning(disable: 5045)
-#endif
-
+// Convenient Containers
 #include <cc.h>
-
-#ifdef _MSC_VER
-#pragma warning(default: 5045)
-#endif
 
 // General helpers
 #include "utils/helpers.h"
@@ -74,6 +66,7 @@ typedef enum CE_IdKind {
 // Limited to 255 due to 8-bit type field (0-254 are valid types, 255 is reserved for invalid type)
 #define CE_MAX_COMPONENT_TYPES 255
 #define CE_MAX_RELATIONSHIP_TYPES 255
+#define CE_MAX_SYSTEM_TYPES 255
 
 // Maximum generation count for entities and relationships (4 bits: 0-15)
 #define CE_MAX_GENERATION_COUNT 15
@@ -81,9 +74,10 @@ typedef enum CE_IdKind {
 //// Exposed structures
 typedef struct CE_ECS_ComponentStaticData CE_ECS_ComponentStaticData;
 typedef struct CE_ECS_Context CE_ECS_Context;
+typedef struct CE_ECS_SystemStaticData CE_ECS_SystemStaticData;
 
 // Adding this for convenience
-#include "core/config.h"
+#include "ecs/config.h"
 #include "utils/bitset.h"
 
 #endif // CORGO_ECS_TYPES_H
