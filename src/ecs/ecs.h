@@ -1,16 +1,18 @@
 //
 //  ecs/ecs.h
-//  Primary ECS include (single entry point for Corgo ECS).
+//  Primary ECS include.
 //  This is the public API for Corgo ECS.
-//  Copyright (c) 2025 Carlos Camacho.
+//  Copyright (c) 2026 Carlos Camacho.
 //
 
 #ifndef CORGO_ECS_ECS_H
 #define CORGO_ECS_ECS_H
 
 #include "types.h"
+#include "engine/core/platform.h"
 #include "core/id.h"
 #include "components.h"
+#include "systems.h"
 #include "core/storage.h"
 
 ////////////////////////////////////
@@ -99,5 +101,12 @@ CE_Result CE_ECS_DestroyEntity(INOUT CE_ECS_Context* context, IN CE_Id entity, O
 ////////////////////////////////////
 
 #include "core/entity.h"
+
+////////////////////////////////////
+/// Internal ECS functions, exposed here because user code may need to call them
+/// But regular should not use it directly
+////////////////////////////////////
+
+CE_Result CE_ECS_GetComponentForSystem(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType, const IN CE_ECS_SystemStaticData *system, OUT CE_Id* componentId, OUT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode);
 
 #endif // CORGO_ECS_ECS_H

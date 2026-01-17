@@ -1,0 +1,17 @@
+//
+//  ecs/core/core_systems.h
+//  List of core ECS systems
+//  Copyright (c) 2026 Carlos Camacho. All rights reserved.
+//
+#ifndef CORGO_ECS_CORE_SYSTEMS_H
+#define CORGO_ECS_CORE_SYSTEMS_H
+
+#include "system.h"
+
+#define CE_CORE_DEBUG_SYSTEM_DEPENDENCIES \
+    REQUIRE_COMPONENT(CE_CORE_DEBUG_COMPONENT, debugComponent)
+
+#define CE_SYSTEM_DESC_CORE(X) \
+	X(CE_CORE_DEBUG_SYSTEM, CE_ECS_SYSTEM_RUN_ORDER_AUTO, CE_ECS_SYSTEM_RUN_PHASE_DEFAULT, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, CE_CORE_DEBUG_SYSTEM_DEPENDENCIES)
+
+#endif // CORGO_ECS_CORE_SYSTEMS_H

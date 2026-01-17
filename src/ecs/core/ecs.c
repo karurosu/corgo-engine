@@ -2,7 +2,7 @@
 //  ecs/ecs.c
 //  Primary ECS C file, header is ecs/ecs.h
 //  This file is in /ecs/core to keep only header files at the root of ecs/
-//  Aggregates core ECS headers for easy inclusion.
+//  Only publlic functions are implemented here.
 //  Copyright (c) 2025 Carlos Camacho.
 //
 
@@ -113,3 +113,8 @@ CE_Result CE_ECS_DestroyEntity(INOUT CE_ECS_Context* context, IN CE_Id entity, O
     return CE_ECS_MainStorage_destroyEntity(&context->m_storage, entity, errorCode);
 }
 
+CE_Result CE_ECS_GetComponentForSystem(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType, const IN CE_ECS_SystemStaticData *system, OUT CE_Id* componentId, OUT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    // TODO: Simply return first component for the time being
+    return CE_Entity_FindFirstComponent(context, entity, componentType, componentId, componentData, errorCode);
+}
