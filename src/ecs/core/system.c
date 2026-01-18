@@ -24,6 +24,8 @@ void name##_description(OUT CE_ECS_SystemStaticData *data) \
     data->m_runFunction = name##_run;\
     CE_Bitset_init(&data->m_requiredComponentBitset, CE_COMPONENT_TYPES_COUNT);\
     CE_Bitset_init(&data->m_requiredRelationshipBitset, CE_COMPONENT_TYPES_COUNT);\
+    data->m_isValid = true;\
+    data->m_enabled = true;\
     __VA_ARGS__ \
 }
 

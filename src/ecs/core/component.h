@@ -14,7 +14,6 @@ struct CE_ECS_ComponentStaticData {
     bool m_isValid;
     CE_TypeId m_type;
     uint32_t m_uid;
-    uint64_t m_bitmask;
     size_t m_storageSizeOf;
     size_t m_initialCapacity;
 
@@ -59,7 +58,6 @@ void name##_description(OUT CE_ECS_ComponentStaticData *data) \
     data->m_isValid = true; \
     data->m_type = name; \
     data->m_uid = name##_UID; \
-    data->m_bitmask = ((uint64_t)1 << name); \
     data->m_storageSizeOf = name##_StorageSize; \
     data->m_initialCapacity = name##_InitialCapacity; \
     data->m_initFunction = name##_init_wrapper; \

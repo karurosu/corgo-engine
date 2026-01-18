@@ -32,10 +32,23 @@ void test_ECSContextSetupTest(void) {
     TEST_ASSERT_TRUE(debugDesc->m_isValid);
     TEST_ASSERT_EQUAL_UINT8(CE_CORE_DEBUG_COMPONENT, debugDesc->m_type);
     TEST_ASSERT_EQUAL_UINT32(0, debugDesc->m_uid);
-    TEST_ASSERT_EQUAL_UINT64((uint64_t)1 << CE_CORE_DEBUG_COMPONENT, debugDesc->m_bitmask);
     TEST_ASSERT_EQUAL_size_t(sizeof(CE_Core_DebugComponent), debugDesc->m_storageSizeOf);
     TEST_ASSERT_EQUAL_size_t(sizeof(CE_Core_DebugComponent), sizeof(CE_CORE_DEBUG_COMPONENT_StorageType));
     TEST_ASSERT_EQUAL_size_t(CE_DEFAULT_COMPONENT_CAPACITY, debugDesc->m_initialCapacity);
+
+    // Verify we have at least 1 system type (CE_CORE_DEBUG_SYSTEM)
+    TEST_ASSERT_GREATER_OR_EQUAL_UINT8(1, CE_SYSTEM_TYPES_COUNT);
+
+    // Verify the debug system descriptor is valid
+    CE_ECS_SystemStaticData* debugSysDesc = &context.m_systemDefinitions[CE_CORE_DEBUG_SYSTEM];
+    TEST_ASSERT_TRUE(debugSysDesc->m_isValid);
+    TEST_ASSERT_EQUAL_UINT8(CE_CORE_DEBUG_SYSTEM, debugSysDesc->m_systemId);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_ORDER_AUTO, debugSysDesc->m_runOrder);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_PHASE_LAST, debugSysDesc->m_runPhase);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_FREQUENCY_ONCE_PER_SECOND, debugSysDesc->m_runFrequency);
+    TEST_ASSERT_NOT_NULL(debugSysDesc->m_runFunction);
+    TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&debugSysDesc->m_requiredComponentBitset, CE_CORE_DEBUG_COMPONENT));
+    
 }
 
 static void test_CEIdHelpersTest(void) {

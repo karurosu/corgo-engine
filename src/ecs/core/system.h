@@ -32,6 +32,8 @@ typedef enum CE_ECS_SYSTEM_RUN_FREQUENCY {
 } CE_ECS_SYSTEM_RUN_FREQUENCY;
 
 struct CE_ECS_SystemStaticData {
+    bool m_isValid;
+    bool m_enabled;
     CE_TypeId m_systemId;
     CE_ECS_SYSTEM_RUN_ORDER m_runOrder;
     CE_ECS_SYSTEM_RUN_PHASE m_runPhase;

@@ -10,6 +10,7 @@
 
 #include "../types.h"
 #include "../components.h"
+#include "../systems.h"
 
 // Component storage structures
 
@@ -52,6 +53,7 @@ typedef struct CE_ECS_MainStorage {
 struct CE_ECS_Context {
     // Static component definitions
     CE_ECS_ComponentStaticData m_componentDefinitions[CE_COMPONENT_TYPES_COUNT];
+    CE_ECS_SystemStaticData m_systemDefinitions[CE_SYSTEM_TYPES_COUNT];
     
     // Main storage for ECS entities and components
     CE_ECS_MainStorage m_storage;
