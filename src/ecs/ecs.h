@@ -13,6 +13,7 @@
 #include "core/id.h"
 #include "components.h"
 #include "systems.h"
+#include "relationships.h"
 #include "core/storage.h"
 
 ////////////////////////////////////

@@ -19,13 +19,13 @@
 #endif
 
 // Engine systems
-//#include "../engine/systems.h"
+#include "../engine/systems.h"
 #ifndef CE_SYSTEM_DESC_ENGINE
 #define CE_SYSTEM_DESC_ENGINE(X)
 #endif
 
 // Game systems
-//#include "../game/systems.h"
+#include "../game/systems.h"
 #ifndef CE_SYSTEM_DESC_GAME
 #define CE_SYSTEM_DESC_GAME(X)
 #endif
