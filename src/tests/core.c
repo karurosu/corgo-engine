@@ -72,20 +72,17 @@ static void test_CEIdHelpersTest(void) {
     TEST_ASSERT_EQUAL_UINT8(CE_INVALID_TYPE_ID, CE_Id_getComponentTypeId(id));
     TEST_ASSERT_EQUAL_UINT8(CE_INVALID_TYPE_ID, CE_Id_getRelationshipTypeId(id));
 
-    // Build relationship entity id (generation unused for relationships)
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)9, 0, 555, &id));
+    // Build relationship entity id
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)9, 3, 555, &id));
     TEST_ASSERT_TRUE(CE_Id_isRelationship(id));
     TEST_ASSERT_FALSE(CE_Id_isEntity(id));
     TEST_ASSERT_EQUAL_UINT32(555, CE_Id_getUniqueId(id));
-    TEST_ASSERT_EQUAL_UINT32(0, CE_Id_getGeneration(id));
+    TEST_ASSERT_EQUAL_UINT32(3, CE_Id_getGeneration(id));
     TEST_ASSERT_EQUAL_UINT8(9, CE_Id_getRelationshipTypeId(id));
     TEST_ASSERT_EQUAL_UINT8(CE_INVALID_TYPE_ID, CE_Id_getComponentTypeId(id));
 
-    // Setters enforcement
     CE_Id original = id;
-    // Invalid: generation not allowed for relationships
-    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_setGeneration(&id, 1));
-    TEST_ASSERT_EQUAL_UINT32(original, id);
+
     // Invalid unique (>16 bits)
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_setUniqueId(&id, 0x1FFFF));
     TEST_ASSERT_EQUAL_UINT32(original, id);
@@ -95,6 +92,8 @@ static void test_CEIdHelpersTest(void) {
     TEST_ASSERT_EQUAL_UINT32(123, CE_Id_getUniqueId(id));
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_setRelationshipTypeId(&id, (CE_TypeId)12));
     TEST_ASSERT_EQUAL_UINT8(12, CE_Id_getRelationshipTypeId(id));
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_setGeneration(&id, 5));
+    TEST_ASSERT_EQUAL_UINT32(5, CE_Id_getGeneration(id));
 
     // Comparison tests
     CE_Id compA, compB, entA, entB, relA, relB;

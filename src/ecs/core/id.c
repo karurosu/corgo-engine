@@ -32,7 +32,7 @@ CE_Result CE_Id_setGeneration(INOUT CE_Id* id, uint32_t generation)
     if (!id) return CE_ERROR;
     if (generation > CE_ID_MASK_GENERATION) return CE_ERROR;
 
-    if (!CE_Id_isEntity(*id)) return CE_ERROR;
+    if (CE_Id_isComponent(*id)) return CE_ERROR;
     
     CE_Id cur = *id;
     *id = (cur & ~(CE_ID_MASK_GENERATION << CE_ID_SHIFT_GENERATION)) | ((generation & CE_ID_MASK_GENERATION) << CE_ID_SHIFT_GENERATION);
@@ -77,7 +77,7 @@ CE_Result CE_Id_make(IN CE_IdKind kind, IN CE_TypeId typeId, IN uint32_t generat
     if (kind == CE_ID_INVALID_KIND || kind >= CE_ID_KIND_COUNT) { *out = CE_INVALID_ID; return CE_ERROR; }
 
     // Validate generation for entity kind only
-    if (kind == CE_ID_ENTITY_REFERENCE_KIND && generation > CE_MAX_GENERATION_COUNT) { *out = CE_INVALID_ID; return CE_ERROR; }
+    if ((kind == CE_ID_ENTITY_REFERENCE_KIND || kind == CE_ID_ENTITY_RELATIONSHIP_KIND) && generation > CE_MAX_GENERATION_COUNT) { *out = CE_INVALID_ID; return CE_ERROR; }
 
     // Validate 8-bit type for component/relationship kinds
     if ((kind == CE_ID_COMPONENT_REFERENCE_KIND || kind == CE_ID_ENTITY_RELATIONSHIP_KIND) && (uint32_t)typeId >= CE_INVALID_TYPE_ID) {
@@ -101,6 +101,7 @@ CE_Result CE_Id_make(IN CE_IdKind kind, IN CE_TypeId typeId, IN uint32_t generat
         break;
     case CE_ID_ENTITY_RELATIONSHIP_KIND:
         id |= (((uint32_t)typeId & CE_ID_MASK_TYPE8) << CE_ID_SHIFT_TYPE);
+        id |= ((generation & CE_ID_MASK_GENERATION) << CE_ID_SHIFT_GENERATION);
         break;
     default:
         *out = CE_INVALID_ID;

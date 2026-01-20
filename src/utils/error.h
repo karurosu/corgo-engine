@@ -24,6 +24,7 @@ typedef int CE_Result;
 // Enums 20-29: Component Storage related errors
 // Enums 30-39: Entity related errors
 // Enums 40-49: Component related errors
+// Enums 50-59: Relationship related errors
 // Enums 60-69: bitset errors
 #define CE_ERROR_CODE_LIST(X) \
     X(NONE, 0, "No error") \
@@ -51,6 +52,8 @@ typedef int CE_Result;
     X(INVALID_COMPONENT_TYPE, 40, "Invalid component type") \
     X(COMPONENT_NOT_FOUND_IN_ENTITY, 41, "Component not found in entity") \
     X(INVALID_COMPONENT_ID, 42, "Invalid component ID") \
+    \
+    X(INVALID_RELATIONSHIP_TYPE, 50, "Invalid relationship type") \
     \
     X(BITSET_INDEX_OUT_OF_BOUNDS, 60, "Bitset index out of bounds") \
     /* Add new error codes here */

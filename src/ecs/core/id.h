@@ -34,7 +34,7 @@ static inline bool CE_Id_isEntity(IN CE_Id id) { return CE_Id_getKind(id) == CE_
 static inline uint32_t CE_Id_getUniqueId(IN CE_Id id) { return (id >> CE_ID_SHIFT_UNIQUE) & CE_ID_MASK_UNIQUE; }
 
 static inline uint32_t CE_Id_getGeneration(IN CE_Id id) {
-    if (!CE_Id_isEntity(id)) return 0;
+    if (CE_Id_isComponent(id)) return 0;
     return (id >> CE_ID_SHIFT_GENERATION) & CE_ID_MASK_GENERATION;
 }
 
