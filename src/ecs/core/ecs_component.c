@@ -1,12 +1,13 @@
 //
-//  ecs/core/entity.h
-//  Live Entity manipulation functions.
+//  ecs/core/component.h
+//  Live Component manipulation functions.
 //  Aggregates core ECS headers for easy inclusion.
 //  Copyright (c) 2026 Carlos Camacho.
 //
 
-#include "entity.h"
-#include "ecs/ecs.h"
+#include "ecs_component.h"
+
+#include "id.h"
 #include "storage.h"
 #include "engine/core/platform.h"
 
@@ -108,100 +109,6 @@ CE_Result CE_Entity_RemoveComponent(INOUT CE_ECS_Context* context, IN CE_Id enti
 
     if (lastComponent) {
         CE_Bitset_clearBit(&entityData->m_entityComponentBitset, componentType);
-    }
-
-    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
-    return CE_OK;
-}
-
-bool CE_Entity_IsValid(INOUT CE_ECS_Context* context, IN CE_Id entity)
-{
-    if (entity == CE_INVALID_ID) {
-        return false;
-    }
-
-    CE_Result result;
-    CE_ECS_EntityData* entityData;
-
-    result = CE_ECS_MainStorage_getEntityData(&context->m_storage, entity, &entityData, NULL);
-    return result == CE_OK;
-}
-
-size_t CE_Entity_GetComponentCount(INOUT CE_ECS_Context* context, IN CE_Id entity)
-{
-    CE_Result result;
-    CE_ECS_EntityData* entityData;
-    result = CE_ECS_MainStorage_getEntityData(&context->m_storage, entity, &entityData, NULL);
-    if (entityData == NULL || result != CE_OK) {
-        return 0;
-    }
-    return cc_size(&entityData->m_components);
-}
-
-size_t CE_Entity_GetRelationshipCount(INOUT CE_ECS_Context* context, IN CE_Id entity)
-{
-    CE_Result result;
-    CE_ECS_EntityData* entityData;
-    result = CE_ECS_MainStorage_getEntityData(&context->m_storage, entity, &entityData, NULL);
-    if (entityData == NULL || result != CE_OK) {
-        return 0;
-    }
-    return cc_size(&entityData->m_relationships);
-}
-
-bool CE_Entity_HasComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType)
-{
-    CE_Result result;
-    CE_ECS_EntityData* entityData;
-    result = CE_ECS_MainStorage_getEntityData(&context->m_storage, entity, &entityData, NULL);
-    if (entityData == NULL || result != CE_OK) {
-        return 0;
-    }
-    return CE_Bitset_isBitSet(&entityData->m_entityComponentBitset, componentType);
-}
-
-CE_Result CE_Entity_GetComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_Id componentId, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
-{
-    CE_Result result;
-    const CE_TypeId componentType = CE_Id_getComponentTypeId(componentId);
-
-    if (entity == CE_INVALID_ID) {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_ENTITY_ID);
-        return CE_ERROR;
-    }
-
-    if (componentType == CE_INVALID_TYPE_ID || componentType >= CE_MAX_COMPONENT_TYPES) {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_COMPONENT_TYPE);
-        return CE_ERROR;
-    }
-
-    CE_ECS_EntityData* entityData = NULL;
-    result = CE_ECS_MainStorage_getEntityData(&context->m_storage, entity, &entityData, errorCode);
-    if (result != CE_OK) {
-        return CE_ERROR;
-    }
-
-    // First check that the entity actually has this component
-    if (!CE_Bitset_isBitSet(&entityData->m_entityComponentBitset, componentType)) {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_COMPONENT_NOT_FOUND_IN_ENTITY);
-        return CE_ERROR;
-    }
-
-    if (cc_get(&entityData->m_components, componentId) == NULL) {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_COMPONENT_NOT_FOUND_IN_ENTITY);
-        return CE_ERROR;
-    }
-
-    if (componentData != NULL) {
-        void *dataPtr = NULL;
-        const CE_ECS_ComponentStaticData *staticComponentDataPtr = &context->m_componentDefinitions[componentType];
-        dataPtr = CE_ECS_ComponentStorage_getComponentDataPointerById(context->m_storage.m_componentTypeStorage[componentType], staticComponentDataPtr, componentId);
-        if (dataPtr == NULL) {
-            CE_Debug("Component data not found in storage for componentId %u of type %u", componentId, componentType);
-            CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_NOT_FOUND);
-            return CE_ERROR;
-        }
-        *componentData = dataPtr;
     }
 
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
@@ -336,17 +243,18 @@ CE_Result CE_Entity_GetAllComponentsIter(INOUT CE_ECS_Context* context, IN CE_Id
     return result;
 }
 
-CE_Result CE_Entity_AddRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, IN CE_Id targetEntity, IN CE_TypeId reciprocalRelationshipType, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_Entity_GetComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_Id componentId, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     CE_Result result;
+    const CE_TypeId componentType = CE_Id_getComponentTypeId(componentId);
 
     if (entity == CE_INVALID_ID) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_ENTITY_ID);
         return CE_ERROR;
     }
 
-    if (relationshipType == CE_INVALID_TYPE_ID || relationshipType >= CE_MAX_RELATIONSHIP_TYPES) {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_RELATIONSHIP_TYPE);
+    if (componentType == CE_INVALID_TYPE_ID || componentType >= CE_MAX_COMPONENT_TYPES) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_COMPONENT_TYPE);
         return CE_ERROR;
     }
 
@@ -356,20 +264,35 @@ CE_Result CE_Entity_AddRelationship(INOUT CE_ECS_Context* context, IN CE_Id enti
         return CE_ERROR;
     }
 
-    CE_Id newRel = CE_INVALID_ID;
-    result = CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, relationshipType, 0, targetEntity, &newRel);
-
-    if (result != CE_OK) {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
+    // First check that the entity actually has this component
+    if (!CE_Bitset_isBitSet(&entityData->m_entityComponentBitset, componentType)) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_COMPONENT_NOT_FOUND_IN_ENTITY);
         return CE_ERROR;
     }
 
-    if (cc_insert(&entityData->m_relationships, newRel) == NULL)
-    {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
+    if (cc_get(&entityData->m_components, componentId) == NULL) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_COMPONENT_NOT_FOUND_IN_ENTITY);
         return CE_ERROR;
-    };
+    }
+
+    if (componentData != NULL) {
+        void *dataPtr = NULL;
+        const CE_ECS_ComponentStaticData *staticComponentDataPtr = &context->m_componentDefinitions[componentType];
+        dataPtr = CE_ECS_ComponentStorage_getComponentDataPointerById(context->m_storage.m_componentTypeStorage[componentType], staticComponentDataPtr, componentId);
+        if (dataPtr == NULL) {
+            CE_Debug("Component data not found in storage for componentId %u of type %u", componentId, componentType);
+            CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_NOT_FOUND);
+            return CE_ERROR;
+        }
+        *componentData = dataPtr;
+    }
 
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
+}
+
+CE_Result CE_ECS_GetComponentForSystem(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType, const IN CE_ECS_SystemStaticData *system, OUT CE_Id* componentId, OUT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    // TODO: Simply return first component for the time being
+    return CE_Entity_FindFirstComponent(context, entity, componentType, componentId, componentData, errorCode);
 }
