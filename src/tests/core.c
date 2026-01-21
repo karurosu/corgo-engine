@@ -843,13 +843,34 @@ void test_ECS_Relationships(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 
-    // Check all relationships from parent
+    // Check all relationships
     TEST_ASSERT_EQUAL_UINT32(2, CE_Entity_GetRelationshipCount(&context, parentEntity));
     TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD));
     TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, childEntity1));
     TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT));
     TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, childEntity2));
     TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT));
+
+    CE_Id found = CE_INVALID_ID;
+    result = CE_Entity_FindFirstRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT, &found, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_UINT32(CE_Id_getUniqueId(parentEntity), CE_Id_getUniqueId(found));
+    result = CE_Entity_FindFirstRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT, &found, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_UINT32(CE_Id_getUniqueId(parentEntity), CE_Id_getUniqueId(found));
+
+    CE_Id foundChildren[3];
+    size_t foundCount = 0;
+    result = CE_Entity_FindAllRelationships(&context, parentEntity, CE_RELATIONSHIP_CHILD, foundChildren, 3, &foundCount, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_UINT32(2, foundCount);
+    for (size_t i = 0; i < foundCount; i++) {
+        const uint32_t childId = CE_Id_getUniqueId(foundChildren[i]);
+        TEST_ASSERT_TRUE(childId == CE_Id_getUniqueId(childEntity1) || childId == CE_Id_getUniqueId(childEntity2));
+    }
 
     // Remove second relationship
     result = CE_Entity_RemoveRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, CE_RELATIONSHIP_PARENT, &errorCode);

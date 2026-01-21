@@ -127,3 +127,87 @@ CE_Result CE_Entity_RemoveRelationship(INOUT CE_ECS_Context* context, IN CE_Id e
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
 }
+
+CE_Result CE_Entity_FindFirstRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, OUT CE_Id* relationshipId, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    CE_Result result = CE_OK;
+    
+    if (entity == CE_INVALID_ID) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_ENTITY_ID);
+        return CE_ERROR;
+    }
+
+    if (relationshipType == CE_INVALID_TYPE_ID || relationshipType >= CE_MAX_RELATIONSHIP_TYPES) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_RELATIONSHIP_TYPE);
+        return CE_ERROR;
+    }
+
+    CE_ECS_EntityData* entityData = NULL;
+    result = CE_ECS_MainStorage_getEntityData(&context->m_storage, entity, &entityData, errorCode);
+    if (result != CE_OK) {
+        return CE_ERROR;
+    }
+
+    // First check that the entity actually has this component
+    if (!CE_Bitset_isBitSet(&entityData->m_entityRelationshipBitset, relationshipType)) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_ENTITY_DOES_NOT_HAVE_RELATIONSHIP);
+        return CE_ERROR;
+    }
+
+    cc_for_each(&entityData->m_relationships, el) 
+    {
+        if (CE_Id_getRelationshipTypeId(*el) == relationshipType) {
+            *relationshipId = *el;
+            break;
+        }
+    }
+
+    if (errorCode != NULL && result == CE_OK) {
+        *errorCode = CE_ERROR_CODE_NONE;
+    }
+    return result;
+}
+
+CE_Result CE_Entity_FindAllRelationships(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, OUT CE_Id results[], IN size_t bufsize, OUT size_t *resultCount, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    CE_Result result = CE_OK;
+    
+    if (entity == CE_INVALID_ID) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_ENTITY_ID);
+        return CE_ERROR;
+    }
+
+    if (relationshipType == CE_INVALID_TYPE_ID || relationshipType >= CE_MAX_RELATIONSHIP_TYPES) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_RELATIONSHIP_TYPE);
+        return CE_ERROR;
+    }
+
+    CE_ECS_EntityData* entityData = NULL;
+    result = CE_ECS_MainStorage_getEntityData(&context->m_storage, entity, &entityData, errorCode);
+    if (result != CE_OK) {
+        return CE_ERROR;
+    }
+
+    // First check that the entity actually has this component
+    if (!CE_Bitset_isBitSet(&entityData->m_entityRelationshipBitset, relationshipType)) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_ENTITY_DOES_NOT_HAVE_RELATIONSHIP);
+        return CE_ERROR;
+    }
+
+    int index = 0;
+
+    cc_for_each(&entityData->m_relationships, el) 
+    {
+        if (CE_Id_getRelationshipTypeId(*el) == relationshipType) {
+            results[index++] = *el;
+            if (index >= bufsize) {
+                break;
+            }
+        }
+    }
+
+    *resultCount = index;
+
+    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+    return result;
+}
