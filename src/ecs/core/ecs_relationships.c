@@ -211,3 +211,9 @@ CE_Result CE_Entity_FindAllRelationships(INOUT CE_ECS_Context* context, IN CE_Id
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return result;
 }
+
+CE_Result CE_ECS_GetRelationshipForSystem(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, const IN CE_ECS_SystemStaticData *system, OUT CE_Id* targetId, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    // TODO: add support for multiple relationships of the same type
+    return CE_Entity_FindFirstRelationship(context, entity, relationshipType, targetId, errorCode);
+}

@@ -62,6 +62,15 @@ void name##_description(OUT CE_ECS_SystemStaticData *data);\
         return CE_ERROR;\
     }\
 
+// Called by the relationship list to setup variables
+#define REQUIRE_RELATIONSHIP(relationshipType, varName) \
+    CE_Id varName##_Id = CE_INVALID_ID;\
+    CE_ECS_GetRelationshipForSystem(context, entity, relationshipType, systemDesc, &varName##_Id, errorCode);\
+    if (*errorCode != CE_ERROR_CODE_NONE || varName##_Id == CE_INVALID_ID) {\
+        CE_Error("Entity %u missing required component type" #relationshipType " for system", entity);\
+        return CE_ERROR;\
+    }\
+
 // Load components and set up local variables
 #define CE_START_SYSTEM_IMPLEMENTATION(name, ...)\
 CE_Result name##_run(INOUT struct CE_ECS_Context* context, const IN CE_ECS_SystemStaticData *systemDesc, const IN CE_Id entity, const IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode)\

@@ -90,5 +90,12 @@ CE_Result CE_Entity_FindFirstRelationship(INOUT CE_ECS_Context* context, IN CE_I
  */
 CE_Result CE_Entity_FindAllRelationships(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, OUT CE_Id results[], IN size_t bufsize, OUT size_t *resultCount, OUT_OPT CE_ERROR_CODE* errorCode);
 
+////////////////////////////////////
+/// Internal ECS functions, exposed here because user code may need to call them
+/// But regular should not use it directly
+////////////////////////////////////
+
+CE_Result CE_ECS_GetRelationshipForSystem(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, const IN CE_ECS_SystemStaticData *system, OUT CE_Id* targetId, OUT_OPT CE_ERROR_CODE* errorCode);
+
 
 #endif // CORGO_ECS_CORE_ECS_RELATIONSHIPS_H
