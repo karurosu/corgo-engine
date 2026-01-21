@@ -54,6 +54,7 @@ typedef int CE_Result;
     X(INVALID_COMPONENT_ID, 42, "Invalid component ID") \
     \
     X(INVALID_RELATIONSHIP_TYPE, 50, "Invalid relationship type") \
+    X(ENTITY_DOES_NOT_HAVE_RELATIONSHIP, 51, "Entity does not have the specified relationship") \
     \
     X(BITSET_INDEX_OUT_OF_BOUNDS, 60, "Bitset index out of bounds") \
     /* Add new error codes here */

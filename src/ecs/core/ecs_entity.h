@@ -98,4 +98,15 @@ size_t CE_Entity_GetRelationshipCount(INOUT CE_ECS_Context* context, IN CE_Id en
  */
 bool CE_Entity_HasComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType);
 
+/**
+ * @brief Check if an entity has at least one relationship of the specified type attached.
+ * 
+ * @param[in,out] context The ECS context.
+ * @param[in] entity The entity ID to query.
+ * @param[in] relationshipType The relationship type to check for.
+ * 
+ * @return true if the entity has the specified relationship type, false otherwise.
+ */
+bool CE_Entity_HasRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType);
+
 #endif // CORGO_ECS_CORE_ECS_ENTITY_H

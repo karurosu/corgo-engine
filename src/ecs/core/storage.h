@@ -32,7 +32,8 @@ typedef struct CE_ECS_ComponentStorage {
 typedef struct CE_ECS_EntityData {
     bool m_isValid;
     CE_Id m_entityId;
-    CE_Bitset m_entityComponentBitset; // Bitset to track which components are attached to the entity
+    CE_Bitset m_entityComponentBitset; // Bitset to track which component types are attached to the entity
+    CE_Bitset m_entityRelationshipBitset; // Bitset to track which relationship types are attached to the entity
     CE_Id_Set m_components; // Vector of component ids attached to the entity
     CE_Id_Set m_relationships; // Vector of relationship ids attached to the entity
 } CE_ECS_EntityData;

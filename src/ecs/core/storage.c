@@ -81,6 +81,7 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
         storage->m_entityStorage.m_entityDataArray[i].m_isValid = false;
         storage->m_entityStorage.m_entityDataArray[i].m_entityId = CE_INVALID_ID;
         CE_Bitset_init(&storage->m_entityStorage.m_entityDataArray[i].m_entityComponentBitset, CE_COMPONENT_TYPES_COUNT);
+        CE_Bitset_init(&storage->m_entityStorage.m_entityDataArray[i].m_entityRelationshipBitset, CE_RELATIONSHIP_TYPES_COUNT);
         
         cc_init(&storage->m_entityStorage.m_entityDataArray[i].m_components);
         cc_init(&storage->m_entityStorage.m_entityDataArray[i].m_relationships);
@@ -325,6 +326,7 @@ CE_Result CE_ECS_MainStorage_createEntity(INOUT CE_ECS_MainStorage* storage, OUT
     entityData->m_entityId = newId;
     entityData->m_isValid = true;
     CE_Bitset_clear(&entityData->m_entityComponentBitset);
+    CE_Bitset_clear(&entityData->m_entityRelationshipBitset);
     cc_clear(&entityData->m_components);
     cc_clear(&entityData->m_relationships);
 
@@ -372,6 +374,7 @@ CE_Result CE_ECS_MainStorage_destroyEntity(INOUT CE_ECS_MainStorage* storage, IN
     entityData->m_isValid = false;
     storage->m_entityStorage.m_count--;
     CE_Bitset_clear(&entityData->m_entityComponentBitset);
+    CE_Bitset_clear(&entityData->m_entityRelationshipBitset);
     cc_clear(&entityData->m_components);
     cc_clear(&entityData->m_relationships);
 

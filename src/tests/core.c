@@ -23,7 +23,7 @@ void tearDown(void) {
 }
 
 
-void test_ECSContextSetupTest(void) {
+void test_ECS_ContextSetup(void) {
     // Verify we have at least 1 component type (CE_CORE_DEBUG_COMPONENT)
     TEST_ASSERT_GREATER_OR_EQUAL_UINT8(1, CE_COMPONENT_TYPES_COUNT);
     
@@ -51,7 +51,7 @@ void test_ECSContextSetupTest(void) {
     
 }
 
-static void test_CEIdHelpersTest(void) {
+static void test_CE_Id_Helpers(void) {
     CE_Id id;
     // Build component id
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, (CE_TypeId)5, 0, 1234, &id));
@@ -150,7 +150,7 @@ static void test_CEIdHelpersTest(void) {
     TEST_ASSERT_FALSE(CE_Id_isRelationship(invalidId));
 }
 
-static void test_ComponentStorageTest(void) {
+static void test_ECS_ComponentStorage(void) {
     CE_ERROR_CODE errorCode;
     CE_Result result;
     CE_Id id;
@@ -233,7 +233,7 @@ static void test_ComponentStorageTest(void) {
     TEST_ASSERT_NULL(componentData);
 }
 
-static void test_CE_Bitset_InitTest(void) {
+static void test_CE_Bitset_Init(void) {
     CE_Bitset bitset;
     
     // Test valid initialization
@@ -260,7 +260,7 @@ static void test_CE_Bitset_InitTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Bitset_init(&bitset, 0));
 }
 
-static void test_CE_Bitset_SetBitTest(void) {
+static void test_CE_Bitset_SetBit(void) {
     CE_Bitset bitset;
     
     CE_Bitset_init(&bitset, 64);
@@ -293,7 +293,7 @@ static void test_CE_Bitset_SetBitTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Bitset_setBit(&bitset, 200));
 }
 
-static void test_CE_Bitset_ClearBitTest(void) {
+static void test_CE_Bitset_ClearBit(void) {
     CE_Bitset bitset;
     
     CE_Bitset_init(&bitset, 64);
@@ -335,7 +335,7 @@ static void test_CE_Bitset_ClearBitTest(void) {
     TEST_ASSERT_FALSE(CE_Bitset_isBitSet(&bitset, 10));
 }
 
-static void test_CE_Bitset_ToggleBitTest(void) {
+static void test_CE_Bitset_ToggleBit(void) {
     CE_Bitset bitset;
     
     CE_Bitset_init(&bitset, 64);
@@ -375,7 +375,7 @@ static void test_CE_Bitset_ToggleBitTest(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Bitset_toggleBit(&bitset, 400));
 }
 
-static void test_CE_Bitset_IsBitSetTest(void) {
+static void test_CE_Bitset_IsBitSet(void) {
     CE_Bitset bitset;
     
     CE_Bitset_init(&bitset, 64);
@@ -407,7 +407,7 @@ static void test_CE_Bitset_IsBitSetTest(void) {
     TEST_ASSERT_FALSE(CE_Bitset_isBitSet(&bitset, 500));
 }
 
-static void test_CE_Bitset_ByteBoundariesTest(void) {
+static void test_CE_Bitset_ByteBoundaries(void) {
     CE_Bitset bitset;
     
     // Test operations across byte boundaries
@@ -442,7 +442,7 @@ static void test_CE_Bitset_ByteBoundariesTest(void) {
     }
 }
 
-static void test_CE_Bitset_AllBitsTest(void) {
+static void test_CE_Bitset_AllBits(void) {
     CE_Bitset bitset;
     
     CE_Bitset_init(&bitset, CE_BITSET_MAX_BITS);
@@ -468,7 +468,7 @@ static void test_CE_Bitset_AllBitsTest(void) {
     }
 }
 
-static void test_CE_EntityConstructionTest(void) {
+static void test_CE_EntityConstruction(void) {
     CE_ERROR_CODE errorCode;
     CE_Result result = CE_ERROR;
     CE_Id entityId = CE_INVALID_ID;
@@ -547,7 +547,7 @@ static void test_CE_EntityConstructionTest(void) {
     TEST_ASSERT_EQUAL_UINT32(newEntityId, entityData->m_entityId);
 }
 
-void test_EntityComponentCreationTest(void) {
+void test_Entity_ComponentCreation(void) {
     CE_ERROR_CODE errorCode;
     CE_Result result = CE_ERROR;
     CE_Id entity_1 = CE_INVALID_ID;
@@ -615,7 +615,7 @@ void test_EntityComponentCreationTest(void) {
     TEST_ASSERT_EQUAL_UINT32(componentId_2, foundComponentId);
 }
 
-void test_EntityComponentDeletionTest(void) {
+void test_Entity_ComponentDeletion(void) {
     CE_ERROR_CODE errorCode;
     CE_Result result = CE_ERROR;
     CE_Id entity_1 = CE_INVALID_ID;
@@ -701,7 +701,7 @@ void test_EntityComponentDeletionTest(void) {
     TEST_ASSERT_NULL(deletedComponentData_2);
 }
 
-void test_EntityDeletionTest(void) {
+void test_Entity_Deletion(void) {
     CE_ERROR_CODE errorCode;
     CE_Result result = CE_ERROR;
     CE_Id entity_1 = CE_INVALID_ID;
@@ -736,7 +736,7 @@ void test_EntityDeletionTest(void) {
     TEST_ASSERT_NULL(componentData);
 }
 
-void test_EntityMultipleComponents(void) {
+void test_Entity_MultipleComponents(void) {
     CE_ERROR_CODE errorCode;
     CE_Result result = CE_ERROR;
     CE_Id entity_1 = CE_INVALID_ID;
@@ -802,22 +802,114 @@ void test_EntityMultipleComponents(void) {
     TEST_ASSERT_FALSE(CE_Entity_HasComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT));
 }
 
+void test_ECS_Relationships(void) {
+    CE_ERROR_CODE errorCode;
+    CE_Result result = CE_ERROR;
+    CE_Id parentEntity = CE_INVALID_ID;
+    CE_Id childEntity1 = CE_INVALID_ID;
+    CE_Id childEntity2 = CE_INVALID_ID;
+
+    // Create parent entity
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &parentEntity, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, parentEntity);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Create child entity
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &childEntity1, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, childEntity1);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Create a second child entity
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &childEntity2, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, childEntity2);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Add relationship from parent to child
+    result = CE_Entity_AddRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity1, CE_RELATIONSHIP_PARENT, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Verify relationship exists
+    TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, parentEntity));
+    TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD));
+    TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_PARENT)); // Check parent didn't get added mistakenly
+    
+    // Check reciprocal relationship from child to parent
+    TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, childEntity1));
+    TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT));
+
+    // Add a second relationship from parent to another child
+    result = CE_Entity_AddRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, CE_RELATIONSHIP_PARENT, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Check all relationships from parent
+    TEST_ASSERT_EQUAL_UINT32(2, CE_Entity_GetRelationshipCount(&context, parentEntity));
+    TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD));
+    TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, childEntity1));
+    TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT));
+    TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, childEntity2));
+    TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT));
+
+    // Remove second relationship
+    result = CE_Entity_RemoveRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, CE_RELATIONSHIP_PARENT, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, parentEntity));
+    TEST_ASSERT_EQUAL_UINT32(0, CE_Entity_GetRelationshipCount(&context, childEntity2));
+    TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, childEntity1));
+    TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD)); // Still has one child
+    TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT)); // Still has parent
+    TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT)); // No longer has parent
+
+    // Now try again and it should fail
+    result = CE_Entity_RemoveRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, CE_RELATIONSHIP_PARENT, &errorCode);
+    TEST_ASSERT_EQUAL_UINT32(CE_ERROR_CODE_ENTITY_DOES_NOT_HAVE_RELATIONSHIP, errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR, result);
+
+    // Nothing should have changed
+    TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, parentEntity));
+    TEST_ASSERT_EQUAL_UINT32(0, CE_Entity_GetRelationshipCount(&context, childEntity2));
+    TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, childEntity1));
+    TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD)); // Still has one child
+    TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT)); // Still has parent
+    TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT)); // No longer has parent
+
+    // Remove first relationship
+    result = CE_Entity_RemoveRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity1, CE_RELATIONSHIP_PARENT, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Verify all relationships removed
+    TEST_ASSERT_EQUAL_UINT32(0, CE_Entity_GetRelationshipCount(&context, parentEntity));
+    TEST_ASSERT_EQUAL_UINT32(0, CE_Entity_GetRelationshipCount(&context, childEntity2));
+    TEST_ASSERT_EQUAL_UINT32(0, CE_Entity_GetRelationshipCount(&context, childEntity1));
+    TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD)); // No longer has children
+    TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT)); // No longer has parent
+    TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT)); // No longer has parent
+}
+
 int main(void) {
     UNITY_BEGIN();
-    RUN_TEST(test_ECSContextSetupTest);
-    RUN_TEST(test_CEIdHelpersTest);
-    RUN_TEST(test_ComponentStorageTest);
-    RUN_TEST(test_CE_Bitset_InitTest);
-    RUN_TEST(test_CE_Bitset_SetBitTest);
-    RUN_TEST(test_CE_Bitset_ClearBitTest);
-    RUN_TEST(test_CE_Bitset_ToggleBitTest);
-    RUN_TEST(test_CE_Bitset_IsBitSetTest);
-    RUN_TEST(test_CE_Bitset_ByteBoundariesTest);
-    RUN_TEST(test_CE_Bitset_AllBitsTest);
-    RUN_TEST(test_CE_EntityConstructionTest);
-    RUN_TEST(test_EntityComponentCreationTest);
-    RUN_TEST(test_EntityComponentDeletionTest);
-    RUN_TEST(test_EntityDeletionTest);
-    RUN_TEST(test_EntityMultipleComponents);
+    RUN_TEST(test_ECS_ContextSetup);
+    RUN_TEST(test_ECS_ComponentStorage);
+    RUN_TEST(test_ECS_Relationships);
+    
+    RUN_TEST(test_Entity_ComponentCreation);
+    RUN_TEST(test_Entity_ComponentDeletion);
+    RUN_TEST(test_Entity_Deletion);
+    RUN_TEST(test_Entity_MultipleComponents);
+
+    RUN_TEST(test_CE_Id_Helpers);
+
+    RUN_TEST(test_CE_Bitset_Init);
+    RUN_TEST(test_CE_Bitset_SetBit);
+    RUN_TEST(test_CE_Bitset_ClearBit);
+    RUN_TEST(test_CE_Bitset_ToggleBit);
+    RUN_TEST(test_CE_Bitset_IsBitSet);
+    RUN_TEST(test_CE_Bitset_ByteBoundaries);
+    RUN_TEST(test_CE_Bitset_AllBits);
+    RUN_TEST(test_CE_EntityConstruction);
+        
     return UNITY_END();
 }

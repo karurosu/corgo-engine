@@ -103,3 +103,14 @@ bool CE_Entity_HasComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN C
     return CE_Bitset_isBitSet(&entityData->m_entityComponentBitset, componentType);
 }
 
+bool CE_Entity_HasRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType)
+{
+    CE_Result result;
+    CE_ECS_EntityData* entityData;
+    result = CE_ECS_MainStorage_getEntityData(&context->m_storage, entity, &entityData, NULL);
+    if (entityData == NULL || result != CE_OK) {
+        return 0;
+    }
+    return CE_Bitset_isBitSet(&entityData->m_entityRelationshipBitset, relationshipType);
+}
+
