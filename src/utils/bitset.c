@@ -60,3 +60,18 @@ CE_Result CE_Bitset_clear(INOUT CE_Bitset* bitset)
     }
     return CE_OK;
 }
+
+bool CE_Bitset_hasAll(IN const CE_Bitset* a, IN const CE_Bitset* b)
+{
+    if (a->m_size != b->m_size) {
+        return false;
+    }
+
+    for (size_t i = 0; i < CE_BITSET_ARRAY_SIZE; i++) {
+        if ((a->m_bits[i] & b->m_bits[i]) != b->m_bits[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
