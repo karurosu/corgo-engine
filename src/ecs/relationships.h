@@ -7,6 +7,8 @@
 #ifndef CORGO_ECS_RELATIONSHIPS_H
 #define CORGO_ECS_RELATIONSHIPS_H
 
+#include "types.h"
+
 //// Build relationship type list
 // Core ECS relationships
 #include "core/core_relationships.h"
@@ -37,5 +39,8 @@ typedef enum CE_RELATIONSHIP_TYPES_ENUM {
 #undef X
 	CE_RELATIONSHIP_TYPES_COUNT //Invalid system count
 } CE_RELATIONSHIP_TYPES;
+
+//// Debug helpers
+const char* CE_ECS_GetRelationshipTypeNameDebugStr(IN CE_TypeId typeId);
 
 #endif

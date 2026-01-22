@@ -54,4 +54,7 @@ _Static_assert(CE_SYSTEM_TYPES_COUNT <= CE_MAX_SYSTEM_TYPES, "Too many system ty
 #endif
 #undef X
 
+//// Debug helpers
+const char* CE_ECS_GetSystemTypeNameDebugStr(IN CE_TypeId typeId);
+
 #endif // CORGO_ECS_SYSTEMS_H

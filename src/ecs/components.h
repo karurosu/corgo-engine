@@ -54,4 +54,7 @@ _Static_assert(CE_COMPONENT_TYPES_COUNT <= CE_MAX_COMPONENT_TYPES, "Too many com
 #endif
 #undef X
 
-#endif
+//// Debug helpers
+const char* CE_ECS_GetComponentTypeNameDebugStr(IN CE_TypeId typeId);
+
+#endif // CORGO_ECS_COMPONENTS_H

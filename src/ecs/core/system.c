@@ -38,3 +38,21 @@ void name##_description(OUT CE_ECS_SystemStaticData *data) \
 #undef X
 
 #undef REQUIRE_COMPONENT
+
+const char* CE_ECS_GetSystemTypeNameDebugStr(IN CE_TypeId typeId)
+{
+#ifdef CE_DEBUG_BUILD
+    switch (typeId) {
+#define X(name, run_order, run_phase, run_frequency, ...) case name: return #name;
+        CE_SYSTEM_DESC_CORE(X)
+        CE_SYSTEM_DESC_ENGINE(X)
+#ifndef CE_CORE_TEST_MODE
+        CE_SYSTEM_DESC_GAME(X)
+#endif
+    #undef X
+        default: return "InvalidSystemType";
+    }
+#else
+    return "NotInDebugBuild";
+#endif
+}
