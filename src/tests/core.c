@@ -490,7 +490,7 @@ static void test_CE_EntityConstruction(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_UINT32(CE_ID_ENTITY_REFERENCE_KIND, CE_Id_getKind(entityId));
     TEST_ASSERT_EQUAL_UINT32(0, CE_Id_getGeneration(entityId));
-
+    TEST_ASSERT_EQUAL_size_t(1, cc_size(&context.m_storage.m_entityStorage.m_knownEntities));
     TEST_ASSERT_EQUAL_size_t(1, context.m_storage.m_entityStorage.m_count);
     
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_getEntityData(&context.m_storage, entityId, &entityData, &errorCode));
@@ -518,11 +518,15 @@ static void test_CE_EntityConstruction(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_ECS_MainStorage_getEntityData(&context.m_storage, entityId, &entityData, &errorCode));
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_ENTITY_NOT_FOUND, errorCode);
 
+    TEST_ASSERT_EQUAL_size_t(0, cc_size(&context.m_storage.m_entityStorage.m_knownEntities));
+
     // Use up all entity IDs
     for (CE_Id i = 0; i < CE_MAX_ENTITIES; i++) {
         TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &entityId, &errorCode));
         TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     }
+
+    TEST_ASSERT_EQUAL_size_t(CE_MAX_ENTITIES, cc_size(&context.m_storage.m_entityStorage.m_knownEntities));
 
     // Attempt to create one more entity should fail
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_ECS_CreateEntity(&context, &entityId, &errorCode));

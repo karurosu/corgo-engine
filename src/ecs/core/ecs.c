@@ -7,6 +7,7 @@
 //
 
 #include "../ecs.h"
+#include "ecs_internal.h"
 #include "engine/core/platform.h"
 
 CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *errorCode)
@@ -89,6 +90,7 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
     }
 
     // Initialize runtime data
+    // Reserve memory
     for (uint32_t order = 0; order < CE_ECS_SYSTEM_RUN_ORDER_COUNT; order++) {
         for (uint32_t freq = 0; freq < CE_ECS_SYSTEM_RUN_FREQUENCY_COUNT; freq++) {
             for (uint32_t phase = 0; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++) {
@@ -102,6 +104,7 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
         }
     }
 
+    // Populate cached system lists
     for (CE_TypeId sysType = 0; sysType < CE_SYSTEM_TYPES_COUNT; sysType++) {
         const CE_ECS_SystemStaticData* sysData = &context->m_systemDefinitions[sysType];
         if (sysData->m_isValid) {
@@ -112,6 +115,10 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
             }
         }
     }
+
+    // Initialize runtime data counters
+    context->m_systemRuntimeData.m_timeSinceLastRun = 0.0f;
+    context->m_systemRuntimeData.m_frameCounter = 0;
 
     CE_Debug("ECS context initialized successfully");
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
@@ -131,7 +138,53 @@ CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* e
 
 CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode)
 {
-    // First tick systems that run every second
+    CE_Result result;
+    context->m_systemRuntimeData.m_timeSinceLastRun += deltaTime;
+    context->m_systemRuntimeData.m_frameCounter++;
+
+    const bool runOncePerSecond = context->m_systemRuntimeData.m_timeSinceLastRun >= 1.0f;
+
+    for (int phase = CE_ECS_SYSTEM_RUN_PHASE_EARLY; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++)
+    {
+        // Display
+        result = CE_ECS_RunSystems_AutoOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode);
+        if (result != CE_OK) {
+            return CE_ERROR;
+        }
+        result = CE_ECS_RunSystems_SceneOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode);
+        if (result != CE_OK) {
+            return CE_ERROR;
+        }
+        
+        // Half Display
+        if (context->m_systemRuntimeData.m_frameCounter % 2 == 0) {
+            result = CE_ECS_RunSystems_AutoOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY, errorCode);
+            if (result != CE_OK) {
+                return CE_ERROR;
+            }
+            result = CE_ECS_RunSystems_SceneOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY, errorCode);
+            if (result != CE_OK) {
+                return CE_ERROR;
+            }
+        }
+
+        // Once Per Second
+        if (runOncePerSecond)
+        {
+            result = CE_ECS_RunSystems_AutoOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_ONCE_PER_SECOND, errorCode);
+            if (result != CE_OK) {
+                return CE_ERROR;
+            }
+            result = CE_ECS_RunSystems_SceneOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_ONCE_PER_SECOND, errorCode);
+            if (result != CE_OK) {
+                return CE_ERROR;
+            }
+        }
+    }
+
+    if (runOncePerSecond) {
+        context->m_systemRuntimeData.m_timeSinceLastRun = 0.0f;
+    }
 
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;

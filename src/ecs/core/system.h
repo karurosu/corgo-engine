@@ -17,8 +17,8 @@ typedef enum CE_ECS_SYSTEM_RUN_ORDER {
 } CE_ECS_SYSTEM_RUN_ORDER;
 
 typedef enum CE_ECS_SYSTEM_RUN_PHASE {
-    CE_ECS_SYSTEM_RUN_PHASE_DEFAULT = 0,
-    CE_ECS_SYSTEM_RUN_PHASE_EARLY = 1,
+    CE_ECS_SYSTEM_RUN_PHASE_EARLY = 0,
+    CE_ECS_SYSTEM_RUN_PHASE_DEFAULT = 1,
     CE_ECS_SYSTEM_RUN_PHASE_LATE = 2,
     CE_ECS_SYSTEM_RUN_PHASE_COUNT = 3,
 } CE_ECS_SYSTEM_RUN_PHASE;
@@ -59,6 +59,8 @@ typedef struct CE_ECS_System_CacheList_Frequency {
 // Runtime data container for all system information
 typedef struct CE_ECS_SystemRuntimeData {
     CE_ECS_System_CacheList_Frequency m_systemsByRunOrder[CE_ECS_SYSTEM_RUN_ORDER_COUNT]; // Cached systems per run order
+    float m_timeSinceLastRun; // Time accumulator for systems that run once per second
+    uint32_t m_frameCounter; // Frame counter to help with frequency calculations
 } CE_ECS_SystemRuntimeData;
 
 // Generate the systems declarations

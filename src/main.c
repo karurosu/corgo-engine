@@ -49,9 +49,9 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 		pd->system->resetElapsedTime();
 		
 		CE_Debug("Creating ECS Context");
-		CE_ERROR_CODE errorCode;
+		CE_ERROR_CODE errorCode;														
 		ecsContext = CE_realloc(NULL, sizeof(CE_ECS_Context));
-		CE_Debug("ECS Context allocated at %p", ecsContext);
+		CE_Debug("ECS Context allocated at %p with size %u bytes", ecsContext, sizeof(CE_ECS_Context));
 
 		if (ecsContext == NULL) {
 			CE_Error("Failed to allocate memory for ECS context");

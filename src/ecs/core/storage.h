@@ -40,6 +40,7 @@ typedef struct CE_ECS_EntityData {
 typedef struct CE_ECS_EntityStorage {
     size_t m_count;
     CE_ECS_EntityData m_entityDataArray[CE_MAX_ENTITIES];
+    CE_Id_Set m_knownEntities;
 } CE_ECS_EntityStorage;
 
 // Main storage structure

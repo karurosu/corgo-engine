@@ -37,7 +37,7 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
             return CE_ERROR;
         }
 
-        CE_Debug("Component storage allocated at %p for type %d", storageEntry, x);
+        CE_Debug("Component storage allocated at %p for type %d of size %u bytes", storageEntry, x, sizeof(CE_ECS_ComponentStorage));
 
         storageEntry->m_typeId = (CE_TypeId)x;
         storageEntry->m_capacity = initialCapacity;
@@ -62,7 +62,7 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
             return CE_ERROR;
         }
 
-        CE_Debug("Component data pool allocated at %p for type %d", storageEntry->m_componentDataPool, x);
+        CE_Debug("Component data pool allocated at %p for type %d of size %u bytes", storageEntry->m_componentDataPool, x, initialCapacity * componentSize);
 
         // Initialize component headers
         CE_ECS_ComponentStorageHeader header = { .m_isValid = false };
@@ -77,6 +77,7 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
         storage->m_componentTypeStorage[x] = storageEntry;
     }
 
+    // Initialize entity storage
     for (int i=0; i < CE_MAX_ENTITIES; i++) {
         storage->m_entityStorage.m_entityDataArray[i].m_isValid = false;
         storage->m_entityStorage.m_entityDataArray[i].m_entityId = CE_INVALID_ID;
@@ -85,6 +86,12 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
         
         cc_init(&storage->m_entityStorage.m_entityDataArray[i].m_components);
         cc_init(&storage->m_entityStorage.m_entityDataArray[i].m_relationships);
+    }
+
+    cc_init(&storage->m_entityStorage.m_knownEntities);
+    if (!cc_reserve(&storage->m_entityStorage.m_knownEntities, CE_MAX_ENTITIES/4)) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
+        return CE_ERROR;
     }
 
     storage->m_initialized = true;
@@ -125,6 +132,7 @@ CE_Result CE_ECS_MainStorage_cleanup(OUT CE_ECS_MainStorage* storage, IN const C
             cc_cleanup(&storage->m_entityStorage.m_entityDataArray[i].m_relationships);
         }
 
+        cc_cleanup(&storage->m_entityStorage.m_knownEntities);
         storage->m_initialized = false;
     }
 
@@ -338,6 +346,11 @@ CE_Result CE_ECS_MainStorage_createEntity(INOUT CE_ECS_MainStorage* storage, OUT
         return CE_ERROR;
     }
 
+    if (cc_insert(&storage->m_entityStorage.m_knownEntities, newId) == NULL) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
+        return CE_ERROR;
+    }
+
     storage->m_entityStorage.m_count++;
     *id = entityData->m_entityId;
 
@@ -377,6 +390,8 @@ CE_Result CE_ECS_MainStorage_destroyEntity(INOUT CE_ECS_MainStorage* storage, IN
     CE_Bitset_clear(&entityData->m_entityRelationshipBitset);
     cc_clear(&entityData->m_components);
     cc_clear(&entityData->m_relationships);
+
+    cc_erase(&storage->m_entityStorage.m_knownEntities, id);
 
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
