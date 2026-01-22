@@ -9,6 +9,7 @@
 
 #include "id.h"
 #include "storage.h"
+#include "context.h"
 #include "engine/core/platform.h"
 
 CE_Result CE_ECS_CreateEntity(INOUT CE_ECS_Context* context, OUT CE_Id* outId, OUT_OPT CE_ERROR_CODE* errorCode)

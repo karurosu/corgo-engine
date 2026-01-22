@@ -13,7 +13,6 @@
 #include "../systems.h"
 
 // Component storage structures
-
 // Component header is used to track metadata for each component instance in storage
 typedef struct CE_ECS_ComponentStorageHeader {
     bool m_isValid;
@@ -50,15 +49,6 @@ typedef struct CE_ECS_MainStorage {
     CE_ECS_EntityStorage m_entityStorage;
 } CE_ECS_MainStorage;
 
-// Main ECS Context
-struct CE_ECS_Context {
-    // Static component definitions
-    CE_ECS_ComponentStaticData m_componentDefinitions[CE_COMPONENT_TYPES_COUNT];
-    CE_ECS_SystemStaticData m_systemDefinitions[CE_SYSTEM_TYPES_COUNT];
-    
-    // Main storage for ECS entities and components
-    CE_ECS_MainStorage m_storage;
-};
 
 // Initialization and cleanup functions
 CE_Result CE_ECS_MainStorage_init(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_Context *context, OUT_OPT CE_ERROR_CODE* errorCode);

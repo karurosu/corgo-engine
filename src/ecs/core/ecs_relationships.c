@@ -9,6 +9,7 @@
 
 #include "id.h"
 #include "storage.h"
+#include "context.h"
 #include "engine/core/platform.h"
 
 CE_Result CE_Entity_AddRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, IN CE_Id targetEntity, IN CE_TypeId reciprocalRelationshipType, OUT_OPT CE_ERROR_CODE* errorCode)

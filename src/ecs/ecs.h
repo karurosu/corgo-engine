@@ -15,6 +15,7 @@
 #include "systems.h"
 #include "relationships.h"
 #include "core/storage.h"
+#include "core/context.h"
 
 ////////////////////////////////////
 /// Main ECS Functions

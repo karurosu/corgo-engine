@@ -11,6 +11,9 @@
 
 CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *errorCode)
 {
+    // temp variable to count how many systems are registered per filter
+    uint8_t systemCount[CE_ECS_SYSTEM_RUN_ORDER_COUNT][CE_ECS_SYSTEM_RUN_FREQUENCY_COUNT][CE_ECS_SYSTEM_RUN_PHASE_COUNT] = {0};
+    
     // Clear all component definitions
     for (uint32_t i = 0; i < CE_COMPONENT_TYPES_COUNT; i++) {
         context->m_componentDefinitions[i] = (CE_ECS_ComponentStaticData){ 
@@ -57,7 +60,9 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
         };
     }
 
-#define X(name, run_order, run_phase, run_frequency, ...) name##_description(&context->m_systemDefinitions[name]);
+#define X(name, run_order, run_phase, run_frequency, ...) \
+    name##_description(&context->m_systemDefinitions[name]);\
+    systemCount[run_order][run_frequency][run_phase]++;
     CE_SYSTEM_DESC_CORE(X)
     CE_SYSTEM_DESC_ENGINE(X)
     #ifndef CE_CORE_TEST_MODE
@@ -83,6 +88,31 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
         return CE_ERROR;
     }
 
+    // Initialize runtime data
+    for (uint32_t order = 0; order < CE_ECS_SYSTEM_RUN_ORDER_COUNT; order++) {
+        for (uint32_t freq = 0; freq < CE_ECS_SYSTEM_RUN_FREQUENCY_COUNT; freq++) {
+            for (uint32_t phase = 0; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++) {
+                CE_ECS_System_CacheList* cacheList = &context->m_systemRuntimeData.m_systemsByRunOrder[order].m_frequency[freq].m_phase[phase];
+                cc_init(&cacheList->m_systems);
+                if (!cc_reserve(&cacheList->m_systems, systemCount[order][freq][phase])) {
+                    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
+                    return CE_ERROR;
+                }
+            }
+        }
+    }
+
+    for (CE_TypeId sysType = 0; sysType < CE_SYSTEM_TYPES_COUNT; sysType++) {
+        const CE_ECS_SystemStaticData* sysData = &context->m_systemDefinitions[sysType];
+        if (sysData->m_isValid) {
+            CE_ECS_System_CacheList* cacheList = &context->m_systemRuntimeData.m_systemsByRunOrder[sysData->m_runOrder].m_frequency[sysData->m_runFrequency].m_phase[sysData->m_runPhase];
+            if (cc_push(&cacheList->m_systems, sysType) == NULL) {
+                CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
+                return CE_ERROR;
+            }
+        }
+    }
+
     CE_Debug("ECS context initialized successfully");
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
@@ -101,7 +131,8 @@ CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* e
 
 CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode)
 {
-    // TODO
+    // First tick systems that run every second
+
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
 }

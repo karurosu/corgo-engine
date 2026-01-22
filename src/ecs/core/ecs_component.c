@@ -9,6 +9,7 @@
 
 #include "id.h"
 #include "storage.h"
+#include "context.h"
 #include "engine/core/platform.h"
 
 CE_Result CE_Entity_AddComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, CE_TypeId componentType, OUT CE_Id* componentId, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)

@@ -44,11 +44,21 @@ void test_ECS_ContextSetup(void) {
     TEST_ASSERT_TRUE(debugSysDesc->m_isValid);
     TEST_ASSERT_EQUAL_UINT8(CE_CORE_DEBUG_SYSTEM, debugSysDesc->m_systemId);
     TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_ORDER_AUTO, debugSysDesc->m_runOrder);
-    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_PHASE_LAST, debugSysDesc->m_runPhase);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_PHASE_LATE, debugSysDesc->m_runPhase);
     TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_FREQUENCY_ONCE_PER_SECOND, debugSysDesc->m_runFrequency);
     TEST_ASSERT_NOT_NULL(debugSysDesc->m_runFunction);
     TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&debugSysDesc->m_requiredComponentBitset, CE_CORE_DEBUG_COMPONENT));
     
+    // Verify system is cached correctly
+    CE_ECS_System_CacheList* cacheList = &context.m_systemRuntimeData.m_systemsByRunOrder[debugSysDesc->m_runOrder].m_frequency[debugSysDesc->m_runFrequency].m_phase[debugSysDesc->m_runPhase];
+    TEST_ASSERT_GREATER_OR_EQUAL_UINT32(1, cc_size(&cacheList->m_systems));
+    bool found = false;
+    cc_for_each(&cacheList->m_systems, sysTypeIdPtr) {
+        if (*sysTypeIdPtr == CE_CORE_DEBUG_SYSTEM) {
+            found = true;
+            break;
+        }
+    }
 }
 
 static void test_CE_Id_Helpers(void) {

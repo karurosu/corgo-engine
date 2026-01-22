@@ -59,6 +59,7 @@ typedef enum CE_IdKind {
 // Container types
 #define CE_Id_Vector cc_vec(CE_Id)
 #define CE_Id_Set cc_set(CE_Id)
+#define CE_TypeId_Vector cc_vec(CE_TypeId)
 
 //// Component types
 
