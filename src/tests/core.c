@@ -24,37 +24,98 @@ void tearDown(void) {
 
 
 void test_ECS_ContextSetup(void) {
+    CE_ECS_SystemStaticData* sysDesc;
+    CE_ECS_System_CacheList* cacheList;
+    bool found = false;
+
     // Verify we have at least 1 component type (CE_CORE_DEBUG_COMPONENT)
     TEST_ASSERT_GREATER_OR_EQUAL_UINT8(1, CE_COMPONENT_TYPES_COUNT);
     
     // Verify the debug component descriptor is valid
-    CE_ECS_ComponentStaticData* debugDesc = &context.m_componentDefinitions[CE_CORE_DEBUG_COMPONENT];
-    TEST_ASSERT_TRUE(debugDesc->m_isValid);
-    TEST_ASSERT_EQUAL_UINT8(CE_CORE_DEBUG_COMPONENT, debugDesc->m_type);
-    TEST_ASSERT_EQUAL_UINT32(0, debugDesc->m_uid);
-    TEST_ASSERT_EQUAL_size_t(sizeof(CE_Core_DebugComponent), debugDesc->m_storageSizeOf);
+    CE_ECS_ComponentStaticData  *compDesc = &context.m_componentDefinitions[CE_CORE_DEBUG_COMPONENT];
+    TEST_ASSERT_TRUE(compDesc->m_isValid);
+    TEST_ASSERT_EQUAL_UINT8(CE_CORE_DEBUG_COMPONENT, compDesc->m_type);
+    TEST_ASSERT_EQUAL_UINT32(0, compDesc->m_uid);
+    TEST_ASSERT_EQUAL_size_t(sizeof(CE_Core_DebugComponent), compDesc->m_storageSizeOf);
     TEST_ASSERT_EQUAL_size_t(sizeof(CE_Core_DebugComponent), sizeof(CE_CORE_DEBUG_COMPONENT_StorageType));
-    TEST_ASSERT_EQUAL_size_t(CE_DEFAULT_COMPONENT_CAPACITY, debugDesc->m_initialCapacity);
+    TEST_ASSERT_EQUAL_size_t(CE_DEFAULT_COMPONENT_CAPACITY, compDesc->m_initialCapacity);
 
-    // Verify we have at least 1 system type (CE_CORE_DEBUG_SYSTEM)
-    TEST_ASSERT_GREATER_OR_EQUAL_UINT8(1, CE_SYSTEM_TYPES_COUNT);
+    // Verify we have at least 4 system types (1 debug + 3 test systems)
+    TEST_ASSERT_GREATER_OR_EQUAL_UINT8(4, CE_SYSTEM_TYPES_COUNT);
 
     // Verify the debug system descriptor is valid
-    CE_ECS_SystemStaticData* debugSysDesc = &context.m_systemDefinitions[CE_CORE_DEBUG_SYSTEM];
-    TEST_ASSERT_TRUE(debugSysDesc->m_isValid);
-    TEST_ASSERT_EQUAL_UINT8(CE_CORE_DEBUG_SYSTEM, debugSysDesc->m_systemId);
-    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_ORDER_AUTO, debugSysDesc->m_runOrder);
-    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_PHASE_LATE, debugSysDesc->m_runPhase);
-    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_FREQUENCY_ONCE_PER_SECOND, debugSysDesc->m_runFrequency);
-    TEST_ASSERT_NOT_NULL(debugSysDesc->m_runFunction);
-    TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&debugSysDesc->m_requiredComponentBitset, CE_CORE_DEBUG_COMPONENT));
-    
-    // Verify system is cached correctly
-    CE_ECS_System_CacheList* cacheList = &context.m_systemRuntimeData.m_systemsByRunOrder[debugSysDesc->m_runOrder].m_frequency[debugSysDesc->m_runFrequency].m_phase[debugSysDesc->m_runPhase];
+    sysDesc = &context.m_systemDefinitions[CE_CORE_DEBUG_SYSTEM];
+    TEST_ASSERT_TRUE(sysDesc->m_isValid);
+    TEST_ASSERT_EQUAL_UINT8(CE_CORE_DEBUG_SYSTEM, sysDesc->m_systemId);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_ORDER_AUTO, sysDesc->m_runOrder);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_PHASE_LATE, sysDesc->m_runPhase);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY, sysDesc->m_runFrequency);
+    TEST_ASSERT_NOT_NULL(sysDesc->m_runFunction);
+    TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&sysDesc->m_requiredComponentBitset, CE_CORE_DEBUG_COMPONENT));
+
+    cacheList = &context.m_systemRuntimeData.m_systemsByRunOrder[sysDesc->m_runOrder].m_frequency[sysDesc->m_runFrequency].m_phase[sysDesc->m_runPhase];
     TEST_ASSERT_GREATER_OR_EQUAL_UINT32(1, cc_size(&cacheList->m_systems));
-    bool found = false;
+    found = false;
     cc_for_each(&cacheList->m_systems, sysTypeIdPtr) {
-        if (*sysTypeIdPtr == CE_CORE_DEBUG_SYSTEM) {
+        if (*sysTypeIdPtr == sysDesc->m_systemId) {
+            found = true;
+            break;
+        }
+    }
+
+    // Verify test systems
+    sysDesc = &context.m_systemDefinitions[CE_CORE_TEST_SYSTEM_DISPLAY];
+    TEST_ASSERT_TRUE(sysDesc->m_isValid);
+    TEST_ASSERT_EQUAL_UINT8(CE_CORE_TEST_SYSTEM_DISPLAY, sysDesc->m_systemId);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_ORDER_AUTO, sysDesc->m_runOrder);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_PHASE_DEFAULT, sysDesc->m_runPhase);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, sysDesc->m_runFrequency);
+    TEST_ASSERT_NOT_NULL(sysDesc->m_runFunction);
+    TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&sysDesc->m_requiredComponentBitset, CE_CORE_DEBUG_COMPONENT));
+
+    cacheList = &context.m_systemRuntimeData.m_systemsByRunOrder[sysDesc->m_runOrder].m_frequency[sysDesc->m_runFrequency].m_phase[sysDesc->m_runPhase];
+    TEST_ASSERT_GREATER_OR_EQUAL_UINT32(1, cc_size(&cacheList->m_systems));
+    found = false;
+    cc_for_each(&cacheList->m_systems, sysTypeIdPtr) {
+        if (*sysTypeIdPtr == sysDesc->m_systemId) {
+            found = true;
+            break;
+        }
+    }
+
+    sysDesc = &context.m_systemDefinitions[CE_CORE_TEST_SYSTEM_HALF_DISPLAY];
+    TEST_ASSERT_TRUE(sysDesc->m_isValid);
+    TEST_ASSERT_EQUAL_UINT8(CE_CORE_TEST_SYSTEM_HALF_DISPLAY, sysDesc->m_systemId);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_ORDER_AUTO, sysDesc->m_runOrder);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_PHASE_EARLY, sysDesc->m_runPhase);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY, sysDesc->m_runFrequency);
+    TEST_ASSERT_NOT_NULL(sysDesc->m_runFunction);
+    TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&sysDesc->m_requiredComponentBitset, CE_CORE_DEBUG_COMPONENT));
+
+    cacheList = &context.m_systemRuntimeData.m_systemsByRunOrder[sysDesc->m_runOrder].m_frequency[sysDesc->m_runFrequency].m_phase[sysDesc->m_runPhase];
+    TEST_ASSERT_GREATER_OR_EQUAL_UINT32(1, cc_size(&cacheList->m_systems));
+    found = false;
+    cc_for_each(&cacheList->m_systems, sysTypeIdPtr) {
+        if (*sysTypeIdPtr == sysDesc->m_systemId) {
+            found = true;
+            break;
+        }
+    }
+
+    sysDesc = &context.m_systemDefinitions[CE_CORE_TEST_SYSTEM_SECOND];
+    TEST_ASSERT_TRUE(sysDesc->m_isValid);
+    TEST_ASSERT_EQUAL_UINT8(CE_CORE_TEST_SYSTEM_SECOND, sysDesc->m_systemId);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_ORDER_AUTO, sysDesc->m_runOrder);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_PHASE_LATE, sysDesc->m_runPhase);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_FREQUENCY_ONCE_PER_SECOND, sysDesc->m_runFrequency);
+    TEST_ASSERT_NOT_NULL(sysDesc->m_runFunction);
+    TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&sysDesc->m_requiredComponentBitset, CE_CORE_DEBUG_COMPONENT));
+
+    cacheList = &context.m_systemRuntimeData.m_systemsByRunOrder[sysDesc->m_runOrder].m_frequency[sysDesc->m_runFrequency].m_phase[sysDesc->m_runPhase];
+    TEST_ASSERT_GREATER_OR_EQUAL_UINT32(1, cc_size(&cacheList->m_systems));
+    found = false;
+    cc_for_each(&cacheList->m_systems, sysTypeIdPtr) {
+        if (*sysTypeIdPtr == sysDesc->m_systemId) {
             found = true;
             break;
         }
@@ -586,7 +647,7 @@ void test_Entity_ComponentCreation(void) {
     TEST_ASSERT_NOT_NULL(componentData);
 
     componentData->m_enabled = true;
-    componentData->m_debugValue = 42;
+    componentData->m_testValue = 42;
 
     count = CE_Entity_GetComponentCount(&context, entity_1);
     TEST_ASSERT_EQUAL_UINT32(1, count);
@@ -600,7 +661,7 @@ void test_Entity_ComponentCreation(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_NOT_NULL(componentData);
     TEST_ASSERT_TRUE(componentData->m_enabled);
-    TEST_ASSERT_EQUAL_INT(42, componentData->m_debugValue);
+    TEST_ASSERT_EQUAL_INT(42, componentData->m_testValue);
 
     // Add a second component
     result = CE_Entity_AddComponent(&context, entity_1, CE_SPRITE_COMPONENT, &componentId_2, &spriteComponentData, &errorCode);
@@ -618,7 +679,7 @@ void test_Entity_ComponentCreation(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_NOT_NULL(componentData);
     TEST_ASSERT_TRUE(componentData->m_enabled);
-    TEST_ASSERT_EQUAL_INT(42, componentData->m_debugValue);
+    TEST_ASSERT_EQUAL_INT(42, componentData->m_testValue);
 
     // Test second component access using FindFirstComponent
     spriteComponentData = NULL;
@@ -668,9 +729,9 @@ void test_Entity_ComponentDeletion(void) {
 
     // Set some data
     componentData->m_enabled = true;
-    componentData->m_debugValue = 42;
+    componentData->m_testValue = 42;
     componentData_2->m_enabled = true;
-    componentData_2->m_debugValue = 84;
+    componentData_2->m_testValue = 84;
 
     // Delete first component
     result = CE_Entity_RemoveComponent(&context, entity_1, componentId_1, &errorCode);
@@ -700,7 +761,7 @@ void test_Entity_ComponentDeletion(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_NOT_NULL(verifyComponentData);
     TEST_ASSERT_TRUE(verifyComponentData->m_enabled);
-    TEST_ASSERT_EQUAL_INT(84, verifyComponentData->m_debugValue);
+    TEST_ASSERT_EQUAL_INT(84, verifyComponentData->m_testValue);
 
     // Delete second component
     result = CE_Entity_RemoveComponent(&context, entity_2, componentId_2, &errorCode);
@@ -924,17 +985,95 @@ void test_ECS_Relationships(void) {
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT)); // No longer has parent
 }
 
+void test_ECS_tick(void) {
+    CE_ERROR_CODE errorCode = CE_ERROR_CODE_NONE;
+    CE_Result result = CE_ERROR;
+    CE_Id entity_1 = CE_INVALID_ID;
+    CE_Id entity_2 = CE_INVALID_ID;
+    CE_CORE_DEBUG_COMPONENT_StorageType* componentData = NULL;
+
+    // Create entity
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &entity_1, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, entity_1);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Create a second entity
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &entity_2, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, entity_2);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Add a debug component to entity 1
+    CE_Id componentId = CE_INVALID_ID;
+    result = CE_Entity_AddComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT, &componentId, &componentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(componentData);
+
+    // Run immediate tick, should only run display systems for 1 entity
+    result = CE_ECS_Tick(&context, 0.0f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_INT(1, componentData->m_testValue);
+    TEST_ASSERT_TRUE(componentData->m_ticked_display);
+    TEST_ASSERT_FALSE(componentData->m_ticked_half);
+    TEST_ASSERT_FALSE(componentData->m_ticked_second);
+
+    // Reset test variables
+    componentData->m_ticked_display = false;
+    componentData->m_ticked_half = false;
+    componentData->m_ticked_second = false;
+    componentData->m_testValue = 0;
+
+    // Now run with a delta of 0.6, triggering display and half tick systems
+    result = CE_ECS_Tick(&context, 0.6f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_INT(2, componentData->m_testValue);
+    TEST_ASSERT_TRUE(componentData->m_ticked_display);
+    TEST_ASSERT_TRUE(componentData->m_ticked_half);
+    TEST_ASSERT_FALSE(componentData->m_ticked_second);
+
+    // Reset test variables
+    componentData->m_ticked_display = false;
+    componentData->m_ticked_half = false;
+    componentData->m_ticked_second = false;
+    componentData->m_testValue = 0;
+
+    // Tick with a delta of 0.1, triggering only display tick
+    result = CE_ECS_Tick(&context, 0.1f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_INT(1, componentData->m_testValue);
+    TEST_ASSERT_TRUE(componentData->m_ticked_display);
+    TEST_ASSERT_FALSE(componentData->m_ticked_half);
+    TEST_ASSERT_FALSE(componentData->m_ticked_second);
+
+    // Reset test variables
+    componentData->m_ticked_display = false;
+    componentData->m_ticked_half = false;
+    componentData->m_ticked_second = false;
+    componentData->m_testValue = 0;
+
+    // Tick with a delta of 0.4, triggering all ticks
+    result = CE_ECS_Tick(&context, 0.4f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_INT(3, componentData->m_testValue);
+    TEST_ASSERT_TRUE(componentData->m_ticked_display);
+    TEST_ASSERT_TRUE(componentData->m_ticked_half);
+    TEST_ASSERT_TRUE(componentData->m_ticked_second);
+}
+
 int main(void) {
     UNITY_BEGIN();
-    RUN_TEST(test_ECS_ContextSetup);
-    RUN_TEST(test_ECS_ComponentStorage);
-    RUN_TEST(test_ECS_Relationships);
-    
-    RUN_TEST(test_Entity_ComponentCreation);
-    RUN_TEST(test_Entity_ComponentDeletion);
-    RUN_TEST(test_Entity_Deletion);
-    RUN_TEST(test_Entity_MultipleComponents);
-
     RUN_TEST(test_CE_Id_Helpers);
 
     RUN_TEST(test_CE_Bitset_Init);
@@ -945,6 +1084,17 @@ int main(void) {
     RUN_TEST(test_CE_Bitset_ByteBoundaries);
     RUN_TEST(test_CE_Bitset_AllBits);
     RUN_TEST(test_CE_EntityConstruction);
+
+    RUN_TEST(test_ECS_ContextSetup);
+    RUN_TEST(test_ECS_ComponentStorage);
+    RUN_TEST(test_ECS_Relationships);
+    
+    RUN_TEST(test_Entity_ComponentCreation);
+    RUN_TEST(test_Entity_ComponentDeletion);
+    RUN_TEST(test_Entity_Deletion);
+    RUN_TEST(test_Entity_MultipleComponents);
+
+    RUN_TEST(test_ECS_tick);
         
     return UNITY_END();
 }

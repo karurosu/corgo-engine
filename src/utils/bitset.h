@@ -115,6 +115,6 @@ inline size_t CE_Bitset_getSize(IN const CE_Bitset* bitset) {
  * 
  * @return true if all bits match, false otherwise or if sizes differ.
  */
-bool CE_Bitset_hasAll(IN const CE_Bitset* a, IN const CE_Bitset* b);
+bool CE_Bitset_containsBits(IN const CE_Bitset* a, IN const CE_Bitset* b);
 
 #endif // CORGO_UTILS_BITSET_H

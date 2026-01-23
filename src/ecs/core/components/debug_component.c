@@ -9,7 +9,12 @@
 CE_DEFINE_COMPONENT_INIT(CE_CORE_DEBUG_COMPONENT)
 {
     component->m_enabled = false;
-    component->m_debugValue = 0;
+#ifdef CE_CORE_TEST_MODE
+    component->m_testValue = 0;
+    component->m_ticked_display = false;
+    component->m_ticked_half = false;
+    component->m_ticked_second = false;
+#endif
     return CE_OK;
 }
 

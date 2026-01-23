@@ -12,7 +12,12 @@
 
 typedef struct CE_Core_DebugComponent {
     bool m_enabled;
-    uint8_t m_debugValue;
+#ifdef CE_CORE_TEST_MODE
+    uint8_t m_testValue;
+    bool m_ticked_display;
+    bool m_ticked_half;
+    bool m_ticked_second;
+#endif
 } CE_Core_DebugComponent;
 
 #define CE_COMPONENT_DESC_CORE(X) \
