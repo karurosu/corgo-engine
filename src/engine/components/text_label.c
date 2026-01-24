@@ -39,7 +39,7 @@ CE_Result CE_TextLabelComponent_setText(INOUT CE_TextLabelComponent* component, 
         return CE_ERROR;
     }
 
-    if (strcpy_s(component->text, sizeof(component->text), text) != 0) {
+    if (strncpy(component->text, text, sizeof(component->text)) == NULL) {
         return CE_ERROR;
     }
     return CE_OK;
@@ -51,7 +51,7 @@ CE_Result CE_TextLabelComponent_setFont(INOUT CE_TextLabelComponent* component, 
         return CE_ERROR;
     }
 
-    if (strcpy_s(component->font, sizeof(component->font), fontName) != 0) {
+    if (strncpy(component->font, fontName, sizeof(component->font)) == NULL) {
         return CE_ERROR;
     }
 

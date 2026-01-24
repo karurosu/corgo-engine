@@ -49,8 +49,10 @@
  */
 
 #define CE_COMPONENT_DESC_GAME(X) \
-    // X(CE_MY_COMPONENT, <UUID>, CE_MyComponent, <Initial Capacity>) \
+/**
+    X(CE_MY_COMPONENT, <UUID>, CE_MyComponent, <Initial Capacity>) \
 
+**/
 
 
 #endif // CORGO_GAME_COMPONENTS_H

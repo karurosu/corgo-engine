@@ -89,13 +89,13 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 				return -1;
 			}
 
-			result = CE_Entity_AddComponent(ecsContext, entityId, CE_TRANSFORM_COMPONENT, &transformComponentId, &transformComponent, &errorCode);
+			result = CE_Entity_AddComponent(ecsContext, entityId, CE_TRANSFORM_COMPONENT, &transformComponentId, (void**)&transformComponent, &errorCode);
 			if (result != CE_OK) {
 				CE_Error("Failed to add TransformComponent to demo entity: %s", CE_GetErrorMessage(errorCode));
 				return -1;
 			}
 
-			result = CE_Entity_AddComponent(ecsContext, entityId, CE_TEXT_LABEL_COMPONENT, &textLabelComponentId, &textLabelComponent, &errorCode);
+			result = CE_Entity_AddComponent(ecsContext, entityId, CE_TEXT_LABEL_COMPONENT, &textLabelComponentId, (void**)&textLabelComponent, &errorCode);
 			if (result != CE_OK) {
 				CE_Error("Failed to add TextLabelComponent to demo entity: %s", CE_GetErrorMessage(errorCode));
 				return -1;

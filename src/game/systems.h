@@ -34,8 +34,10 @@
  */
 
 #define CE_SYSTEM_DESC_GAME(X) \
-    // X(CE_MY_SYSTEM_NAME, <Run Order>, <Run Phase>, <Run Frequency>, CE_MY_SYSTEM_NAME_DEPENDENCIES) \
+/**
+    X(CE_MY_SYSTEM_NAME, <Run Order>, <Run Phase>, <Run Frequency>, CE_MY_SYSTEM_NAME_DEPENDENCIES) \
 
+**/
 
 
 #endif // CORGO_GAME_SYSTEMS_H

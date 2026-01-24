@@ -24,8 +24,10 @@
  */
 
 #define CE_RELATIONSHIP_DESC_GAME(X) \
-    // X(CE_RELATIONSHIP_NAME) \
+/**
+    X(CE_RELATIONSHIP_NAME) \
 
+**/
 
 
 #endif // CORGO_GAME_RELATIONSHIPS_H

@@ -75,7 +75,7 @@ void name##_description(OUT CE_ECS_SystemStaticData *data);\
 #define REQUIRE_COMPONENT(componentType, varName) \
     componentType##_StorageType* varName = NULL;\
     CE_Id varName##_Id = CE_INVALID_ID;\
-    CE_ECS_GetComponentForSystem(context, entity, componentType, systemDesc, &varName##_Id, &varName, errorCode);\
+    CE_ECS_GetComponentForSystem(context, entity, componentType, systemDesc, &varName##_Id, (void**)&varName, errorCode);\
     if (*errorCode != CE_ERROR_CODE_NONE || varName##_Id == CE_INVALID_ID || varName == NULL) {\
         CE_Error("Entity %u missing required component type" #componentType " for system", entity);\
         return CE_ERROR;\
