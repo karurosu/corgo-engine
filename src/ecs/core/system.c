@@ -15,6 +15,10 @@
 #define REQUIRE_COMPONENT(componentType, varName) \
     CE_Bitset_setBit(&data->m_requiredComponentBitset, componentType);
 
+#undef REQUIRE_RELATIONSHIP
+#define REQUIRE_RELATIONSHIP(relationshipType, varName) \
+    CE_Bitset_setBit(&data->m_requiredRelationshipBitset, relationshipType);
+
 #define CE_GENERATE_SYSTEM_DESCRIPTION_FUNCTION(name, ...) \
 void name##_description(OUT CE_ECS_SystemStaticData *data) \
 {\
@@ -39,6 +43,7 @@ void name##_description(OUT CE_ECS_SystemStaticData *data) \
 #undef X
 
 #undef REQUIRE_COMPONENT
+#undef REQUIRE_RELATIONSHIP
 
 const char* CE_ECS_GetSystemTypeNameDebugStr(IN CE_TypeId typeId)
 {

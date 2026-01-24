@@ -63,7 +63,7 @@ CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* e
  */
 CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode);
 
-// Include the separate headers for each mnodule
+// Include the separate headers for each module
 #include "core/ecs_component.h"
 #include "core/ecs_entity.h"
 #include "core/ecs_relationships.h"
