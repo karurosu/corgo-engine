@@ -2,7 +2,9 @@
 
 A minimalist ECS (Entity Component System) engine for the Panic Playdate handheld console, written in pure C.
 
-**Status**: Early development
+**Status**: Early development see below for details.
+
+I am writing a devblog describing the design and development of the engine, you can read it here: https://medium.com/@mrkaru
 
 ## Requirements
 
