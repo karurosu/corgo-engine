@@ -19,9 +19,11 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
         return CE_ERROR;
     }
 
+    size_t componentStorageSize = 0;
+
     for (int x = 0; x < CE_COMPONENT_TYPES_COUNT; x++) {
         const size_t componentSize = context->m_componentDefinitions[x].m_storageSizeOf;
-        const size_t initialCapacity = context->m_componentDefinitions[x].m_initialCapacity;
+        const uint32_t initialCapacity = context->m_componentDefinitions[x].m_initialCapacity;
 
         // Check component capacity vs bitfield size
         if (initialCapacity > CE_BITSET_MAX_BITS) {
@@ -36,8 +38,6 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
             CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_MAIN_ALLOCATION_FAILED);
             return CE_ERROR;
         }
-
-        CE_Debug("Component storage allocated at %p for type %d of size %u bytes", storageEntry, x, sizeof(CE_ECS_ComponentStorage));
 
         storageEntry->m_typeId = (CE_TypeId)x;
         storageEntry->m_capacity = initialCapacity;
@@ -62,11 +62,12 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
             return CE_ERROR;
         }
 
-        CE_Debug("Component data pool allocated at %p for type %d of size %u bytes", storageEntry->m_componentDataPool, x, initialCapacity * componentSize);
+        CE_Debug("Component data pool allocated at %p for type %s of size %u bytes", storageEntry->m_componentDataPool, CE_ECS_GetComponentTypeNameDebugStr(x), initialCapacity * componentSize);
+        componentStorageSize += initialCapacity * componentSize;
 
         // Initialize component headers
         CE_ECS_ComponentStorageHeader header = { .m_isValid = false };
-        for (int i = 0; i < initialCapacity; i++) {
+        for (uint32_t i = 0; i < initialCapacity; i++) {
             if (cc_push(&storageEntry->m_componentMetadata, header) == NULL)
             {
                 CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_ALLOCATION_FAILED);
@@ -78,7 +79,7 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
     }
 
     // Initialize entity storage
-    for (int i=0; i < CE_MAX_ENTITIES; i++) {
+    for (uint32_t i=0; i < CE_MAX_ENTITIES; i++) {
         storage->m_entityStorage.m_entityDataArray[i].m_isValid = false;
         storage->m_entityStorage.m_entityDataArray[i].m_entityId = CE_INVALID_ID;
         CE_Bitset_init(&storage->m_entityStorage.m_entityDataArray[i].m_entityComponentBitset, CE_COMPONENT_TYPES_COUNT);
@@ -95,6 +96,9 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
     }
 
     storage->m_initialized = true;
+
+    CE_Debug("ECS Main Storage initialized. Total component storage size: %u bytes", componentStorageSize);
+
 	CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
 }

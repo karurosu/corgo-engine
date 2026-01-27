@@ -20,8 +20,8 @@ typedef struct CE_ECS_ComponentStorageHeader {
 
 typedef struct CE_ECS_ComponentStorage {
     CE_TypeId m_typeId;
-    size_t m_capacity;
-    size_t m_count;
+    uint32_t m_capacity;
+    uint32_t m_count;
     void *m_componentDataPool;
     CE_Bitset m_componentIndexBitset; // Bitset to track used indices
     cc_vec(CE_ECS_ComponentStorageHeader) m_componentMetadata; // Metadata for each component instance
@@ -38,7 +38,7 @@ typedef struct CE_ECS_EntityData {
 } CE_ECS_EntityData;
 
 typedef struct CE_ECS_EntityStorage {
-    size_t m_count;
+    uint32_t m_count;
     CE_ECS_EntityData m_entityDataArray[CE_MAX_ENTITIES];
     CE_Id_Set m_knownEntities;
 } CE_ECS_EntityStorage;

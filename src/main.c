@@ -61,7 +61,7 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 		// Set screen properties
 		pd->display->setScale(1);
 #endif
-				
+		
 		CE_Debug("Creating ECS Context");
 		CE_ERROR_CODE errorCode;														
 		ecsContext = CE_realloc(NULL, sizeof(CE_ECS_Context));

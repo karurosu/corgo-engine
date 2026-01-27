@@ -26,7 +26,7 @@ typedef struct CESpriteComponent {
 //// Text Label Component
 typedef struct CETextLabelComponent {
 	char text[256];
-	char font[64];
+	const char *fontName;
 #ifdef CE_BACKEND_PLAYDATE
 	LCDFont *fontPtr;
 #endif

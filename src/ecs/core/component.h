@@ -15,7 +15,7 @@ struct CE_ECS_ComponentStaticData {
     CE_TypeId m_type;
     uint32_t m_uid;
     size_t m_storageSizeOf;
-    size_t m_initialCapacity;
+    uint32_t m_initialCapacity;
 
     // Component methods
     CE_Result (*m_initFunction)(OUT void* component);
@@ -35,7 +35,7 @@ void name##_description(OUT CE_ECS_ComponentStaticData *data);\
 typedef storage name##_StorageType;\
 static const uint32_t name##_UID = c_uid;\
 static const size_t name##_StorageSize = sizeof(storage);\
-static const size_t name##_InitialCapacity = initial_capacity;\
+static const uint32_t name##_InitialCapacity = initial_capacity;\
 CE_Result name##_init_wrapper(OUT void* component);\
 CE_Result name##_cleanup_wrapper(OUT void* component);\
 _Static_assert(initial_capacity <= CE_BITSET_MAX_BITS, #name ": Component initial capacity exceeds bitset max bits, increase CE_BITSET_MAX_BITS or reduce initial capacity.");

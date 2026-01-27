@@ -12,7 +12,7 @@
 CE_DEFINE_COMPONENT_INIT(CE_TEXT_LABEL_COMPONENT)
 {
     component->text[0] = '\0';
-    component->font[0] = '\0';
+    component->fontName = "";
 #ifdef CE_BACKEND_PLAYDATE
     component->fontPtr = NULL;
 #endif
@@ -47,13 +47,11 @@ CE_Result CE_TextLabelComponent_setText(INOUT CE_TextLabelComponent* component, 
 
 CE_Result CE_TextLabelComponent_setFont(INOUT CE_TextLabelComponent* component, IN const char* fontName)
 {
-    if (fontName == NULL || strlen(fontName) >= sizeof(component->font)) {
-        return CE_ERROR;
+    if (strcmp(component->fontName, fontName) == 0) {
+        return CE_OK;
     }
 
-    if (strncpy(component->font, fontName, sizeof(component->font)) == NULL) {
-        return CE_ERROR;
-    }
+    component->fontName = fontName;
 
 #ifdef CE_BACKEND_PLAYDATE
     // Temp code to force loading of font
@@ -64,10 +62,10 @@ CE_Result CE_TextLabelComponent_setFont(INOUT CE_TextLabelComponent* component, 
     }
 
     const char* err;
-    component->fontPtr = CE_GetPlaydateAPI()->graphics->loadFont(component->font, &err);
+    component->fontPtr = CE_GetPlaydateAPI()->graphics->loadFont(component->fontName, &err);
     if (component->fontPtr == NULL)
     {
-        CE_Error("Failed to load font %s for TextLabelComponent: %s", component->font, err);
+        CE_Error("Failed to load font %s for TextLabelComponent: %s", component->fontName, err);
         return CE_ERROR;
     }
 #endif

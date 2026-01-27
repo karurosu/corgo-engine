@@ -120,6 +120,14 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
     context->m_systemRuntimeData.m_timeSinceLastRun = 0.0f;
     context->m_systemRuntimeData.m_frameCounter = 0;
 
+    CE_Debug("ECS context initialized with %u components and %u systems", CE_COMPONENT_TYPES_COUNT, CE_SYSTEM_TYPES_COUNT);
+    CE_Debug("System static data cache size: %u bytes", sizeof(CE_ECS_SystemStaticData) * CE_SYSTEM_TYPES_COUNT);
+    CE_Debug("Component static data cache size: %u bytes", sizeof(CE_ECS_ComponentStaticData) * CE_COMPONENT_TYPES_COUNT);
+    CE_Debug("ECS runtime data size: %u bytes", sizeof(CE_ECS_SystemRuntimeData));
+    CE_Debug("ECS Entity storage size: %u bytes", sizeof(CE_ECS_EntityStorage));
+    CE_Debug("Entity data size: %u bytes", sizeof(CE_ECS_EntityData));
+    CE_Debug("Max entities supported: %u", CE_MAX_ENTITIES);
+
     CE_Debug("ECS context initialized successfully");
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
