@@ -43,13 +43,24 @@ typedef struct CE_ECS_EntityStorage {
     CE_Id_Set m_knownEntities;
 } CE_ECS_EntityStorage;
 
+// Global component storage definitions
+typedef struct CE_ECS_GlobalComponentStorage {
+#define X(name, storage) storage CE_PASTE(m_, CE_GLOBAL_COMPONENT(name));
+	CE_GLOBAL_COMPONENT_DESC_CORE(X)
+	CE_GLOBAL_COMPONENT_DESC_ENGINE(X)
+#ifndef CE_CORE_TEST_MODE
+	CE_GLOBAL_COMPONENT_DESC_GAME(X)
+#endif
+#undef X
+} CE_ECS_GlobalComponentStorage;
+
 // Main storage structure
 typedef struct CE_ECS_MainStorage {
     bool m_initialized;
     CE_ECS_ComponentStorage *m_componentTypeStorage[CE_COMPONENT_TYPES_COUNT]; // Array of component storages indexed by component type
     CE_ECS_EntityStorage m_entityStorage;
+    CE_ECS_GlobalComponentStorage m_globalComponents;
 } CE_ECS_MainStorage;
-
 
 // Initialization and cleanup functions
 CE_Result CE_ECS_MainStorage_init(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_Context *context, OUT_OPT CE_ERROR_CODE* errorCode);

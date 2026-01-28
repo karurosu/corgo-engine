@@ -24,4 +24,17 @@ CE_DEFINE_COMPONENT_CLEANUP(CE_CORE_DEBUG_COMPONENT)
     return CE_OK;
 }
 
+CE_DEFINE_GLOBAL_COMPONENT_INIT(CE_CORE_GLOBAL_DEBUG_COMPONENT)
+{
+    component->m_enabled = false;
+    return CE_OK;
+}
+
+CE_DEFINE_GLOBAL_COMPONENT_CLEANUP(CE_CORE_GLOBAL_DEBUG_COMPONENT)
+{
+    // No dynamic resources to clean up for CE_Core_GlobalDebugComponent
+    return CE_OK;
+}
+
+
 CE_GENERATE_COMPONENT_IMP(CE_CORE_DEBUG_COMPONENT)

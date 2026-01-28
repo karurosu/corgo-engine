@@ -26,18 +26,18 @@ void CE_SetLoggingEnabled(bool enabled);
 
 #ifdef CE_DEBUG_BUILD
     #ifdef CE_BACKEND_PLAYDATE
-        #define CE_Debug(...) CE_GetPlaydateAPI()->system->logToConsole(__VA_ARGS__);
+        #define CE_Debug(...) CE_GetPlaydateAPI()->system->logToConsole(__VA_ARGS__)
     #else
-        #define CE_Debug(...) CE_Printf(__VA_ARGS__);
+        #define CE_Debug(...) CE_Printf(__VA_ARGS__)
     #endif
 #else
     #define CE_Debug(...)
 #endif // CE_DEBUG_BUILD
 
 #ifdef CE_BACKEND_PLAYDATE
-    #define CE_Error(...) CE_GetPlaydateAPI()->system->error(__VA_ARGS__);
+    #define CE_Error(...) CE_GetPlaydateAPI()->system->error(__VA_ARGS__)
 #else
-    #define CE_Error(...) CE_Printf(__VA_ARGS__);
+    #define CE_Error(...) CE_Printf(__VA_ARGS__)
 #endif
 
 

@@ -20,7 +20,17 @@ typedef struct CE_Core_DebugComponent {
 #endif
 } CE_Core_DebugComponent;
 
+typedef struct CE_Core_GlobalDebugComponent {
+    bool m_enabled;
+#ifdef CE_CORE_TEST_MODE
+    uint32_t m_testValue;
+#endif
+} CE_Core_GlobalDebugComponent;
+
 #define CE_COMPONENT_DESC_CORE(X) \
 	X(CE_CORE_DEBUG_COMPONENT, 0, CE_Core_DebugComponent, CE_DEFAULT_COMPONENT_CAPACITY)
+
+#define CE_GLOBAL_COMPONENT_DESC_CORE(X) \
+    X(CE_CORE_GLOBAL_DEBUG_COMPONENT, CE_Core_GlobalDebugComponent)
 
 #endif // CORGO_ECS_CORE_COMPONENTS_H

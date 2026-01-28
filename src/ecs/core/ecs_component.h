@@ -124,6 +124,30 @@ CE_Result CE_Entity_FindAllComponents(INOUT CE_ECS_Context* context, IN CE_Id en
 CE_Result CE_Entity_GetAllComponentsIter(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType, OUT CE_Id_Set **components, OUT_OPT CE_ERROR_CODE* errorCode);
 
 ////////////////////////////////////
+/// Global component access functions
+////////////////////////////////////
+
+/**
+ * @brief Access a global component by name.
+ * Function-like macro, returns the name of the global component data. Must be cast to a pointer of the appropriate type.
+ * 
+ * @param[in,out] context The ECS context.
+ * @param[in] name The name of the global component to access.
+ * @return Pointer to the global component data.
+ */
+#define CE_ECS_AccessGlobalComponent(context, name) &((context)->m_storage.m_globalComponents.CE_PASTE(m_, CE_GLOBAL_COMPONENT(name)))
+
+/**
+ * @brief Access a global component by name and create a pointer of the appropriate type with the specified name
+ * Function-like macro, must be called on its own line as it defines a new pointer variable.
+ * 
+ * @param[in,out] context The ECS context.
+ * @param[in] name The name of the global component to access.
+ * @param[in] varname to store the typed pointer to the global component data.
+ */
+#define CE_ECS_GlobalComponentPtr(context, name, varname) CE_GLOBAL_COMPONENT_DATA(name)* varname = CE_ECS_AccessGlobalComponent(context, name)
+
+////////////////////////////////////
 /// Internal ECS functions, exposed here because user code may need to call them
 /// But regular should not use it directly
 ////////////////////////////////////

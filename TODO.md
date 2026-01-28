@@ -13,3 +13,4 @@ Ideas:
 Future:
 - Support for multiple copies of the same component/relationship
 - Grow component storage dynamically
+- make a better global system runner, may need a better codegen/preprocessor

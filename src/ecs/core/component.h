@@ -64,9 +64,27 @@ void name##_description(OUT CE_ECS_ComponentStaticData *data) \
     data->m_cleanupFunction = name##_cleanup_wrapper; \
 }
 
+// Component data shortcuts
+#define CE_COMPONENT_DATA(name) name##_StorageType
+#define CE_COMPONENT_UID(name) name##_UID
+
 // Component method shortcuts
 #define CE_DEFINE_COMPONENT_INIT(name) CE_Result name##_init(OUT name##_StorageType* component)
 #define CE_DEFINE_COMPONENT_CLEANUP(name) CE_Result name##_cleanup(OUT name##_StorageType* component)
 
+//// Global component macros
+#define CE_GLOBAL_COMPONENT(name) CE_GLOBAL_##name
+#define CE_GLOBAL_COMPONENT_DATA(name) CE_PASTE(CE_GLOBAL_COMPONENT(name), _StorageType)
+#define CE_GLOBAL_COMPONENT_INIT(name) CE_PASTE(CE_GLOBAL_COMPONENT(name), _init)
+#define CE_GLOBAL_COMPONENT_CLEANUP(name) CE_PASTE(CE_GLOBAL_COMPONENT(name), _cleanup)
+
+#define CE_DECLARE_GLOBAL_COMPONENT(name, storage) \
+CE_Result CE_PASTE(CE_GLOBAL_COMPONENT(name), _init)(OUT storage* component); \
+CE_Result CE_PASTE(CE_GLOBAL_COMPONENT(name), _cleanup)(OUT storage* component);\
+typedef storage CE_PASTE(CE_GLOBAL_COMPONENT(name), _StorageType);
+
+// Component method shortcuts
+#define CE_DEFINE_GLOBAL_COMPONENT_INIT(name) CE_Result CE_GLOBAL_COMPONENT_INIT(name)(OUT CE_GLOBAL_COMPONENT_DATA(name)* component)
+#define CE_DEFINE_GLOBAL_COMPONENT_CLEANUP(name) CE_Result CE_GLOBAL_COMPONENT_CLEANUP(name)(OUT CE_GLOBAL_COMPONENT_DATA(name)* component)
 
 #endif // CORGO_ECS_CORE_COMPONENT_H

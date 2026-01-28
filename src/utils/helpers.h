@@ -28,4 +28,8 @@
 #define INOUT_OPT
 #endif
 
+// Pasting helper
+#define CE_PASTE_HELPER(x, y) x##y
+#define CE_PASTE(x, y) CE_PASTE_HELPER(x, y)
+
 #endif // CORGO_UTILS_HELPERS_H

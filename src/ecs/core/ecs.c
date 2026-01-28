@@ -120,7 +120,41 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
     context->m_systemRuntimeData.m_timeSinceLastRun = 0.0f;
     context->m_systemRuntimeData.m_frameCounter = 0;
 
+    // Initialize global components
+    #define X(name, storage) \
+        if (CE_GLOBAL_COMPONENT_INIT(name)(CE_ECS_AccessGlobalComponent(context, name)) != CE_OK) { \
+            CE_Error("Failed to initialize global component: " #name); \
+            return CE_ERROR; \
+        }
+        CE_GLOBAL_COMPONENT_DESC_CORE(X)
+        CE_GLOBAL_COMPONENT_DESC_ENGINE(X)
+        #ifndef CE_CORE_TEST_MODE
+        CE_GLOBAL_COMPONENT_DESC_GAME(X)
+        #endif
+    #undef X 
+
+    #ifdef CE_DEBUG_BUILD
+    #define X(name, storage) CE_Debug("Registered global component: %s (Type: %d)", #name, CE_GLOBAL_COMPONENT(name));
+        CE_GLOBAL_COMPONENT_DESC_CORE(X)
+        CE_GLOBAL_COMPONENT_DESC_ENGINE(X)
+        #ifndef CE_CORE_TEST_MODE
+        CE_GLOBAL_COMPONENT_DESC_GAME(X)
+        #endif
+    #undef X
+    #endif
+
+    #ifdef CE_DEBUG_BUILD
+        #define X(name, run_phase, run_frequency) CE_Debug("Registered global system: %s (Type: %d, Run Phase: %d, Run Frequency: %d)", #name, name, run_phase, run_frequency);
+            CE_GLOBAL_SYSTEM_DESC_CORE(X)
+            CE_GLOBAL_SYSTEM_DESC_ENGINE(X)
+            #ifndef CE_CORE_TEST_MODE
+            CE_GLOBAL_SYSTEM_DESC_GAME(X)
+            #endif
+        #undef X
+    #endif
+
     CE_Debug("ECS context initialized with %u components and %u systems", CE_COMPONENT_TYPES_COUNT, CE_SYSTEM_TYPES_COUNT);
+    CE_Debug("Global Components: %u, Global Systems: %u, Storage Size: %u bytes", CE_GLOBAL_COMPONENT_TYPES_COUNT, CE_GLOBAL_SYSTEM_TYPES_COUNT, sizeof(CE_ECS_GlobalComponentStorage));
     CE_Debug("System static data cache size: %u bytes", sizeof(CE_ECS_SystemStaticData) * CE_SYSTEM_TYPES_COUNT);
     CE_Debug("Component static data cache size: %u bytes", sizeof(CE_ECS_ComponentStaticData) * CE_COMPONENT_TYPES_COUNT);
     CE_Debug("ECS runtime data size: %u bytes", sizeof(CE_ECS_SystemRuntimeData));
@@ -135,6 +169,27 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
 
 CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* errorCode)
 {
+    CE_Debug("Cleaning up runtime data");
+    for (uint32_t order = 0; order < CE_ECS_SYSTEM_RUN_ORDER_COUNT; order++) {
+        for (uint32_t freq = 0; freq < CE_ECS_SYSTEM_RUN_FREQUENCY_COUNT; freq++) {
+            for (uint32_t phase = 0; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++) {
+                CE_ECS_System_CacheList* cacheList = &context->m_systemRuntimeData.m_systemsByRunOrder[order].m_frequency[freq].m_phase[phase];
+                cc_cleanup(&cacheList->m_systems);
+            }
+        }
+    }
+
+    CE_Debug("Cleaning up global components");
+    #define X(name, storage) \
+        if (CE_GLOBAL_COMPONENT_CLEANUP(name)(CE_ECS_AccessGlobalComponent(context, name)) != CE_OK) { \
+            CE_Error("Failed to cleanup global component: " #name); \
+        }
+        CE_GLOBAL_COMPONENT_DESC_CORE(X)
+        CE_GLOBAL_COMPONENT_DESC_ENGINE(X)
+        #ifndef CE_CORE_TEST_MODE
+        CE_GLOBAL_COMPONENT_DESC_GAME(X)
+    #endif
+
     CE_Debug("Cleaning up ECS context");
     if (CE_ECS_MainStorage_cleanup(&context->m_storage, context, errorCode) != CE_OK) {
         return CE_ERROR;

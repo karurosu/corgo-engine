@@ -1013,8 +1013,6 @@ void test_ECS_tick(void) {
     result = CE_ECS_Tick(&context, 0.0f, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_EQUAL_INT(CE_OK, result);
-    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_INT(1, componentData->m_testValue);
     TEST_ASSERT_TRUE(componentData->m_ticked_display);
     TEST_ASSERT_FALSE(componentData->m_ticked_half);
@@ -1028,8 +1026,6 @@ void test_ECS_tick(void) {
 
     // Now run with a delta of 0.6, triggering display and half tick systems
     result = CE_ECS_Tick(&context, 0.6f, &errorCode);
-    TEST_ASSERT_EQUAL_INT(CE_OK, result);
-    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_INT(2, componentData->m_testValue);
@@ -1047,8 +1043,6 @@ void test_ECS_tick(void) {
     result = CE_ECS_Tick(&context, 0.1f, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_EQUAL_INT(CE_OK, result);
-    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_INT(1, componentData->m_testValue);
     TEST_ASSERT_TRUE(componentData->m_ticked_display);
     TEST_ASSERT_FALSE(componentData->m_ticked_half);
@@ -1064,12 +1058,30 @@ void test_ECS_tick(void) {
     result = CE_ECS_Tick(&context, 0.4f, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_EQUAL_INT(CE_OK, result);
-    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_INT(3, componentData->m_testValue);
     TEST_ASSERT_TRUE(componentData->m_ticked_display);
     TEST_ASSERT_TRUE(componentData->m_ticked_half);
     TEST_ASSERT_TRUE(componentData->m_ticked_second);
+}
+
+void test_ECS_GlobalComponents(void) {
+    CE_ERROR_CODE errorCode = CE_ERROR_CODE_COUNT;
+    CE_Result result = CE_ERROR;
+
+    // Get global component
+    CE_ECS_GlobalComponentPtr(&context, CE_CORE_GLOBAL_DEBUG_COMPONENT, globalDebugComponentPtr);
+    TEST_ASSERT_NOT_NULL(globalDebugComponentPtr);
+    TEST_ASSERT_FALSE(globalDebugComponentPtr->m_enabled);
+    TEST_ASSERT_EQUAL_INT(0, globalDebugComponentPtr->m_testValue);
+
+    // Enable debug mode
+    globalDebugComponentPtr->m_enabled = true;
+
+    // Tick with a delta of 1.1 seconds, which should trigger the global system
+    result = CE_ECS_Tick(&context, 1.1f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_INT(1, globalDebugComponentPtr->m_testValue);
 }
 
 int main(void) {
@@ -1095,6 +1107,7 @@ int main(void) {
     RUN_TEST(test_Entity_MultipleComponents);
 
     RUN_TEST(test_ECS_tick);
+    RUN_TEST(test_ECS_GlobalComponents);
         
     return UNITY_END();
 }
