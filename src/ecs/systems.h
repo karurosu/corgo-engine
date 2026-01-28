@@ -17,11 +17,17 @@
 #ifndef CE_SYSTEM_DESC_CORE
 #define CE_SYSTEM_DESC_CORE(X)
 #endif
+#ifndef CE_GLOBAL_SYSTEM_DESC_CORE
+#define CE_GLOBAL_SYSTEM_DESC_CORE(X)
+#endif
 
 // Engine systems
 #include "../engine/systems.h"
 #ifndef CE_SYSTEM_DESC_ENGINE
 #define CE_SYSTEM_DESC_ENGINE(X)
+#endif
+#ifndef CE_GLOBAL_SYSTEM_DESC_ENGINE
+#define CE_GLOBAL_SYSTEM_DESC_ENGINE(X)
 #endif
 
 // Game systems
@@ -29,10 +35,13 @@
 #ifndef CE_SYSTEM_DESC_GAME
 #define CE_SYSTEM_DESC_GAME(X)
 #endif
+#ifndef CE_GLOBAL_SYSTEM_DESC_GAME
+#define CE_GLOBAL_SYSTEM_DESC_GAME(X)
+#endif
 
 //// Generate system Types Enum
 typedef enum CE_SYSTEM_TYPES_ENUM {
-#define X(name, uid, storage, initial_capacity, ...) name,
+#define X(name, run_order, run_phase, run_frequency, ...) name,
 	CE_SYSTEM_DESC_CORE(X)
 	CE_SYSTEM_DESC_ENGINE(X)
 #ifndef CE_CORE_TEST_MODE
@@ -45,7 +54,7 @@ typedef enum CE_SYSTEM_TYPES_ENUM {
 // Sanity check: ensure we don't exceed the bitmask capacity.
 _Static_assert(CE_SYSTEM_TYPES_COUNT <= CE_MAX_SYSTEM_TYPES, "Too many system types: exceeds MAX_SYSTEM_TYPES");
 
-//// Declare system global functions
+//// Declare system functions
 #define X(name, run_order, run_phase, run_frequency, ...) CE_DECLARE_SYSTEM(name, run_order, run_phase, run_frequency, __VA_ARGS__)
 	CE_SYSTEM_DESC_CORE(X)
 	CE_SYSTEM_DESC_ENGINE(X)
@@ -54,7 +63,29 @@ _Static_assert(CE_SYSTEM_TYPES_COUNT <= CE_MAX_SYSTEM_TYPES, "Too many system ty
 #endif
 #undef X
 
+// Global systems 
+//// Generate global system Types Enum
+typedef enum CE_GLOBAL_SYSTEM_TYPES_ENUM {
+#define X(name, run_phase, run_frequency) name,
+	CE_GLOBAL_SYSTEM_DESC_CORE(X)
+	CE_GLOBAL_SYSTEM_DESC_ENGINE(X)
+#ifndef CE_CORE_TEST_MODE
+	CE_GLOBAL_SYSTEM_DESC_GAME(X)
+#endif
+#undef X
+	CE_GLOBAL_SYSTEM_TYPES_COUNT //Invalid system count
+} CE_GLOBAL_SYSTEM_TYPES_ENUM;
+
+#define X(name, run_phase, run_frequency) CE_DECLARE_GLOBAL_SYSTEM(name, run_phase, run_frequency)
+	CE_GLOBAL_SYSTEM_DESC_CORE(X)
+	CE_GLOBAL_SYSTEM_DESC_ENGINE(X)
+#ifndef CE_CORE_TEST_MODE
+	CE_GLOBAL_SYSTEM_DESC_GAME(X)
+#endif
+#undef X
+
 //// Debug helpers
 const char* CE_ECS_GetSystemTypeNameDebugStr(IN CE_TypeId typeId);
+const char* CE_ECS_GetGlobalSystemTypeNameDebugStr(IN CE_TypeId typeId);
 
 #endif // CORGO_ECS_SYSTEMS_H

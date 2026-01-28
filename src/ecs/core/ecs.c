@@ -154,6 +154,11 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
 
     for (int phase = CE_ECS_SYSTEM_RUN_PHASE_EARLY; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++)
     {
+        result = CE_ECS_RunGlobalSystems(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode);
+        if (result != CE_OK) {
+            return CE_ERROR;
+        }
+
         // Display
         result = CE_ECS_RunSystems_AutoOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode);
         if (result != CE_OK) {
@@ -166,6 +171,11 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
         
         // Half Display
         if (context->m_systemRuntimeData.m_frameCounter % 2 == 0) {
+            result = CE_ECS_RunGlobalSystems(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY, errorCode);
+            if (result != CE_OK) {
+                return CE_ERROR;
+            }
+
             result = CE_ECS_RunSystems_AutoOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY, errorCode);
             if (result != CE_OK) {
                 return CE_ERROR;
@@ -179,6 +189,11 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
         // Once Per Second
         if (runOncePerSecond)
         {
+            result = CE_ECS_RunGlobalSystems(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_ONCE_PER_SECOND, errorCode);
+            if (result != CE_OK) {
+                return CE_ERROR;
+            }
+
             result = CE_ECS_RunSystems_AutoOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_ONCE_PER_SECOND, errorCode);
             if (result != CE_OK) {
                 return CE_ERROR;

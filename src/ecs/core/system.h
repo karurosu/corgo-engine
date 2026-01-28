@@ -71,6 +71,9 @@ static const CE_ECS_SYSTEM_RUN_FREQUENCY name##_runFrequency = run_frequency;\
 CE_Result name##_run(INOUT struct CE_ECS_Context* context, const IN CE_ECS_SystemStaticData *systemDesc, const IN CE_Id entity, const IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode);\
 void name##_description(OUT CE_ECS_SystemStaticData *data);\
 
+#define CE_DECLARE_GLOBAL_SYSTEM(name, run_phase, run_frequency)\
+CE_Result name##_global_run(INOUT struct CE_ECS_Context* context, const IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode);
+
 // Called by the dependency list to setup variables
 #define REQUIRE_COMPONENT(componentType, varName) \
     componentType##_StorageType* varName = NULL;\
@@ -90,6 +93,8 @@ void name##_description(OUT CE_ECS_SystemStaticData *data);\
         return CE_ERROR;\
     }\
 
+
+// Functions used to define and implement a system
 // Load components and set up local variables
 #define CE_START_SYSTEM_IMPLEMENTATION(name, ...)\
 CE_Result name##_run(INOUT struct CE_ECS_Context* context, const IN CE_ECS_SystemStaticData *systemDesc, const IN CE_Id entity, const IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode)\
@@ -97,8 +102,19 @@ CE_Result name##_run(INOUT struct CE_ECS_Context* context, const IN CE_ECS_Syste
     __VA_ARGS__ \
     \
 
-// Cleanup and end function
+// Cleanup and close function
 #define CE_END_SYSTEM_IMPLEMENTATION \
+    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);\
+    return CE_OK;\
+} \
+
+// Functions used to define and implement a global system
+#define CE_START_GLOBAL_SYSTEM_IMPLEMENTATION(name)\
+CE_Result name##_global_run(INOUT struct CE_ECS_Context* context, const IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode)\
+{\
+
+// Cleanup and close function
+#define CE_END_GLOBAL_SYSTEM_IMPLEMENTATION \
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);\
     return CE_OK;\
 } \

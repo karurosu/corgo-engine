@@ -75,3 +75,30 @@ CE_Result CE_ECS_RunSystemOnEntity(INOUT CE_ECS_Context* context, IN float delta
     }
     return CE_OK;
 }
+
+#define GENERATE_RUN_GLOBAL_SYSTEM_CASE(name, run_phase, run_frequency, exp_run_order, exp_run_phase, exp_run_frequency) \
+if (run_phase == exp_run_phase && run_frequency == exp_run_frequency) {\
+    result = name##_global_run(context, deltaTime, errorCode);\
+    if (result != CE_OK) {\
+        CE_Error("Global system " #name " failed to run with error code %s", CE_GetErrorMessage(*errorCode));\
+        return CE_ERROR;\
+    }\
+}
+
+// Helper to run global systems based on the requested order, phase and frequency.
+// it will run all the systems that match the criteria.
+CE_Result CE_ECS_RunGlobalSystems(INOUT CE_ECS_Context* context, IN float deltaTime, IN CE_ECS_SYSTEM_RUN_PHASE phase, IN CE_ECS_SYSTEM_RUN_FREQUENCY frequency, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    CE_Result result = CE_ERROR;
+
+#define X(name, run_phase, run_frequency) GENERATE_RUN_GLOBAL_SYSTEM_CASE(name, run_phase, run_frequency, runOrder, phase, frequency)
+	CE_GLOBAL_SYSTEM_DESC_CORE(X)
+	CE_GLOBAL_SYSTEM_DESC_ENGINE(X)
+#ifndef CE_CORE_TEST_MODE
+	CE_GLOBAL_SYSTEM_DESC_GAME(X)
+#endif
+#undef X
+
+    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+    return CE_OK;
+}

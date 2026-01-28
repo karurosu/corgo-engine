@@ -62,3 +62,21 @@ const char* CE_ECS_GetSystemTypeNameDebugStr(IN CE_TypeId typeId)
     return "NotInDebugBuild";
 #endif
 }
+
+const char* CE_ECS_GetGlobalSystemTypeNameDebugStr(IN CE_TypeId typeId)
+{
+#ifdef CE_DEBUG_BUILD
+    switch (typeId) {
+#define X(name, run_phase, run_frequency) case name: return #name;
+        CE_GLOBAL_SYSTEM_DESC_CORE(X)
+        CE_GLOBAL_SYSTEM_DESC_ENGINE(X)
+#ifndef CE_CORE_TEST_MODE
+        CE_GLOBAL_SYSTEM_DESC_GAME(X)
+#endif
+    #undef X
+        default: return "InvalidGlobalSystemType";
+    }
+#else
+    return "NotInDebugBuild";
+#endif
+}
