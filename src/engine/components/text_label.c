@@ -8,6 +8,7 @@
 
 #include "helpers.h"
 #include "engine/core/memory.h"
+#include "engine/assets.h"
 
 CE_DEFINE_COMPONENT_INIT(CE_TEXT_LABEL_COMPONENT)
 {
@@ -24,7 +25,7 @@ CE_DEFINE_COMPONENT_CLEANUP(CE_TEXT_LABEL_COMPONENT)
 #ifdef CE_BACKEND_PLAYDATE
     if (component->fontPtr)
     {
-        CE_free(component->fontPtr);
+        CE_FREE_ASSET(CE_ASSET_TYPE_FONT, component->fontPtr);
         component->fontPtr = NULL;
     }
 #endif
@@ -57,19 +58,16 @@ CE_Result CE_TextLabelComponent_setFont(INOUT CE_TextLabelComponent* component, 
     // Temp code to force loading of font
     if (component->fontPtr)
     {
-        CE_free(component->fontPtr);
+        CE_FREE_ASSET(CE_ASSET_TYPE_FONT, component->fontPtr);
         component->fontPtr = NULL;
     }
 
-    const char* err;
-    component->fontPtr = CE_GetPlaydateAPI()->graphics->loadFont(component->fontName, &err);
+    component->fontPtr = CE_LOAD_ASSET(CE_ASSET_TYPE_FONT, fontName, NULL);
     if (component->fontPtr == NULL)
     {
-        CE_Error("Failed to load font %s for TextLabelComponent: %s", component->fontName, err);
         return CE_ERROR;
     }
 #endif
-
     return CE_OK;
 }
 
