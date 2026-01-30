@@ -9,7 +9,7 @@
 
 #include "../ecs/core/component.h"
 #include "core/platform.h"
-#include "core/asset_cache.h"
+#include "engine/assets.h"
 
 //// Transform Component
 typedef struct CETransformComponent {
@@ -27,9 +27,7 @@ typedef struct CESpriteComponent {
 typedef struct CETextLabelComponent {
 	char text[256];
 	const char *fontName;
-#ifdef CE_BACKEND_PLAYDATE
-	LCDFont *fontPtr;
-#endif
+	CE_ASSET_PTR(CE_ASSET_TYPE_FONT) fontPtr;
 } CE_TextLabelComponent;
 
 #define CE_COMPONENT_DESC_ENGINE(X) \

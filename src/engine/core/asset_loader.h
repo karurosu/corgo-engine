@@ -16,11 +16,10 @@
     CE_Result CE_Engine_FreeAsset_##type(IN type##_ptr_t asset)
 
 #define CE_DECLARE_ASSET_LOADER(type, pointer_type, load_params) \
-    typedef pointer_type* type##_ptr_t; \
+    typedef pointer_type *type##_ptr_t; \
     typedef load_params type##_load_params_t; \
     CE_DEFINE_ASSET_LOADER_LOAD(type); \
     CE_DEFINE_ASSET_LOADER_FREE(type);
-
     
 // Shortcuts for uncached loading/releasing
 #define CE_ASSET_PTR(type) type##_ptr_t
@@ -58,5 +57,22 @@
  */
 #define CE_FREE_ASSET(type, asset) \
     CE_Engine_FreeAsset_##type(asset);
+
+
+/**
+ * @brief Generate stub implementations for asset loaders.
+ * These implementations will log an error and return NULL or CE_ERROR.
+ */
+#define CE_GENERATE_ASSET_LOADER_STUB(type) \
+    CE_DEFINE_ASSET_LOADER_LOAD(type) \
+    { \
+        CE_Error("Asset loader stub called for asset: %s", assetPath ? assetPath : "NULL"); \
+        return NULL; \
+    } \
+    CE_DEFINE_ASSET_LOADER_FREE(type) \
+    { \
+        CE_Error("Asset free stub called"); \
+        return CE_ERROR; \
+    }
 
 #endif // CORGO_ENGINE_CORE_ASSET_LOADER_H

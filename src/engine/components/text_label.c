@@ -14,21 +14,17 @@ CE_DEFINE_COMPONENT_INIT(CE_TEXT_LABEL_COMPONENT)
 {
     component->text[0] = '\0';
     component->fontName = "";
-#ifdef CE_BACKEND_PLAYDATE
     component->fontPtr = NULL;
-#endif
     return CE_OK;
 }
 
 CE_DEFINE_COMPONENT_CLEANUP(CE_TEXT_LABEL_COMPONENT)
 {
-#ifdef CE_BACKEND_PLAYDATE
     if (component->fontPtr)
     {
         CE_FREE_ASSET(CE_ASSET_TYPE_FONT, component->fontPtr);
         component->fontPtr = NULL;
     }
-#endif
     return CE_OK;
 }
 
@@ -54,7 +50,6 @@ CE_Result CE_TextLabelComponent_setFont(INOUT CE_TextLabelComponent* component, 
 
     component->fontName = fontName;
 
-#ifdef CE_BACKEND_PLAYDATE
     // Temp code to force loading of font
     if (component->fontPtr)
     {
@@ -67,18 +62,18 @@ CE_Result CE_TextLabelComponent_setFont(INOUT CE_TextLabelComponent* component, 
     {
         return CE_ERROR;
     }
-#endif
+
     return CE_OK;
 }
 
 CE_Result CE_TextLabelComponent_getTextBounds(INOUT CE_TextLabelComponent* component, OUT int* width, OUT int* height)
 {
-#ifdef CE_BACKEND_PLAYDATE
     if (component->fontPtr == NULL)
     {
         return CE_ERROR;
     }
 
+#ifdef CE_BACKEND_PLAYDATE
     *width = CE_GetPlaydateAPI()->graphics->getTextWidth(component->fontPtr, component->text, sizeof(component->text), kASCIIEncoding, 0);
     *height = CE_GetPlaydateAPI()->graphics->getFontHeight(component->fontPtr);
 #else
@@ -86,6 +81,7 @@ CE_Result CE_TextLabelComponent_getTextBounds(INOUT CE_TextLabelComponent* compo
     *width = 0;
     *height = 0; 
 #endif
+
     return CE_OK;
 }
 
