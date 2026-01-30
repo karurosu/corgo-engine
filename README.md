@@ -1,6 +1,7 @@
 # Corgo Engine
 
-A minimalist ECS (Entity Component System) engine for the Panic Playdate handheld console, written in pure C.
+A short-legged but complete ECS (Entity Component System) engine for the Playdate handheld console, written in pure C.
+Intended to be a solid engine for writing most kinds of games, designed with flexibility in mind.
 
 **Status**: Early development see below for details.
 
@@ -19,12 +20,12 @@ https://github.com/karurosu/corgo-engine/blob/main/corgo_demo.gif?raw=true
 
 ## Current state
 1. ECS Core: 80%. Entities, Component and Systems can be defined and tick. Still missing support for scenegraph ordering, optimizations and some features.
-2. Engine core: just a demo. Hardcoded to run, currently in active development.
+2. Engine core: just a demo. Hardcoded to run.
 3. SceneGraph and scripting: nothing yet.
 4. Graphics: nothing yet.
 5. Audio: nothing yet.
 6. Input: nothing yet.
-7. Asset loader: nothing yet
+7. Asset loader: **WIP**
 8. Playdate backend: minimal, just what is required for the demo.
 9. PC backend: nothing yet.
 

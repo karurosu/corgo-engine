@@ -39,5 +39,20 @@
 
 **/
 
+/**
+ * How to define a global system:
+ * Global systems are systems that tick independently of entities at most once per frame.
+ * They have no dependencies on components or relationships and area always active.
+ * 
+ * 1. Add the global system to the global system description macro below, see example.
+ *      
+ * 2. Implement the global system in a .c file using the CE_START_GLOBAL_SYSTEM_IMPLEMENTATION and CE_END_GLOBAL_SYSTEM_IMPLEMENTATION macros
+ */
+
+#define CE_GLOBAL_SYSTEM_DESC_GAME(X) \
+/**
+    X(CE_MY_GLOBAL_SYSTEM_NAME, <Run Phase>, <Run Frequency>) \
+
+**/
 
 #endif // CORGO_GAME_SYSTEMS_H

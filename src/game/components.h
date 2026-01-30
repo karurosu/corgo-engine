@@ -12,7 +12,8 @@
 /**
  * How to define a component:
  * 
- * 1. Define the component data struct, this can be any C struct, for example:
+ * 1. Define the component data struct, this can be any C struct. 
+ *    The CE_* naming convention is not required, but some sort of prefix is recommended to avoid name clashes.
  *    
  *      typedef struct CE_MyComponent {
  *            // Component data here
@@ -54,5 +55,24 @@
 
 **/
 
+/**
+ * Global components are similar to regular components but are not attached to entities.
+ * They are unique instances that exist globally within the ECS context.
+ * They cannot be created or destroyed at runtime.
+ * 
+ * To define a global component:
+ * 
+ * 1. Define the global component macro: CE_GLOBAL_COMPONENT_DESC_GAME, similar to regular components.
+ *    Only name and struct type are needed, no UUID or capacity.
+ * 
+ * 2. Implement the global component initialization and cleanup functions in a .c file using the macros:
+ *    CE_DEFINE_GLOBAL_COMPONENT_INIT(CE_MY_COMPONENT) and CE_DEFINE_GLOBAL_COMPONENT_CLEANUP(CE_MY_COMPONENT).
+ */
+
+#define CE_GLOBAL_COMPONENT_DESC_GAME(X) \
+/**
+    X(CE_MY_COMPONENT, CE_MyGlobalComponent) \
+
+**/
 
 #endif // CORGO_GAME_COMPONENTS_H
