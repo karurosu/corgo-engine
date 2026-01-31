@@ -8,24 +8,29 @@
 #define CORGO_ENGINE_CORE_ASSET_CACHE_H
 
 #include "ecs/types.h"
+#include "engine/assets.h"
 
 typedef struct CE_Engine_AssetCache_Asset {
-    void *m_asset;
-    uint8_t m_refcount;
-    CE_TypeId m_assetType;
+    void *m_data;
+    CE_TypeId m_type;
 } CE_Engine_AssetCache_Asset;
 
 typedef struct CE_Engine_AssetCache_Component {
-    bool m_enabled;
-    cc_map(uintptr_t, CE_Engine_AssetCache_Asset) m_assets;
+    cc_map(uintptr_t, uint32_t) m_assetCount; // Cache the number of times an asset is referenced
+    cc_map(const char *, CE_Engine_AssetCache_Asset) m_assetData; // Cache the asset's info
 } CE_Engine_AssetCache_Component;
 
-#define CE_DECLARE_ASSET_CACHE_FUNCS(type, pointer_type, load_params) \
-    type##_ptr_t CE_Engine_CacheAsset_##type(IN const char* assetPath, IN const type##_load_params_t* loadParams); \
-    CE_Result CE_Engine_ReleaseAsset_##type(IN type##_ptr_t asset);
-
-
-void *CE_Engine_CacheAsset(INOUT CE_ECS_Context* context, IN CE_TypeId assetType, IN const char *assetPath, void *loadParams);
+/** * @brief Cache an asset in the asset cache.
+ * If the asset is already cached, increments the reference count and returns the existing asset.
+ * If not, loads the asset, stores it in the cache, and returns it.
+ * 
+ * @param[in,out] context The ECS context.
+ * @param[in] assetType The type of the asset to cache.
+ * @param[in] assetPath The path to the asset.
+ * @param[in] loadParams Parameters required to load the asset.
+ * @return Pointer to the cached asset, or NULL on failure.
+ */
+void *CE_Engine_CacheAsset(INOUT CE_ECS_Context* context, IN CE_TypeId assetType, IN const char *assetPath, IN_OPT const void* loadParams);
 
 /**
  * @brief Release an asset from the asset cache.
@@ -36,5 +41,27 @@ void *CE_Engine_CacheAsset(INOUT CE_ECS_Context* context, IN CE_TypeId assetType
  * @return CE_OK on success, CE_ERROR on failure.
  */
 CE_Result CE_Engine_ReleaseAsset(INOUT CE_ECS_Context* context, IN void *asset); 
+
+// Shortcuts to cache and release via macros per asset type
+
+#define CE_DEFINE_ASSET_CACHE_LOAD_FUNCTION(type, pointer_type, load_params) \
+    inline pointer_type *CE_Engine_CacheAsset_##type(INOUT CE_ECS_Context* context, IN const char* assetPath, IN const load_params* loadParams)
+
+#define CE_DEFINE_ASSET_CACHE_RELEASE_FUNCTION(type, pointer_type, load_params) \
+    inline CE_Result CE_Engine_ReleaseAsset_##type(INOUT CE_ECS_Context* context, IN pointer_type *asset)
+
+#define CE_DECLARE_ASSET_CACHE_FUNCS(type, pointer_type, load_params) \
+    CE_DEFINE_ASSET_CACHE_LOAD_FUNCTION(type, pointer_type, load_params); \
+    CE_DEFINE_ASSET_CACHE_RELEASE_FUNCTION(type, pointer_type, load_params);
+
+#define CE_CACHE_ASSET(context, type, path, loadParams) \
+    CE_Engine_CacheAsset_##type(context, path, loadParams);
+
+#define CE_CACHE_ASSET_TO_VAR(variable, context, type, path, loadParams) \
+    CE_ASSET_PTR(type) variable = CE_Engine_CacheAsset_##type(context, path, loadParams);
+
+#define X(type, pointer_type, load_params) CE_DECLARE_ASSET_CACHE_FUNCS(type, pointer_type, load_params)
+    CE_ASSET_LOADERS(X)
+#undef X
 
 #endif // CORGO_ENGINE_CORE_ASSET_CACHE_H
