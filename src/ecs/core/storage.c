@@ -11,7 +11,7 @@
 #include "storage.h"
 #include "../ecs.h"
 
-CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_ECS_Context *context, OUT CE_ERROR_CODE *errorCode)
+CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN CE_ECS_Context *context, OUT CE_ERROR_CODE *errorCode)
 {
     if (storage->m_initialized)  
     {
@@ -103,7 +103,7 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN const CE_E
     return CE_OK;
 }
 
-CE_Result CE_ECS_MainStorage_cleanup(OUT CE_ECS_MainStorage* storage, IN const CE_ECS_Context *context,  OUT CE_ERROR_CODE *errorCode)
+CE_Result CE_ECS_MainStorage_cleanup(OUT CE_ECS_MainStorage* storage, IN CE_ECS_Context *context,  OUT CE_ERROR_CODE *errorCode)
 {
     CE_Result result = CE_OK;
 
@@ -118,7 +118,7 @@ CE_Result CE_ECS_MainStorage_cleanup(OUT CE_ECS_MainStorage* storage, IN const C
                         // Call cleanup function for each valid component
                         void* componentPtr = CE_ECS_ComponentStorage_getComponentDataPointer(storageEntry, componentStaticData, i);
                         if (componentPtr) {
-                            result = componentStaticData->m_cleanupFunction(componentPtr);
+                            result = componentStaticData->m_cleanupFunction(context, componentPtr);
                             CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_CLEANUP_FAILED);
                         }
                     }
@@ -168,7 +168,7 @@ void* CE_ECS_ComponentStorage_getComponentDataPointerById(INOUT CE_ECS_Component
     return CE_ECS_ComponentStorage_getComponentDataPointer(storage, componentStaticData, index);
 }
 
-CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, OUT CE_Id* id, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, IN CE_ECS_Context *context, IN const CE_ECS_ComponentStaticData *componentStaticData, OUT CE_Id* id, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     CE_Result result = CE_OK;
 
@@ -215,7 +215,7 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
         return CE_ERROR;
     }
 
-    result = componentStaticData->m_initFunction(componentPtr);
+    result = componentStaticData->m_initFunction(context, componentPtr);
 
     if (result != CE_OK) {
         // Init failed, free the slot
@@ -244,7 +244,7 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
     return CE_OK;
 }
 
-CE_Result CE_ECS_MainStorage_destroyComponent(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_Id id, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_ECS_MainStorage_destroyComponent(INOUT CE_ECS_MainStorage* storage, IN CE_ECS_Context *context, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_Id id, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     CE_Result result = CE_OK;
 
@@ -273,7 +273,7 @@ CE_Result CE_ECS_MainStorage_destroyComponent(INOUT CE_ECS_MainStorage* storage,
         return CE_ERROR;
     }
 
-    result = componentStaticData->m_cleanupFunction(componentPtr);
+    result = componentStaticData->m_cleanupFunction(context, componentPtr);
 
     if (result != CE_OK) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_CLEANUP_FAILED);

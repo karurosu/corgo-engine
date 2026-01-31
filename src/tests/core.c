@@ -232,7 +232,7 @@ static void test_ECS_ComponentStorage(void) {
     CE_ECS_ComponentStorage* debugStorage = context.m_storage.m_componentTypeStorage[CE_CORE_DEBUG_COMPONENT];
 
     // Create the first component
-    result = CE_ECS_MainStorage_createComponent(&context.m_storage, debugDesc, &id, &componentData, &errorCode);
+    result = CE_ECS_MainStorage_createComponent(&context.m_storage, &context, debugDesc, &id, &componentData, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_NOT_NULL(componentData);
@@ -248,7 +248,7 @@ static void test_ECS_ComponentStorage(void) {
     TEST_ASSERT_EQUAL_UINT32(CE_CORE_DEBUG_COMPONENT, CE_Id_getComponentTypeId(id));
 
     // Create another component to muddle things up a bit
-    result = CE_ECS_MainStorage_createComponent(&context.m_storage, debugDesc, &anotherId, &componentData, &errorCode);
+    result = CE_ECS_MainStorage_createComponent(&context.m_storage, &context, debugDesc, &anotherId, &componentData, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_NOT_NULL(componentData);
@@ -273,7 +273,7 @@ static void test_ECS_ComponentStorage(void) {
     }
 
     // Test destroy the second component
-    result = CE_ECS_MainStorage_destroyComponent(&context.m_storage, debugDesc, anotherId, &errorCode);
+    result = CE_ECS_MainStorage_destroyComponent(&context.m_storage, &context, debugDesc, anotherId, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_size_t(1, debugStorage->m_count); 
@@ -293,7 +293,7 @@ static void test_ECS_ComponentStorage(void) {
     TEST_ASSERT_NULL(componentData);
 
     // Destroy the first component
-    result = CE_ECS_MainStorage_destroyComponent(&context.m_storage, debugDesc, id, &errorCode);
+    result = CE_ECS_MainStorage_destroyComponent(&context.m_storage, &context, debugDesc, id, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_size_t(0, debugStorage->m_count);

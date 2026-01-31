@@ -63,12 +63,12 @@ typedef struct CE_ECS_MainStorage {
 } CE_ECS_MainStorage;
 
 // Initialization and cleanup functions
-CE_Result CE_ECS_MainStorage_init(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_Context *context, OUT_OPT CE_ERROR_CODE* errorCode);
-CE_Result CE_ECS_MainStorage_cleanup(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_Context *context, OUT_OPT CE_ERROR_CODE *errorCode);
+CE_Result CE_ECS_MainStorage_init(INOUT CE_ECS_MainStorage* storage, IN CE_ECS_Context *context, OUT_OPT CE_ERROR_CODE* errorCode);
+CE_Result CE_ECS_MainStorage_cleanup(INOUT CE_ECS_MainStorage* storage, IN CE_ECS_Context *context, OUT_OPT CE_ERROR_CODE *errorCode);
 
 // Component creation and management functions
-CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, OUT CE_Id* id, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode);
-CE_Result CE_ECS_MainStorage_destroyComponent(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_Id id, OUT_OPT CE_ERROR_CODE* errorCode);
+CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, IN CE_ECS_Context *context, IN const CE_ECS_ComponentStaticData *componentStaticData, OUT CE_Id* id, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode);
+CE_Result CE_ECS_MainStorage_destroyComponent(INOUT CE_ECS_MainStorage* storage, IN CE_ECS_Context *context, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_Id id, OUT_OPT CE_ERROR_CODE* errorCode);
 CE_Result CE_ECS_MainStorage_growStorageForComponent(INOUT CE_ECS_MainStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, OUT_OPT CE_ERROR_CODE* errorCode);
 
 // Component data access

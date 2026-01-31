@@ -31,7 +31,7 @@ CE_Result CE_Entity_AddComponent(INOUT CE_ECS_Context* context, IN CE_Id entity,
     
     CE_Id newComponentId = CE_INVALID_ID;
     void *newComponentData = NULL;
-    result = CE_ECS_MainStorage_createComponent(&context->m_storage, componentDataPtr, &newComponentId, &newComponentData, errorCode);
+    result = CE_ECS_MainStorage_createComponent(&context->m_storage, context, componentDataPtr, &newComponentId, &newComponentData, errorCode);
     if (result != CE_OK) {
         return CE_ERROR;
     }
@@ -88,7 +88,7 @@ CE_Result CE_Entity_RemoveComponent(INOUT CE_ECS_Context* context, IN CE_Id enti
 
     // All good, delete
     const CE_ECS_ComponentStaticData *componentDataPtr = &context->m_componentDefinitions[componentType];
-    result = CE_ECS_MainStorage_destroyComponent(&context->m_storage, componentDataPtr, componentId, errorCode);
+    result = CE_ECS_MainStorage_destroyComponent(&context->m_storage, context, componentDataPtr, componentId, errorCode);
     if (result != CE_OK) {
         return CE_ERROR;
     }

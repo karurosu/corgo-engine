@@ -122,7 +122,7 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
 
     // Initialize global components
     #define X(name, storage) \
-        if (CE_GLOBAL_COMPONENT_INIT(name)(CE_ECS_AccessGlobalComponent(context, name)) != CE_OK) { \
+        if (CE_GLOBAL_COMPONENT_INIT_FUNCTION(name)(context, CE_ECS_AccessGlobalComponent(context, name)) != CE_OK) { \
             CE_Error("Failed to initialize global component: " #name); \
             return CE_ERROR; \
         }
@@ -181,7 +181,7 @@ CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* e
 
     CE_Debug("Cleaning up global components");
     #define X(name, storage) \
-        if (CE_GLOBAL_COMPONENT_CLEANUP(name)(CE_ECS_AccessGlobalComponent(context, name)) != CE_OK) { \
+        if (CE_GLOBAL_COMPONENT_CLEANUP_FUNCTION(name)(context, CE_ECS_AccessGlobalComponent(context, name)) != CE_OK) { \
             CE_Error("Failed to cleanup global component: " #name); \
         }
         CE_GLOBAL_COMPONENT_DESC_CORE(X)

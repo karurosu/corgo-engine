@@ -18,40 +18,44 @@ struct CE_ECS_ComponentStaticData {
     uint32_t m_initialCapacity;
 
     // Component methods
-    CE_Result (*m_initFunction)(OUT void* component);
-    CE_Result (*m_cleanupFunction)(OUT void* component);
+    CE_Result (*m_initFunction)(INOUT CE_ECS_Context* context, INOUT void* component);
+    CE_Result (*m_cleanupFunction)(INOUT CE_ECS_Context* context, INOUT void* component);
 };
 
 //// Component macros
+
+// Component method shortcuts
+#define CE_DEFINE_COMPONENT_INIT(name) CE_Result name##_init(INOUT CE_ECS_Context* context, INOUT name##_StorageType* component)
+#define CE_DEFINE_COMPONENT_CLEANUP(name) CE_Result name##_cleanup(INOUT CE_ECS_Context* context, INOUT name##_StorageType* component)
 
 // Main component declaration, declares all methods and storage for a component.
 // UID is a unique int32 identifier for the component type, it must be unique across all components and hardcoded.
 // Changing of uuid is not allowed once a component is in use, as it will break serialization.
 // UIDs 0-10 are reserved for core components.
 #define CE_DECLARE_COMPONENT(name, c_uid, storage, initial_capacity) \
-CE_Result name##_init(OUT storage* component); \
-CE_Result name##_cleanup(OUT storage* component);\
 void name##_description(OUT CE_ECS_ComponentStaticData *data);\
 typedef storage name##_StorageType;\
 static const uint32_t name##_UID = c_uid;\
 static const size_t name##_StorageSize = sizeof(storage);\
 static const uint32_t name##_InitialCapacity = initial_capacity;\
-CE_Result name##_init_wrapper(OUT void* component);\
-CE_Result name##_cleanup_wrapper(OUT void* component);\
+CE_DEFINE_COMPONENT_INIT(name); \
+CE_DEFINE_COMPONENT_CLEANUP(name); \
+CE_Result name##_init_wrapper(INOUT CE_ECS_Context* context, INOUT void* component);\
+CE_Result name##_cleanup_wrapper(INOUT CE_ECS_Context* context, INOUT void* component);\
 _Static_assert(initial_capacity <= CE_BITSET_MAX_BITS, #name ": Component initial capacity exceeds bitset max bits, increase CE_BITSET_MAX_BITS or reduce initial capacity.");
 
 // Component method implementation generator
 // Must be called in the component's .c file
 #define CE_GENERATE_COMPONENT_IMP(name) \
-CE_Result name##_init_wrapper(OUT void* component) \
+CE_Result name##_init_wrapper(INOUT CE_ECS_Context* context, INOUT void* component) \
 { \
     if (!component) return CE_ERROR; \
-    return name##_init((name##_StorageType*)component); \
+    return name##_init(context, (name##_StorageType*)component); \
 } \
-CE_Result name##_cleanup_wrapper(OUT void* component) \
+CE_Result name##_cleanup_wrapper(INOUT CE_ECS_Context* context, INOUT void* component) \
 { \
     if (!component) return CE_ERROR; \
-    return name##_cleanup((name##_StorageType*)component); \
+    return name##_cleanup(context, (name##_StorageType*)component); \
 } \
 void name##_description(OUT CE_ECS_ComponentStaticData *data) \
 { \
@@ -68,23 +72,21 @@ void name##_description(OUT CE_ECS_ComponentStaticData *data) \
 #define CE_COMPONENT_DATA(name) name##_StorageType
 #define CE_COMPONENT_UID(name) name##_UID
 
-// Component method shortcuts
-#define CE_DEFINE_COMPONENT_INIT(name) CE_Result name##_init(OUT name##_StorageType* component)
-#define CE_DEFINE_COMPONENT_CLEANUP(name) CE_Result name##_cleanup(OUT name##_StorageType* component)
-
 //// Global component macros
 #define CE_GLOBAL_COMPONENT(name) CE_GLOBAL_##name
 #define CE_GLOBAL_COMPONENT_DATA(name) CE_PASTE(CE_GLOBAL_COMPONENT(name), _StorageType)
-#define CE_GLOBAL_COMPONENT_INIT(name) CE_PASTE(CE_GLOBAL_COMPONENT(name), _init)
-#define CE_GLOBAL_COMPONENT_CLEANUP(name) CE_PASTE(CE_GLOBAL_COMPONENT(name), _cleanup)
-
-#define CE_DECLARE_GLOBAL_COMPONENT(name, storage) \
-CE_Result CE_PASTE(CE_GLOBAL_COMPONENT(name), _init)(OUT storage* component); \
-CE_Result CE_PASTE(CE_GLOBAL_COMPONENT(name), _cleanup)(OUT storage* component);\
-typedef storage CE_PASTE(CE_GLOBAL_COMPONENT(name), _StorageType);
+#define CE_GLOBAL_COMPONENT_INIT_FUNCTION(name) CE_PASTE(CE_GLOBAL_COMPONENT(name), _init)
+#define CE_GLOBAL_COMPONENT_CLEANUP_FUNCTION(name) CE_PASTE(CE_GLOBAL_COMPONENT(name), _cleanup)
 
 // Component method shortcuts
-#define CE_DEFINE_GLOBAL_COMPONENT_INIT(name) CE_Result CE_GLOBAL_COMPONENT_INIT(name)(OUT CE_GLOBAL_COMPONENT_DATA(name)* component)
-#define CE_DEFINE_GLOBAL_COMPONENT_CLEANUP(name) CE_Result CE_GLOBAL_COMPONENT_CLEANUP(name)(OUT CE_GLOBAL_COMPONENT_DATA(name)* component)
+#define CE_DEFINE_GLOBAL_COMPONENT_INIT(name) CE_Result CE_GLOBAL_COMPONENT_INIT_FUNCTION(name)(INOUT CE_ECS_Context* context, INOUT CE_GLOBAL_COMPONENT_DATA(name)* component)
+#define CE_DEFINE_GLOBAL_COMPONENT_CLEANUP(name) CE_Result CE_GLOBAL_COMPONENT_CLEANUP_FUNCTION(name)(INOUT CE_ECS_Context* context, INOUT CE_GLOBAL_COMPONENT_DATA(name)* component)
+
+#define CE_DECLARE_GLOBAL_COMPONENT(name, storage) \
+typedef storage CE_PASTE(CE_GLOBAL_COMPONENT(name), _StorageType);\
+CE_DEFINE_GLOBAL_COMPONENT_INIT(name); \
+CE_DEFINE_GLOBAL_COMPONENT_CLEANUP(name);
+
+
 
 #endif // CORGO_ECS_CORE_COMPONENT_H

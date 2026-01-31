@@ -36,7 +36,7 @@ CE_Result CE_ECS_DestroyEntity(INOUT CE_ECS_Context* context, IN CE_Id entity, O
     {
         const CE_Id componentId = *componentIdPtr;
         const CE_ECS_ComponentStaticData *componentDataPtr = &context->m_componentDefinitions[CE_Id_getComponentTypeId(componentId)];
-        if (CE_ECS_MainStorage_destroyComponent(&context->m_storage, componentDataPtr, componentId, &localErrorCode) != CE_OK) {
+        if (CE_ECS_MainStorage_destroyComponent(&context->m_storage, context, componentDataPtr, componentId, &localErrorCode) != CE_OK) {
             // Just print and error and continue, its not ideal but we want to ensure cleanup continues
             CE_Error("Failed to destroy component with ID %d with code %s", componentId, CE_GetErrorMessage(localErrorCode));
             success = false;
