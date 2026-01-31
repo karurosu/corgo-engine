@@ -45,20 +45,29 @@ CE_Result CE_Engine_ReleaseAsset(INOUT CE_ECS_Context* context, IN void *asset);
 // Shortcuts to cache and release via macros per asset type
 
 #define CE_DEFINE_ASSET_CACHE_LOAD_FUNCTION(type, pointer_type, load_params) \
-    inline pointer_type *CE_Engine_CacheAsset_##type(INOUT CE_ECS_Context* context, IN const char* assetPath, IN const load_params* loadParams)
+    inline pointer_type *CE_Engine_CacheAsset_##type(INOUT CE_ECS_Context* context, IN const char* assetPath, IN const load_params* loadParams)\
+    { \
+        return (pointer_type *)CE_Engine_CacheAsset(context, type, assetPath, (const void *)loadParams); \
+    }
 
 #define CE_DEFINE_ASSET_CACHE_RELEASE_FUNCTION(type, pointer_type, load_params) \
-    inline CE_Result CE_Engine_ReleaseAsset_##type(INOUT CE_ECS_Context* context, IN pointer_type *asset)
+    inline CE_Result CE_Engine_ReleaseAsset_##type(INOUT CE_ECS_Context* context, IN pointer_type *asset) \
+    { \
+        return CE_Engine_ReleaseAsset(context, (void *)asset); \
+    }
 
 #define CE_DECLARE_ASSET_CACHE_FUNCS(type, pointer_type, load_params) \
-    CE_DEFINE_ASSET_CACHE_LOAD_FUNCTION(type, pointer_type, load_params); \
-    CE_DEFINE_ASSET_CACHE_RELEASE_FUNCTION(type, pointer_type, load_params);
+    CE_DEFINE_ASSET_CACHE_LOAD_FUNCTION(type, pointer_type, load_params) \
+    CE_DEFINE_ASSET_CACHE_RELEASE_FUNCTION(type, pointer_type, load_params)
 
 #define CE_CACHE_ASSET(context, type, path, loadParams) \
     CE_Engine_CacheAsset_##type(context, path, loadParams);
 
 #define CE_CACHE_ASSET_TO_VAR(variable, context, type, path, loadParams) \
     CE_ASSET_PTR(type) variable = CE_Engine_CacheAsset_##type(context, path, loadParams);
+
+#define CE_RELEASE_ASSET(context, type, asset) \
+    CE_Engine_ReleaseAsset_##type(context, asset);
 
 #define X(type, pointer_type, load_params) CE_DECLARE_ASSET_CACHE_FUNCS(type, pointer_type, load_params)
     CE_ASSET_LOADERS(X)

@@ -26,6 +26,7 @@ float lastTickTime = 0.0f;
 
 static int update(void* userdata);
 const char* fontpath = "/System/Fonts/Asheville-Sans-14-Bold.pft";
+const char* font2path = "/System/Fonts/Roobert-10-Bold.pft";
 LCDFont* font = NULL;
 
 // Demo variables, global to keep it simple
@@ -102,26 +103,31 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 			}
 
 			// Set text and font
-			result = CE_TextLabelComponent_setText(textLabelComponent, "Hello, Corgo Engine!");
+			result = CE_TextLabelComponent_setText(ecsContext, textLabelComponent, "Hello, Corgo Engine!");
 			if (result != CE_OK) {
 				CE_Error("Failed to set text for TextLabelComponent: %s", CE_GetErrorMessage(errorCode));
 				return -1;
 			}
-			result = CE_TextLabelComponent_setFont(textLabelComponent, fontpath);
+			result = CE_TextLabelComponent_setFont(ecsContext, textLabelComponent, fontpath);
+			if (result != CE_OK) {
+				CE_Error("Failed to set font for TextLabelComponent: %s", CE_GetErrorMessage(errorCode));
+				return -1;
+			}
+			result = CE_TextLabelComponent_setFont(ecsContext, textLabelComponent, font2path);
 			if (result != CE_OK) {
 				CE_Error("Failed to set font for TextLabelComponent: %s", CE_GetErrorMessage(errorCode));
 				return -1;
 			}
 
 			// Get bounds of the text
-			result = CE_TextLabelComponent_getTextBounds(textLabelComponent, &x_size, &y_size);
+			result = CE_TextLabelComponent_getTextBounds(ecsContext, textLabelComponent, &x_size, &y_size);
 			if (result != CE_OK) {
 				CE_Error("Failed to get text bounds for TextLabelComponent: %s", CE_GetErrorMessage(errorCode));
 				return -1;
 			}
 
 			CE_Debug("Text bounds: %d x %d", x_size, y_size);
-			CE_TransformComponent_setPosition(transformComponent, (CE_GetDisplayWidth()-x_size)/2, (CE_GetDisplayHeight()-y_size)/2, 0);
+			CE_TransformComponent_setPosition(ecsContext, transformComponent, (CE_GetDisplayWidth()-x_size)/2, (CE_GetDisplayHeight()-y_size)/2, 0);
 		}
 
 #ifdef CE_BACKEND_PLAYDATE
@@ -184,7 +190,7 @@ static int update(void* userdata)
 		}
 
 		// Update transform component position
-		CE_TransformComponent_setPosition(transformComponent, x, y, 0);
+		CE_TransformComponent_setPosition(ecsContext, transformComponent, x, y, 0);
 	}
 
 #ifdef CE_BACKEND_PLAYDATE

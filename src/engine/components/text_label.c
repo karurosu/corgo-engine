@@ -30,7 +30,7 @@ CE_DEFINE_COMPONENT_CLEANUP(CE_TEXT_LABEL_COMPONENT)
 
 // Helpers
 
-CE_Result CE_TextLabelComponent_setText(INOUT CE_TextLabelComponent* component, IN const char* text)
+CE_Result CE_TextLabelComponent_setText(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, IN const char* text)
 {
     if (text == NULL || strlen(text) >= sizeof(component->text)) {
         return CE_ERROR;
@@ -42,7 +42,7 @@ CE_Result CE_TextLabelComponent_setText(INOUT CE_TextLabelComponent* component, 
     return CE_OK;
 }
 
-CE_Result CE_TextLabelComponent_setFont(INOUT CE_TextLabelComponent* component, IN const char* fontName)
+CE_Result CE_TextLabelComponent_setFont(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, IN const char* fontName)
 {
     if (strcmp(component->fontName, fontName) == 0) {
         return CE_OK;
@@ -53,11 +53,11 @@ CE_Result CE_TextLabelComponent_setFont(INOUT CE_TextLabelComponent* component, 
     // Temp code to force loading of font
     if (component->fontPtr)
     {
-        CE_FREE_ASSET(CE_ASSET_TYPE_FONT, component->fontPtr);
+        CE_RELEASE_ASSET(context, CE_ASSET_TYPE_FONT, component->fontPtr);
         component->fontPtr = NULL;
     }
 
-    component->fontPtr = CE_LOAD_ASSET(CE_ASSET_TYPE_FONT, fontName, NULL);
+    component->fontPtr = CE_CACHE_ASSET(context, CE_ASSET_TYPE_FONT, fontName, NULL);
     if (component->fontPtr == NULL)
     {
         return CE_ERROR;
@@ -66,7 +66,7 @@ CE_Result CE_TextLabelComponent_setFont(INOUT CE_TextLabelComponent* component, 
     return CE_OK;
 }
 
-CE_Result CE_TextLabelComponent_getTextBounds(INOUT CE_TextLabelComponent* component, OUT int* width, OUT int* height)
+CE_Result CE_TextLabelComponent_getTextBounds(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, OUT int* width, OUT int* height)
 {
     if (component->fontPtr == NULL)
     {

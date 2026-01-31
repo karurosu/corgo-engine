@@ -66,6 +66,7 @@ void *CE_Engine_CacheAsset(INOUT CE_ECS_Context* context, IN CE_TypeId assetType
             return NULL;
         }
         (*count)++;
+        CE_Debug("Asset %s already cached, incremented ref count to %u", assetPath, *count);
         return data->m_data;
     }
     else
@@ -94,6 +95,7 @@ void *CE_Engine_CacheAsset(INOUT CE_ECS_Context* context, IN CE_TypeId assetType
             return NULL;
         }
 
+        CE_Debug("Cached new asset %s with initial ref count 1", assetPath);
         return asset;
     }
 }
@@ -121,6 +123,7 @@ CE_Result CE_Engine_ReleaseAsset(INOUT CE_ECS_Context* context, IN void *asset)
                 {
                     // Free the asset
                     CE_Engine_FreeAsset(el->m_data, el->m_type);
+                    CE_Debug("Released asset from cache: %s", *key);
                     // Remove from both maps
                     cc_erase_itr(&component->m_assetData, el);
                     cc_erase_itr(&component->m_assetCount, count);
@@ -143,19 +146,4 @@ CE_Result CE_Engine_ReleaseAsset(INOUT CE_ECS_Context* context, IN void *asset)
         return CE_ERROR;
     }
 }
-
-// Shortcut macros
-#define CE_DEFINE_ASSET_CACHE_FUNCTIONS(type, pointer_type, load_params) \
-    CE_DEFINE_ASSET_CACHE_LOAD_FUNCTION(type, pointer_type, load_params) \
-    { \
-        return (pointer_type *)CE_Engine_CacheAsset(context, type, assetPath, (const void *)loadParams); \
-    } \
-    CE_DEFINE_ASSET_CACHE_RELEASE_FUNCTION(type, pointer_type, load_params) \
-    { \
-        return CE_Engine_ReleaseAsset(context, (void *)asset); \
-    }
-
-#define X(type, pointer_type, load_params) CE_DEFINE_ASSET_CACHE_FUNCTIONS(type, pointer_type, load_params)
-    CE_ASSET_LOADERS(X)
-#undef X
 
