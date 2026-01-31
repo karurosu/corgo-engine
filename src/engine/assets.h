@@ -10,10 +10,6 @@
 #include "ecs/types.h"
 #include "core/platform.h"
 
-// Include this here to expose API
-#include "core/asset_cache.h"
-#include "core/asset_loader.h"
-
 #include "game/assets.h"
 #ifndef CE_ASSET_TYPES_GAME
 #define CE_ASSET_TYPES_GAME(X)
@@ -49,19 +45,17 @@ typedef void CE_Asset_LoadParams_None; // Indicate the loader takes no parameter
     // Playdate backend asset loaders
     #define CE_ASSET_LOADERS_ENGINE(X) \
         X(CE_ASSET_TYPE_BITMAP, LCDBitmap, CE_Asset_LoadParams_None) \
-        X(CE_ASSET_TYPE_FONT, LCDFont, CE_Asset_LoadParams_None)
-    
-    #define CE_ASSET_LOADERS_STUBBED(X) \
-        X(CE_ASSET_TYPE_SOUND) \
-        X(CE_ASSET_TYPE_MUSIC) 
+        X(CE_ASSET_TYPE_FONT, LCDFont, CE_Asset_LoadParams_None) \
+        X(CE_ASSET_TYPE_SOUND, void, void) \
+        X(CE_ASSET_TYPE_MUSIC, void, void)
 
 #else 
-    // Stub asset loaders for unsupported backends
-    #define CE_ASSET_LOADERS_STUBBED(X) \
-        X(CE_ASSET_TYPE_BITMAP) \
-        X(CE_ASSET_TYPE_SOUND) \
-        X(CE_ASSET_TYPE_MUSIC) \
-        X(CE_ASSET_TYPE_FONT)
+    // Default loaders (stubs)
+    #define CE_ASSET_LOADERS_ENGINE(X) \
+        X(CE_ASSET_TYPE_BITMAP, void, void) \
+        X(CE_ASSET_TYPE_SOUND, void, void) \
+        X(CE_ASSET_TYPE_MUSIC, void, void) \
+        X(CE_ASSET_TYPE_FONT, void, void)
 
 #endif // CE_BACKEND_PLAYDATE
 
@@ -85,14 +79,9 @@ typedef void CE_Asset_LoadParams_None; // Indicate the loader takes no parameter
 // Auto generated declarations
 ////////////////////////////////////
 
-// Defined assets
-#define X(type, pointerType, loadParams) CE_DECLARE_ASSET_LOADER(type, pointerType, loadParams)
-    CE_ASSET_LOADERS(X)
-#undef X
+#include "core/asset_loader.h"
+// Include this here to expose API
+#include "core/asset_cache.h"
 
-// Stubbed assets
-#define X(type) CE_DECLARE_ASSET_LOADER(type, void, void)
-    CE_ASSET_LOADERS_STUBBED(X)
-#undef X
 
 #endif // CORGO_ENGINE_ASSETS_H
