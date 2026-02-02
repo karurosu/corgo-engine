@@ -884,6 +884,10 @@ void test_ECS_Relationships(void) {
     CE_Id childEntity1 = CE_INVALID_ID;
     CE_Id childEntity2 = CE_INVALID_ID;
 
+    // Check that reciprocal data is correct
+    TEST_ASSERT_EQUAL_UINT32(CE_RELATIONSHIP_PARENT, CE_RELATIONSHIPS_RECIPROCALS[CE_RELATIONSHIP_CHILD]);
+    TEST_ASSERT_EQUAL_UINT32(CE_RELATIONSHIP_CHILD, CE_RELATIONSHIPS_RECIPROCALS[CE_RELATIONSHIP_PARENT]);
+
     // Create parent entity
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &parentEntity, &errorCode));
     TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, parentEntity);
@@ -900,7 +904,7 @@ void test_ECS_Relationships(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 
     // Add relationship from parent to child
-    result = CE_Entity_AddRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity1, CE_RELATIONSHIP_PARENT, &errorCode);
+    result = CE_Entity_AddRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity1, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 
@@ -914,7 +918,7 @@ void test_ECS_Relationships(void) {
     TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT));
 
     // Add a second relationship from parent to another child
-    result = CE_Entity_AddRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, CE_RELATIONSHIP_PARENT, &errorCode);
+    result = CE_Entity_AddRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 
@@ -948,7 +952,7 @@ void test_ECS_Relationships(void) {
     }
 
     // Remove second relationship
-    result = CE_Entity_RemoveRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, CE_RELATIONSHIP_PARENT, &errorCode);
+    result = CE_Entity_RemoveRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, parentEntity));
@@ -959,7 +963,7 @@ void test_ECS_Relationships(void) {
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT)); // No longer has parent
 
     // Now try again and it should fail
-    result = CE_Entity_RemoveRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, CE_RELATIONSHIP_PARENT, &errorCode);
+    result = CE_Entity_RemoveRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, &errorCode);
     TEST_ASSERT_EQUAL_UINT32(CE_ERROR_CODE_ENTITY_DOES_NOT_HAVE_RELATIONSHIP, errorCode);
     TEST_ASSERT_EQUAL_INT(CE_ERROR, result);
 
@@ -972,7 +976,7 @@ void test_ECS_Relationships(void) {
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT)); // No longer has parent
 
     // Remove first relationship
-    result = CE_Entity_RemoveRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity1, CE_RELATIONSHIP_PARENT, &errorCode);
+    result = CE_Entity_RemoveRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity1, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 
@@ -983,6 +987,48 @@ void test_ECS_Relationships(void) {
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD)); // No longer has children
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT)); // No longer has parent
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT)); // No longer has parent
+}
+
+void test_ECS_Clean_Relationships(void) {
+    CE_ERROR_CODE errorCode;
+    CE_Result result = CE_ERROR;
+    CE_Id parentEntity = CE_INVALID_ID;
+    CE_Id childEntity1 = CE_INVALID_ID;
+    CE_Id childEntity2 = CE_INVALID_ID;
+
+    // Create parent entity
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &parentEntity, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, parentEntity);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Create child entity
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &childEntity1, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, childEntity1);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Create a second child entity
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &childEntity2, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, childEntity2);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Add relationship from parent to child
+    result = CE_Entity_AddRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity1, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Add a second relationship from parent to another child
+    result = CE_Entity_AddRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Remove Parent
+    result = CE_ECS_DestroyEntity(&context, parentEntity, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Verify all relationships removed
+    TEST_ASSERT_EQUAL_UINT32(0, CE_Entity_GetRelationshipCount(&context, childEntity1));
+    TEST_ASSERT_EQUAL_UINT32(0, CE_Entity_GetRelationshipCount(&context, childEntity2));
 }
 
 void test_ECS_tick(void) {
@@ -1100,6 +1146,7 @@ int main(void) {
     RUN_TEST(test_ECS_ContextSetup);
     RUN_TEST(test_ECS_ComponentStorage);
     RUN_TEST(test_ECS_Relationships);
+    RUN_TEST(test_ECS_Clean_Relationships);
     
     RUN_TEST(test_Entity_ComponentCreation);
     RUN_TEST(test_Entity_ComponentDeletion);

@@ -12,6 +12,8 @@
 #include "context.h"
 #include "engine/core/platform.h"
 
+#include "ecs_relationships.h"
+
 CE_Result CE_ECS_CreateEntity(INOUT CE_ECS_Context* context, OUT CE_Id* outId, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     // Just call create on storage
@@ -45,7 +47,20 @@ CE_Result CE_ECS_DestroyEntity(INOUT CE_ECS_Context* context, IN CE_Id entity, O
 
     cc_for_each(&entityData->m_relationships, relationshipIdPtr) 
     {
-        // TODO: Destroy relationships associated with this entity
+        const CE_Id relationshipId = *relationshipIdPtr;
+        CE_Id targetId = CE_INVALID_ID;
+        result = CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, CE_Id_getRelationshipTypeId(relationshipId), CE_Id_getGeneration(relationshipId), CE_Id_getUniqueId(relationshipId), &targetId);
+        if (result != CE_OK) {
+            CE_Error("Failed to make reference ID for relationship ID %d", relationshipId);
+            success = false;
+            continue;
+        }
+
+        if (CE_Entity_RemoveRelationship(context, entity, CE_Id_getRelationshipTypeId(relationshipId), targetId, &localErrorCode) != CE_OK) {
+            // Just print and error and continue, its not ideal but we want to ensure cleanup continues
+            CE_Error("Failed to remove relationship with ID %d with code %s", relationshipId, CE_GetErrorMessage(localErrorCode));
+            success = false;
+        }
         
     }
 

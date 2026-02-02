@@ -30,7 +30,7 @@
 
 //// Generate relationship Types Enum
 typedef enum CE_RELATIONSHIP_TYPES_ENUM {
-#define X(name) name,
+#define X(relationship, reciprocal) relationship, reciprocal,
 	CE_RELATIONSHIP_DESC_CORE(X)
 	CE_RELATIONSHIP_DESC_ENGINE(X)
 #ifndef CE_CORE_TEST_MODE
@@ -39,6 +39,16 @@ typedef enum CE_RELATIONSHIP_TYPES_ENUM {
 #undef X
 	CE_RELATIONSHIP_TYPES_COUNT //Invalid system count
 } CE_RELATIONSHIP_TYPES;
+
+static const int CE_RELATIONSHIPS_RECIPROCALS[CE_RELATIONSHIP_TYPES_COUNT] = {
+#define X(relationship, reciprocal) reciprocal, relationship,
+	CE_RELATIONSHIP_DESC_CORE(X)
+	CE_RELATIONSHIP_DESC_ENGINE(X)
+#ifndef CE_CORE_TEST_MODE
+	CE_RELATIONSHIP_DESC_GAME(X)
+#endif
+#undef X
+};
 
 //// Debug helpers
 const char* CE_ECS_GetRelationshipTypeNameDebugStr(IN CE_TypeId typeId);

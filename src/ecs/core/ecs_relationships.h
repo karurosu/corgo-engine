@@ -24,12 +24,11 @@
  * @param[in] entity The ID of the source entity.
  * @param[in] relationshipType The type ID of the relationship to add.
  * @param[in] targetEntity The ID of the target entity.
- * @param[in] reciprocalRelationshipType The type ID of the reciprocal relationship to add on the target entity, or CE_INVALID_TYPE_ID to skip.
  * @param[out] errorCode Optional error code if addition fails.
  * 
  * @return CE_OK on success, CE_ERROR on failure.
  */
-CE_Result CE_Entity_AddRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, IN CE_Id targetEntity, IN CE_TypeId reciprocalRelationshipType, OUT_OPT CE_ERROR_CODE* errorCode);
+CE_Result CE_Entity_AddRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, IN CE_Id targetEntity, OUT_OPT CE_ERROR_CODE* errorCode);
 
 /**
  * @brief Remove a relationship from one entity to another.
@@ -41,12 +40,11 @@ CE_Result CE_Entity_AddRelationship(INOUT CE_ECS_Context* context, IN CE_Id enti
  * @param[in] entity The ID of the source entity.
  * @param[in] relationshipType The type ID of the relationship to remove.
  * @param[in] targetEntity The ID of the target entity.
- * @param[in] reciprocalRelationshipType The type ID of the reciprocal relationship to remove on the target entity, or CE_INVALID_TYPE_ID to skip.
  * @param[out] errorCode Optional error code if removal fails.
  * 
  * @return CE_OK on success, CE_ERROR on failure.
  */
-CE_Result CE_Entity_RemoveRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, IN CE_Id targetEntity, IN CE_TypeId reciprocalRelationshipType, OUT_OPT CE_ERROR_CODE* errorCode);
+CE_Result CE_Entity_RemoveRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, IN CE_Id targetEntity, OUT_OPT CE_ERROR_CODE* errorCode);
 
 /////////////////////////////////
 // Relationship query functions

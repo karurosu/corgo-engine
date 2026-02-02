@@ -11,7 +11,7 @@ const char* CE_ECS_GetRelationshipTypeNameDebugStr(IN CE_TypeId typeId)
 {
 #ifdef CE_DEBUG_BUILD
     switch (typeId) {
-#define X(name) case name: return #name;
+#define X(name, reciprocal) case name: return #name; case reciprocal: return #reciprocal;
 	CE_RELATIONSHIP_DESC_CORE(X)
 	CE_RELATIONSHIP_DESC_ENGINE(X)
 #ifndef CE_CORE_TEST_MODE
