@@ -2,13 +2,14 @@
 //  ecs/core/storage.h
 //  Main include file for all data storage definitions.
 //  All functions here are internal to the ECS implementation.
-//  Copyright (c) 2025 Carlos Camacho. All rights reserved.
+//  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
 #ifndef CORGO_ECS_CORE_STORAGE_H
 #define CORGO_ECS_CORE_STORAGE_H
 
 #include "../types.h"
+#include "entity.h"
 #include "../components.h"
 #include "../systems.h"
 
@@ -27,18 +28,9 @@ typedef struct CE_ECS_ComponentStorage {
     cc_vec(CE_ECS_ComponentStorageHeader) m_componentMetadata; // Metadata for each component instance
 } CE_ECS_ComponentStorage;
 
-// Entity storage definitions
-typedef struct CE_ECS_EntityData {
-    bool m_isValid;
-    CE_Id m_entityId;
-    CE_Bitset m_entityComponentBitset; // Bitset to track which component types are attached to the entity
-    CE_Bitset m_entityRelationshipBitset; // Bitset to track which relationship types are attached to the entity
-    CE_Id_Set m_components; // Vector of component ids attached to the entity
-    CE_Id_Set m_relationships; // Vector of relationship ids attached to the entity
-} CE_ECS_EntityData;
-
 typedef struct CE_ECS_EntityStorage {
     uint32_t m_count;
+    CE_Bitset m_entityIndexBitset; // Bitset to track used indices
     CE_ECS_EntityData m_entityDataArray[CE_MAX_ENTITIES];
     CE_Id_Set m_knownEntities;
 } CE_ECS_EntityStorage;

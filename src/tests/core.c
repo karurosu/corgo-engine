@@ -558,7 +558,7 @@ static void test_CE_EntityConstruction(void) {
     TEST_ASSERT_NOT_NULL(entityData);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 
-    TEST_ASSERT_TRUE(entityData->m_isValid);
+    TEST_ASSERT_TRUE(CE_Entity_IsValid(&context, entityId));
     TEST_ASSERT_EQUAL_UINT32(entityId, entityData->m_entityId);
     const size_t componentCount = cc_size(&entityData->m_components);
     const size_t relationshipCount = cc_size(&entityData->m_relationships);
@@ -618,7 +618,7 @@ static void test_CE_EntityConstruction(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_getEntityData(&context.m_storage, newEntityId, &entityData, &errorCode));
     TEST_ASSERT_NOT_NULL(entityData);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_TRUE(entityData->m_isValid);
+    TEST_ASSERT_TRUE(CE_Entity_IsValid(&context, newEntityId));
     TEST_ASSERT_EQUAL_UINT32(newEntityId, entityData->m_entityId);
 }
 
@@ -809,6 +809,9 @@ void test_Entity_Deletion(void) {
     // Attempt to access component directly fails too
     componentData = CE_ECS_ComponentStorage_getComponentDataPointerById(context.m_storage.m_componentTypeStorage[CE_CORE_DEBUG_COMPONENT], &context.m_componentDefinitions[CE_CORE_DEBUG_COMPONENT], componentId_1);
     TEST_ASSERT_NULL(componentData);
+
+    // IsValid should return false
+    TEST_ASSERT_FALSE(CE_Entity_IsValid(&context, entity_1));
 }
 
 void test_Entity_MultipleComponents(void) {

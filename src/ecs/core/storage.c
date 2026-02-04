@@ -80,10 +80,16 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN CE_ECS_Con
 
     // Initialize entity storage
     for (uint32_t i=0; i < CE_MAX_ENTITIES; i++) {
-        storage->m_entityStorage.m_entityDataArray[i].m_isValid = false;
         storage->m_entityStorage.m_entityDataArray[i].m_entityId = CE_INVALID_ID;
-        CE_Bitset_init(&storage->m_entityStorage.m_entityDataArray[i].m_entityComponentBitset, CE_COMPONENT_TYPES_COUNT);
-        CE_Bitset_init(&storage->m_entityStorage.m_entityDataArray[i].m_entityRelationshipBitset, CE_RELATIONSHIP_TYPES_COUNT);
+        
+        if (CE_Bitset_init(&storage->m_entityStorage.m_entityDataArray[i].m_entityComponentBitset, CE_COMPONENT_TYPES_COUNT) != CE_OK) {
+            CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
+            return CE_ERROR;
+        }
+        if (CE_Bitset_init(&storage->m_entityStorage.m_entityDataArray[i].m_entityRelationshipBitset, CE_RELATIONSHIP_TYPES_COUNT) != CE_OK) {
+            CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
+            return CE_ERROR;
+        }
         
         cc_init(&storage->m_entityStorage.m_entityDataArray[i].m_components);
         cc_init(&storage->m_entityStorage.m_entityDataArray[i].m_relationships);
@@ -92,6 +98,12 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN CE_ECS_Con
     cc_init(&storage->m_entityStorage.m_knownEntities);
     if (!cc_reserve(&storage->m_entityStorage.m_knownEntities, CE_MAX_ENTITIES/4)) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
+        return CE_ERROR;
+    }
+
+    storage->m_entityStorage.m_count = 0;
+    if (CE_Bitset_init(&storage->m_entityStorage.m_entityIndexBitset, CE_MAX_ENTITIES) != CE_OK) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
         return CE_ERROR;
     }
 
@@ -308,12 +320,12 @@ CE_Result CE_ECS_MainStorage_createEntity(INOUT CE_ECS_MainStorage* storage, OUT
     // Find the first available slot for a new entity
     size_t index;
     for (index = 0; index < CE_MAX_ENTITIES; index++) {
-        if (!storage->m_entityStorage.m_entityDataArray[index].m_isValid) {
+        if (!CE_Bitset_isBitSet(&storage->m_entityStorage.m_entityIndexBitset, index)) {
             break;
         }
     }
 
-    if (index == CE_MAX_ENTITIES) {
+    if (index >= CE_MAX_ENTITIES) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_MAX_ENTITIES_REACHED);
         return CE_ERROR;
     }
@@ -336,7 +348,7 @@ CE_Result CE_ECS_MainStorage_createEntity(INOUT CE_ECS_MainStorage* storage, OUT
     }
 
     entityData->m_entityId = newId;
-    entityData->m_isValid = true;
+    CE_Bitset_setBit(&storage->m_entityStorage.m_entityIndexBitset, index);
     CE_Bitset_clear(&entityData->m_entityComponentBitset);
     CE_Bitset_clear(&entityData->m_entityRelationshipBitset);
     cc_clear(&entityData->m_components);
@@ -375,12 +387,13 @@ CE_Result CE_ECS_MainStorage_destroyEntity(INOUT CE_ECS_MainStorage* storage, IN
         return CE_ERROR;
     }
 
-    CE_ECS_EntityData* entityData = &storage->m_entityStorage.m_entityDataArray[index];
-    if (!entityData->m_isValid) {
+    if (!CE_Bitset_isBitSet(&storage->m_entityStorage.m_entityIndexBitset, index)) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_ENTITY_NOT_FOUND);
         return CE_ERROR;
     }
 
+    CE_ECS_EntityData* entityData = &storage->m_entityStorage.m_entityDataArray[index];
+    
     // Detect if the passed id is stale (references a deleted entity)
     const uint32_t generation = CE_Id_getGeneration(entityData->m_entityId);
     if (generation != CE_Id_getGeneration(id)) {
@@ -388,7 +401,7 @@ CE_Result CE_ECS_MainStorage_destroyEntity(INOUT CE_ECS_MainStorage* storage, IN
         return CE_ERROR;
     }
 
-    entityData->m_isValid = false;
+    CE_Bitset_clearBit(&storage->m_entityStorage.m_entityIndexBitset, index);
     storage->m_entityStorage.m_count--;
     CE_Bitset_clear(&entityData->m_entityComponentBitset);
     CE_Bitset_clear(&entityData->m_entityRelationshipBitset);
@@ -415,7 +428,7 @@ CE_Result CE_ECS_MainStorage_getEntityData(INOUT CE_ECS_MainStorage* storage, IN
     }
 
     CE_ECS_EntityData* entityData = &storage->m_entityStorage.m_entityDataArray[index];
-    if (!entityData->m_isValid) {
+    if (!CE_Bitset_isBitSet(&storage->m_entityStorage.m_entityIndexBitset, index)) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_ENTITY_NOT_FOUND);
         return CE_ERROR;
     }
