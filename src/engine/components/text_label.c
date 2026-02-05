@@ -4,10 +4,7 @@
 //  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
-#include "ecs/components.h"
-
-#include "engine/core/memory.h"
-#include "engine/assets.h"
+#include "ecs/ecs.h"
 
 CE_DEFINE_COMPONENT_INIT(CE_TEXT_LABEL_COMPONENT)
 {

@@ -47,6 +47,11 @@ typedef uint32_t CE_Id;
 // Component Type Id is a 8-bit unsigned integer that identifies a unique component type.
 typedef uint8_t CE_TypeId;
 
+// Short Id type: 16-bit unsigned integer for local ids within an Id type.
+// Used to track objects temporarily without the full 32-bit Id.
+// Use carefully as it doesn't store generation or component type.
+typedef uint16_t CE_ShortId;
+
 //// CE_Id kind
 // Different kinds of Ids stored in the top 4 bits.
 typedef enum CE_IdKind {

@@ -4,7 +4,7 @@
 //  Copyright (c) 2025 Carlos Camacho. All rights reserved.
 //
 
-#include "ecs/components.h"
+#include "ecs/ecs.h"
 
 CE_DEFINE_COMPONENT_INIT(CE_SPRITE_COMPONENT)
 {

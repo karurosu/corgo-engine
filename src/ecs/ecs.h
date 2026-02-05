@@ -10,6 +10,7 @@
 
 #include "types.h"
 #include "engine/core/platform.h"
+#include "engine/core/memory.h"
 #include "core/id.h"
 #include "components.h"
 #include "systems.h"

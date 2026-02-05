@@ -12,12 +12,16 @@
 CE_DEFINE_GLOBAL_COMPONENT_INIT(CE_ENGINE_SCENE_GRAPH_COMPONENT)
 {
     component->m_rootEntityId = CE_INVALID_ID;
+    component->m_rebuildZOrderCache = true;
+    component->m_needsRedraw = true;
+
+    cc_init(&component->m_zOrderCache);
     return CE_OK;
 }
 
 CE_DEFINE_GLOBAL_COMPONENT_CLEANUP(CE_ENGINE_SCENE_GRAPH_COMPONENT)
 {
-    // No dynamic resources to clean up for CE_SceneGraphComponent
+    cc_cleanup(&component->m_zOrderCache);
     return CE_OK;
 }
 

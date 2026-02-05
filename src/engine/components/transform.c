@@ -4,7 +4,7 @@
 //  Copyright (c) 2025 Carlos Camacho. All rights reserved.
 //
 
-#include "ecs/components.h"
+#include "ecs/ecs.h"
 
 CE_DEFINE_COMPONENT_INIT(CE_TRANSFORM_COMPONENT)
 {
@@ -19,11 +19,29 @@ CE_DEFINE_COMPONENT_CLEANUP(CE_TRANSFORM_COMPONENT)
     return CE_OK;
 }
 
-CE_Result CE_TransformComponent_setPosition(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN uint32_t x, IN uint32_t y, IN uint32_t z)
+CE_Result CE_TransformComponent_setPosition(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN uint32_t x, IN uint32_t y, IN uint16_t z)
 {
     component->x = x;
     component->y = y;
     component->z = z;
+    CE_Engine_SceneGraph_MarkDirty(context);
+    CE_Engine_SceneGraph_MarkZOrderDirty(context);
+    return CE_OK;
+}
+
+CE_Result CE_TransformComponent_setPositionXY(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN uint32_t x, IN uint32_t y)
+{
+    component->x = x;
+    component->y = y;
+    CE_Engine_SceneGraph_MarkDirty(context);
+    return CE_OK;
+}
+
+CE_Result CE_TransformComponent_setZIndex(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN uint16_t z)
+{
+    component->z = z;
+    CE_Engine_SceneGraph_MarkDirty(context);
+    CE_Engine_SceneGraph_MarkZOrderDirty(context);
     return CE_OK;
 }
 

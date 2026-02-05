@@ -22,7 +22,24 @@
  *      #define CE_SYSTEM_DESC_GAME(X) \
  *          X(CE_MY_SYSTEM_NAME, <Run Order>, <Run Phase>, <Run Frequency>, CE_MY_SYSTEM_NAME_DEPENDENCIES)
  * 
- *    See docs for details on Run Order, Phase, and Frequency.
+ *    <Run Order>: Determines what entity order the system runs on. Options are:
+ *       - CE_ECS_SYSTEM_RUN_ORDER_AUTO: System runs on automatic order that maximizes performance, use this unless you have special requirements.
+ *       - CE_ECS_SYSTEM_RUN_ORDER_SCENETREE: System runs in scene tree order, from root to leaves, breadth-first. Use this for systems that depend on parent-child relationships.
+ *       - CE_ECS_SYSTEM_RUN_ORDER_RENDER: System runs in render order (Z index), from back to front. Use this for systems that need to process entities in the order they will be rendered.
+ *    
+ *    <Run Phase>: Determines when the system runs relative to other systems. Systems of the same phase have no guaranteed order. In general
+ *      use the default phase unless you have special requirements. Options are:
+ *       - CE_ECS_SYSTEM_RUN_PHASE_EARLY: System runs first.
+ *       - CE_ECS_SYSTEM_RUN_PHASE_DEFAULT: System runs after all early systems.
+ *       - CE_ECS_SYSTEM_RUN_PHASE_LATE: System runs after all default systems.
+ *    
+ *    <Run Frequency>: Determines how often the system runs. Running more often can impact performance. Options are:
+ *       - CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY: System runs every display frame (for example: input).
+ *       - CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY: System runs every other frame (less critical gameplay tasks).
+ *       - CE_ECS_SYSTEM_RUN_FREQUENCY_ONCE_PER_SECOND: System runs once per second. Run times may vary slightly to accommodate frame timing (time related tasks).
+ *  
+ *    Note: CE_ECS_SYSTEM_RUN_ORDER_RENDER does not follow phase or frequency, instead it always runs once per frame after all other systems.
+ *    These systems should only be used for rendering-related tasks, avoid loading resources or heavy computations.
  * 
  * 3. Implement the system in a .c file using the CE_START_SYSTEM_IMPLEMENTATION and CE_END_SYSTEM_IMPLEMENTATION macros:
  * 
@@ -44,8 +61,7 @@
  * Global systems are systems that tick independently of entities at most once per frame.
  * They have no dependencies on components or relationships and area always active.
  * 
- * 1. Add the global system to the global system description macro below, see example.
- *      
+ * 1. Add the global system to the global system description macro below, <Run Phase>, <Run Frequency> are the same as above.
  * 2. Implement the global system in a .c file using the CE_START_GLOBAL_SYSTEM_IMPLEMENTATION and CE_END_GLOBAL_SYSTEM_IMPLEMENTATION macros
  */
 
