@@ -21,11 +21,11 @@ https://github.com/karurosu/corgo-engine/blob/main/corgo_demo.gif?raw=true
 ## Current state
 1. ECS Core: 80%. Entities, Component and Systems can be defined and tick. Still missing support for scenegraph ordering, optimizations and some features.
 2. Engine core: just a demo. Hardcoded to run.
-3. SceneGraph and scripting: nothing yet.
+3. SceneGraph and scripting: **WIP**
 4. Graphics: nothing yet.
 5. Audio: nothing yet.
 6. Input: nothing yet.
-7. Asset loader: **WIP**
+7. Asset loader: Done
 8. Playdate backend: minimal, just what is required for the demo.
 9. PC backend: nothing yet.
 
