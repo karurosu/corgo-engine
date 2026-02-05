@@ -11,24 +11,13 @@
 #include "core/platform.h"
 #include "engine/assets.h"
 
-//// Transform Component
-typedef struct CETransformComponent {
-    uint32_t x;
-	uint32_t y;
-	uint32_t z; // Z-index for layering
-} CE_TransformComponent;
+// Include component headers
+#include "components/text_label.h"
+#include "components/transform.h"
+#include "components/sprite.h"
 
-//// Sprite Component
-typedef struct CESpriteComponent {
-	bool visible;
-} CE_SpriteComponent;
-
-//// Text Label Component
-typedef struct CETextLabelComponent {
-	char text[256];
-	const char *fontName;
-	CE_ASSET_PTR(CE_ASSET_TYPE_FONT) fontPtr;
-} CE_TextLabelComponent;
+// Global components
+#include "components/scene_graph.h"
 
 #define CE_COMPONENT_DESC_ENGINE(X) \
 	X(CE_TRANSFORM_COMPONENT, 10, CE_TransformComponent, CE_DEFAULT_COMPONENT_CAPACITY)\
@@ -36,6 +25,7 @@ typedef struct CETextLabelComponent {
 	X(CE_TEXT_LABEL_COMPONENT, 12, CE_TextLabelComponent, 16)
 
 #define CE_GLOBAL_COMPONENT_DESC_ENGINE(X) \
-    X(CE_ENGINE_ASSET_CACHE, CE_Engine_AssetCache_Component)
+    X(CE_ENGINE_ASSET_CACHE, CE_Engine_AssetCache_Component)\
+	X(CE_ENGINE_SCENE_GRAPH_COMPONENT, CE_SceneGraphComponent)
 
 #endif // CORGO_ENGINE_COMPONENTS_H

@@ -15,9 +15,6 @@
 // Include main ECS header
 #include "ecs/ecs.h"
 
-// Helper include for demo
-#include "engine/components/helpers.h"
-
 // Global ECS context
 CE_ECS_Context *ecsContext;
 

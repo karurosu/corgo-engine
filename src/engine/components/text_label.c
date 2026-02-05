@@ -1,12 +1,11 @@
 //
 //  engine/components/text_label.c
-//  A simple 2d Based transform component
-//  Copyright (c) 2025 Carlos Camacho. All rights reserved.
+//  Text label component definition.
+//  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
 #include "ecs/components.h"
 
-#include "helpers.h"
 #include "engine/core/memory.h"
 #include "engine/assets.h"
 

@@ -209,12 +209,12 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
 
     for (int phase = CE_ECS_SYSTEM_RUN_PHASE_EARLY; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++)
     {
+        // Display
         result = CE_ECS_RunGlobalSystems(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode);
         if (result != CE_OK) {
             return CE_ERROR;
         }
 
-        // Display
         result = CE_ECS_RunSystems_AutoOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode);
         if (result != CE_OK) {
             return CE_ERROR;

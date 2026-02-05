@@ -26,6 +26,8 @@ typedef int CE_Result;
 // Enums 40-49: Component related errors
 // Enums 50-59: Relationship related errors
 // Enums 60-69: bitset errors
+// Enums 70-99: Engine specific errors
+// Enums 100+: Game specific errors
 #define CE_ERROR_CODE_LIST(X) \
     X(NONE, 0, "No error") \
     X(UNSUPPORTED_OPERATION, 1, "Unsupported operation") \
@@ -57,6 +59,8 @@ typedef int CE_Result;
     X(ENTITY_DOES_NOT_HAVE_RELATIONSHIP, 51, "Entity does not have the specified relationship") \
     \
     X(BITSET_INDEX_OUT_OF_BOUNDS, 60, "Bitset index out of bounds") \
+    \
+    X(ENGINE_CANNOT_INITIALIZE_SCENE_GRAPH, 70, "Engine cannot initialize scene graph") \
     /* Add new error codes here */
 
 // Generate enum values
