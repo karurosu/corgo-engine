@@ -145,7 +145,7 @@ CE_Result CE_Entity_GetAllComponentsIter(INOUT CE_ECS_Context* context, IN CE_Id
  * @param[in] name The name of the global component to access.
  * @param[in] varname to store the typed pointer to the global component data.
  */
-#define CE_ECS_GlobalComponentPtr(context, name, varname) CE_GLOBAL_COMPONENT_DATA(name)* varname = CE_ECS_AccessGlobalComponent(context, name)
+#define CE_ECS_AccessGlobalComponentToVariable(context, name, varname) CE_GLOBAL_COMPONENT_DATA(name)* varname = CE_ECS_AccessGlobalComponent(context, name)
 
 ////////////////////////////////////
 /// Internal ECS functions, exposed here because user code may need to call them

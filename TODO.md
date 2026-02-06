@@ -7,6 +7,7 @@ TODOs:
 
 Ideas:
 - Change component metadata to have a bitset to track flags (requires a variable sized bitset)
+- Add flags for entities, lightweight empty components that can be used to trigger systems
 
 Future:
 - Support for multiple copies of the same component/relationship

@@ -1118,7 +1118,7 @@ void test_ECS_GlobalComponents(void) {
     CE_Result result = CE_ERROR;
 
     // Get global component
-    CE_ECS_GlobalComponentPtr(&context, CE_CORE_GLOBAL_DEBUG_COMPONENT, globalDebugComponentPtr);
+    CE_ECS_AccessGlobalComponentToVariable(&context, CE_CORE_GLOBAL_DEBUG_COMPONENT, globalDebugComponentPtr);
     TEST_ASSERT_NOT_NULL(globalDebugComponentPtr);
     TEST_ASSERT_FALSE(globalDebugComponentPtr->m_enabled);
     TEST_ASSERT_EQUAL_INT(0, globalDebugComponentPtr->m_testValue);
