@@ -53,3 +53,49 @@ CE_Result CE_Engine_SceneGraph_Init(CE_ECS_Context* context, CE_ERROR_CODE* erro
 
     return CE_OK;
 }
+
+CE_Result CE_SceneGraph_AddChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN CE_Id childId, IN bool move, CE_ERROR_CODE* errorCode)
+{
+    CE_SceneGraphComponent* sceneGraph = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_SCENE_GRAPH_COMPONENT);
+    
+    sceneGraph->m_rebuildZOrderCache = true;
+    sceneGraph->m_needsRedraw = true;
+
+    if (CE_Entity_HasRelationship(context, childId, CE_RELATIONSHIP_PARENT)) {
+        if (!move) {
+            CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_ENGINE_ALREADY_PARENTED);
+            return CE_ERROR;
+        }
+
+        if (CE_Entity_RemoveRelationship(context, childId, CE_RELATIONSHIP_PARENT, parentId, errorCode) != CE_OK) {
+            return CE_ERROR;
+        }
+    }
+
+    return CE_Entity_AddRelationship(context, parentId, CE_RELATIONSHIP_CHILD, childId, errorCode);
+}
+
+CE_Result CE_SceneGraph_RemoveChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN CE_Id childId, CE_ERROR_CODE* errorCode)
+{
+    CE_SceneGraphComponent* sceneGraph = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_SCENE_GRAPH_COMPONENT);
+    
+    sceneGraph->m_rebuildZOrderCache = true;
+    sceneGraph->m_needsRedraw = true;
+
+    bool exists = false;
+    if (CE_Entity_HasSpecificRelationship(context, childId, CE_RELATIONSHIP_PARENT, parentId, &exists, errorCode) != CE_OK) {
+        return CE_ERROR;
+    }
+
+    if (!exists) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_ENGINE_ENTITY_DOES_NOT_HAVE_CHILD);
+        return CE_ERROR;
+    }
+
+    return CE_Entity_RemoveRelationship(context, parentId, CE_RELATIONSHIP_CHILD, childId, errorCode);
+}
+
+CE_Result CE_Engine_SceneGraph_RebuildZOrderCache(INOUT CE_ECS_Context* context, CE_ERROR_CODE* errorCode)
+{
+    return CE_OK;
+}

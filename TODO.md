@@ -4,12 +4,12 @@ Mostly so I don't forget.
 TODOs:
 - SceneTree ordering
 - Optimize auto ordering
-- add scenegraph methods to add/remove children to guarantee dirtying the caches
 
 Ideas:
 - Change component metadata to have a bitset to track flags (requires a variable sized bitset)
 - Add flags for entities, lightweight empty components that can be used to trigger systems
 - expand max entities to 512
+- separate global render system
 
 Future:
 - Support for multiple copies of the same component/relationship

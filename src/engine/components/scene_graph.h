@@ -44,4 +44,33 @@ CE_Result CE_Engine_SceneGraph_Init(CE_ECS_Context* context, CE_ERROR_CODE* erro
         sceneGraphComp->m_rebuildZOrderCache = true; \
     } while(0)
 
+/// Private API
+
+CE_Result CE_Engine_SceneGraph_RebuildZOrderCache(INOUT CE_ECS_Context* context, CE_ERROR_CODE* errorCode);
+
+/// Public API
+
+/** 
+ * @brief Adds a child entity to a parent entity in the scene graph.
+ * Ensures caches are updated accordingly.
+ * 
+ * @param context[in,out] The ECS context.
+ * @param parentId[in] The parent entity ID.
+ * @param childId[in] The child entity ID.
+ * @param move[in] Whether to move the child from its current parent if it already has one.
+ * @param errorCode[out] The error code in case of failure.
+ */
+CE_Result CE_SceneGraph_AddChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN CE_Id childId, IN bool move, CE_ERROR_CODE* errorCode);
+
+/**
+ * @brief Removes a child entity from a parent entity in the scene graph.
+ * Ensures caches are updated accordingly.
+ * 
+ * @param context[in,out] The ECS context.
+ * @param parentId[in] The parent entity ID.
+ * @param childId[in] The child entity ID.
+ * @param errorCode[out] The error code in case of failure.
+ */
+CE_Result CE_SceneGraph_RemoveChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN CE_Id childId, CE_ERROR_CODE* errorCode);
+
 #endif // CORGO_ENGINE_COMPONENTS_SCENE_GRAPH_H

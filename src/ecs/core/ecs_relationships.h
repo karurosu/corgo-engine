@@ -88,6 +88,20 @@ CE_Result CE_Entity_FindFirstRelationship(INOUT CE_ECS_Context* context, IN CE_I
  */
 CE_Result CE_Entity_FindAllRelationships(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, OUT CE_Id results[], IN size_t bufsize, OUT size_t *resultCount, OUT_OPT CE_ERROR_CODE* errorCode);
 
+/**
+ * @brief Check if an entity has a specific relationship with a target entity.
+ * 
+ * @param[in,out] context The ECS context.
+ * @param[in] entity The ID of the entity to check.
+ * @param[in] relationshipType The type ID of the relationship to check.
+ * @param[in] targetEntity The ID of the target entity.
+ * @param[out] exists Pointer to a boolean that will be set to true if the relationship exists, false otherwise.    
+ * @param[out] errorCode Optional error code if check fails.
+ * 
+ * @return CE_OK on success, CE_ERROR on failure.
+ */
+CE_Result CE_Entity_HasSpecificRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, IN CE_Id targetEntity, OUT bool* exists, OUT_OPT CE_ERROR_CODE* errorCode);
+
 ////////////////////////////////////
 /// Internal ECS functions, exposed here because user code may need to call them
 /// But regular should not use it directly

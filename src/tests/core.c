@@ -915,6 +915,19 @@ void test_ECS_Relationships(void) {
     TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, parentEntity));
     TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD));
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_PARENT)); // Check parent didn't get added mistakenly
+
+    // Check has specific relationship
+    bool exists = false;
+    result = CE_Entity_HasSpecificRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity1, &exists, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_TRUE(exists);
+
+    // Ensure relationship to entity 2 does not exist yet
+    result = CE_Entity_HasSpecificRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, &exists, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_FALSE(exists);
     
     // Check reciprocal relationship from child to parent
     TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, childEntity1));
@@ -978,8 +991,8 @@ void test_ECS_Relationships(void) {
     TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT)); // Still has parent
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT)); // No longer has parent
 
-    // Remove first relationship
-    result = CE_Entity_RemoveRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity1, &errorCode);
+    // Remove first relationship from reciprocal relationship
+    result = CE_Entity_RemoveRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT, parentEntity, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 

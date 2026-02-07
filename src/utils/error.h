@@ -61,6 +61,8 @@ typedef int CE_Result;
     X(BITSET_INDEX_OUT_OF_BOUNDS, 60, "Bitset index out of bounds") \
     \
     X(ENGINE_CANNOT_INITIALIZE_SCENE_GRAPH, 70, "Engine cannot initialize scene graph") \
+    X(ENGINE_ALREADY_PARENTED, 71, "New child entity already has a parent") \
+    X(ENGINE_ENTITY_DOES_NOT_HAVE_CHILD, 72, "Entity does not have the specified child") \
     /* Add new error codes here */
 
 // Generate enum values
