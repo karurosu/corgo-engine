@@ -15,13 +15,13 @@ CE_DEFINE_GLOBAL_COMPONENT_INIT(CE_ENGINE_SCENE_GRAPH_COMPONENT)
     component->m_rebuildZOrderCache = true;
     component->m_needsRedraw = true;
 
-    cc_init(&component->m_zOrderCache);
+    cc_init(&component->m_renderList);
     return CE_OK;
 }
 
 CE_DEFINE_GLOBAL_COMPONENT_CLEANUP(CE_ENGINE_SCENE_GRAPH_COMPONENT)
 {
-    cc_cleanup(&component->m_zOrderCache);
+    cc_cleanup(&component->m_renderList);
     return CE_OK;
 }
 
@@ -150,7 +150,7 @@ CE_Result CE_Engine_SceneGraph_Traverse(INOUT CE_ECS_Context* context, IN CE_Id 
     return CE_OK;
 }
 
-CE_Result CacheZOrderTraverseFunc(IN CE_ECS_Context* context, IN CE_Id entityId, IN CE_Id parentId, INOUT void* userData, CE_ERROR_CODE* errorCode)
+CE_Result CacheRenderListTraverseFunc(IN CE_ECS_Context* context, IN CE_Id entityId, IN CE_Id parentId, INOUT void* userData, CE_ERROR_CODE* errorCode)
 {
     CE_SceneGraphComponent* sceneGraph = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_SCENE_GRAPH_COMPONENT);
     CE_TransformComponent* transformComponent = NULL;
@@ -163,16 +163,21 @@ CE_Result CacheZOrderTraverseFunc(IN CE_ECS_Context* context, IN CE_Id entityId,
     }
 
     CESceneGraphRenderNode renderNode = {
-        .m_entityShortId = CE_Id_getUniqueId(entityId),
-        .m_zIndex = transformComponent->z
+        .m_x = transformComponent->x,
+        .m_y = transformComponent->y,
+        .m_z = transformComponent->z
     };
 
-    cc_insert(&sceneGraph->m_zOrderCache, renderNode);
+    if (cc_insert(&sceneGraph->m_renderList, CE_Id_getUniqueId(entityId), renderNode) == NULL) {
+        CE_Error("Failed to insert render node for entity %u into scene graph Z-order cache", entityId);
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
+        return CE_ERROR;
+    }
 
     return CE_OK;
 }
 
-CE_Result CE_Engine_SceneGraph_RebuildZOrderCache(INOUT CE_ECS_Context* context, CE_ERROR_CODE* errorCode)
+CE_Result CE_Engine_SceneGraph_RebuildRenderList(INOUT CE_ECS_Context* context, CE_ERROR_CODE* errorCode)
 {
     CE_SceneGraphComponent* sceneGraph = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_SCENE_GRAPH_COMPONENT);
     
@@ -183,7 +188,7 @@ CE_Result CE_Engine_SceneGraph_RebuildZOrderCache(INOUT CE_ECS_Context* context,
     }
 
     // Remove old cache
-    cc_clear(&sceneGraph->m_zOrderCache);
+    cc_clear(&sceneGraph->m_renderList);
 
     if (sceneGraph->m_rootEntityId == CE_INVALID_ID)
     {
@@ -192,11 +197,12 @@ CE_Result CE_Engine_SceneGraph_RebuildZOrderCache(INOUT CE_ECS_Context* context,
     }
     
     // Traverse the scene graph and rebuild the cache
-    if (CE_Engine_SceneGraph_Traverse(context, sceneGraph->m_rootEntityId, CacheZOrderTraverseFunc, NULL, errorCode) != CE_OK)
+    if (CE_Engine_SceneGraph_Traverse(context, sceneGraph->m_rootEntityId, CacheRenderListTraverseFunc, NULL, errorCode) != CE_OK)
     {
         return CE_ERROR;
     }
 
+    CE_Debug("Rebuilt scene graph render list with %zu nodes", cc_size(&sceneGraph->m_renderList));
     sceneGraph->m_rebuildZOrderCache = false;
     return CE_OK;
 }

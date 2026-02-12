@@ -115,12 +115,11 @@ CE_Result CE_ECS_RunSystems_RenderOrder(INOUT CE_ECS_Context* context, IN float 
 
     CE_ECS_AccessGlobalComponentToVariable(context, CE_ENGINE_SCENE_GRAPH_COMPONENT, sceneGraph);
     
-    cc_for_each(&sceneGraph->m_zOrderCache, renderNodePtr) 
+    cc_for_each(&sceneGraph->m_renderList, index, renderNodePtr)
     {
-        const uint16_t entityShortId = renderNodePtr->m_entityShortId;
         CE_ECS_EntityData* entityData;
 
-        result = CE_ECS_MainStorage_getEntityDataByUniqueId(&context->m_storage, entityShortId, &entityData, errorCode);
+        result = CE_ECS_MainStorage_getEntityDataByUniqueId(&context->m_storage, *index, &entityData, errorCode);
         if (entityData == NULL || result != CE_OK) {
             return CE_ERROR;
         }

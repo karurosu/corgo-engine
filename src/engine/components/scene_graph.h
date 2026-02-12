@@ -11,26 +11,26 @@
 #include "ecs/core/ecs_component.h"
 
 typedef struct {
-    uint16_t m_entityShortId;
-    uint16_t m_zIndex;
+    int16_t m_x;
+    int16_t m_y;
+    int16_t m_z;
 } CESceneGraphRenderNode;
 
-#define CC_CMPR CESceneGraphRenderNode, { return val_1.m_zIndex < val_2.m_zIndex ? -1 : val_1.m_zIndex > val_2.m_zIndex; }
-#define CC_HASH CESceneGraphRenderNode, { return val.m_entityShortId * 2654435761ull; }
+#define CC_CMPR CESceneGraphRenderNode, { return val_1.m_z < val_2.m_z ? -1 : val_1.m_z > val_2.m_z; }
 #include <cc.h>
 
 typedef struct CESceneGraphComponent {
     CE_Id m_rootEntityId;
     bool m_rebuildZOrderCache;
     bool m_needsRedraw;
-    cc_oset(CESceneGraphRenderNode) m_zOrderCache;
+    cc_omap(uint16_t, CESceneGraphRenderNode) m_renderList; // Cache entity coordinates for rendering, sorted by Z-order
 } CE_SceneGraphComponent;
 
 // Helpers
 CE_Result CE_Engine_SceneGraph_Init(CE_ECS_Context* context, CE_ERROR_CODE* errorCode);
 
-#define CE_Engine_GetSceneRootId(contextPtr) \
-    ((CE_ECS_AccessGlobalComponent((contextPtr), CE_ENGINE_SCENE_GRAPH_COMPONENT))->m_rootEntityId)
+#define CE_SceneGraph_GetSceneRootId(contextPtr) \
+    (CE_ECS_AccessGlobalComponent((contextPtr), CE_ENGINE_SCENE_GRAPH_COMPONENT)->m_rootEntityId)
 
 #define CE_Engine_SceneGraph_MarkDirty(contextPtr) \
     do { \
@@ -49,7 +49,7 @@ CE_Result CE_Engine_SceneGraph_Init(CE_ECS_Context* context, CE_ERROR_CODE* erro
 typedef CE_Result (*CE_SceneGraphTraverseCallback)(IN CE_ECS_Context* context, IN CE_Id entityId, IN CE_Id parentId, INOUT void* userData, CE_ERROR_CODE* errorCode);
 
 CE_Result CE_Engine_SceneGraph_Traverse(INOUT CE_ECS_Context* context, IN CE_Id entityId, IN CE_SceneGraphTraverseCallback callback, INOUT void* userData, CE_ERROR_CODE* errorCode);
-CE_Result CE_Engine_SceneGraph_RebuildZOrderCache(INOUT CE_ECS_Context* context, CE_ERROR_CODE* errorCode);
+CE_Result CE_Engine_SceneGraph_RebuildRenderList(INOUT CE_ECS_Context* context, CE_ERROR_CODE* errorCode);
 
 /// Public API
 

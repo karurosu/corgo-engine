@@ -165,6 +165,7 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
     CE_Debug("ECS runtime data size: %u bytes", sizeof(CE_ECS_SystemRuntimeData));
     CE_Debug("ECS Entity storage size: %u bytes", sizeof(CE_ECS_EntityStorage));
     CE_Debug("Entity data size: %u bytes", sizeof(CE_ECS_EntityData));
+    CE_Debug("Size of render list nodes: %u bytes", sizeof(CESceneGraphRenderNode));
     CE_Debug("Max entities supported: %u", CE_MAX_ENTITIES);
 
     CE_Debug("ECS context initialized successfully");
@@ -260,8 +261,8 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
     }
 
     // Regenerate caches if needed
-    if (CE_Engine_SceneGraph_RebuildZOrderCache(context, errorCode) != CE_OK) {
-        CE_Error("Failed to rebuild scene graph Z-order cache with error code: %s", CE_GetErrorMessage(*errorCode));
+    if (CE_Engine_SceneGraph_RebuildRenderList(context, errorCode) != CE_OK) {
+        CE_Error("Failed to rebuild scene graph render list with error code: %s", CE_GetErrorMessage(*errorCode));
         return CE_ERROR;
     }
 

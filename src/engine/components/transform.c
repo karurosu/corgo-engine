@@ -19,29 +19,38 @@ CE_DEFINE_COMPONENT_CLEANUP(CE_TRANSFORM_COMPONENT)
     return CE_OK;
 }
 
-CE_Result CE_TransformComponent_setPosition(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN int32_t x, IN int32_t y, IN uint16_t z)
+CE_Result CE_TransformComponent_setPosition(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN int32_t x, IN int32_t y, IN int16_t z)
 {
-    component->x = x;
-    component->y = y;
-    component->z = z;
-    CE_Engine_SceneGraph_MarkDirty(context);
-    CE_Engine_SceneGraph_MarkZOrderDirty(context);
+    if (component->x != x || component->y != y || component->z != z) {
+        CE_Engine_SceneGraph_MarkDirty(context);
+        component->x = x;
+        component->y = y;
+    }
+    
+    if (component->z != z) {
+        CE_Engine_SceneGraph_MarkZOrderDirty(context);
+        component->z = z;
+    }
     return CE_OK;
 }
 
 CE_Result CE_TransformComponent_setPositionXY(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN int32_t x, IN int32_t y)
 {
-    component->x = x;
-    component->y = y;
-    CE_Engine_SceneGraph_MarkDirty(context);
+    if (component->x != x || component->y != y) {
+        CE_Engine_SceneGraph_MarkDirty(context);
+        component->x = x;
+        component->y = y;
+    }
     return CE_OK;
 }
 
-CE_Result CE_TransformComponent_setZIndex(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN uint16_t z)
+CE_Result CE_TransformComponent_setZIndex(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN int16_t z)
 {
-    component->z = z;
-    CE_Engine_SceneGraph_MarkDirty(context);
-    CE_Engine_SceneGraph_MarkZOrderDirty(context);
+    if (component->z != z) {
+        CE_Engine_SceneGraph_MarkZOrderDirty(context);
+        CE_Engine_SceneGraph_MarkDirty(context);
+        component->z = z;
+    }
     return CE_OK;
 }
 

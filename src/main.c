@@ -131,7 +131,7 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 			}
 
 			// Add to graph
-			CE_SceneGraph_AddChild(ecsContext, CE_ECS_AccessGlobalComponent(ecsContext, CE_ENGINE_SCENE_GRAPH_COMPONENT)->m_rootEntityId, entityId, false, &errorCode);
+			CE_SceneGraph_AddChild(ecsContext, CE_SceneGraph_GetSceneRootId(ecsContext), entityId, false, &errorCode);
 			if (result != CE_OK) {
 				CE_Error("Failed to add demo entity to scene graph: %s", CE_GetErrorMessage(errorCode));
 				return -1;
@@ -139,6 +139,65 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 
 			CE_Debug("Text bounds: %d x %d", x_size, y_size);
 			CE_TransformComponent_setPosition(ecsContext, transformComponent, (CE_GetDisplayWidth()-x_size)/2, (CE_GetDisplayHeight()-y_size)/2, 0);
+
+			// Create a second entity to test the scene graph Z ordering
+			CE_Id entityId2 = CE_INVALID_ID;
+			CE_Id transformComponentId2 = CE_INVALID_ID;
+			CE_Id textLabelComponentId2 = CE_INVALID_ID;
+			CE_TransformComponent* transformComponent2 = NULL;
+			CE_TextLabelComponent* textLabelComponent2 = NULL;
+			int x_size2 = 0;
+			int y_size2 = 0;
+
+			result = CE_ECS_CreateEntity(ecsContext, &entityId2, &errorCode);
+			if (result != CE_OK) {
+				CE_Error("Failed to create demo entity 2: %s", CE_GetErrorMessage(errorCode));
+				return -1;
+			}
+
+			result = CE_Entity_AddComponent(ecsContext, entityId2, CE_TRANSFORM_COMPONENT, &transformComponentId2, (void**)&transformComponent2, &errorCode);
+			if (result != CE_OK) {
+				CE_Error("Failed to add TransformComponent to demo entity 2: %s", CE_GetErrorMessage(errorCode));
+				return -1;
+			}
+
+			result = CE_Entity_AddComponent(ecsContext, entityId2, CE_TEXT_LABEL_COMPONENT, &textLabelComponentId2, (void**)&textLabelComponent2, &errorCode);
+			if (result != CE_OK) {
+				CE_Error("Failed to add TextLabelComponent to demo entity 2: %s", CE_GetErrorMessage(errorCode));
+				return -1;
+			}
+
+			// Set text and font
+			result = CE_TextLabelComponent_setText(ecsContext, textLabelComponent2, "WOOF!!");
+			if (result != CE_OK) {
+				CE_Error("Failed to set text for TextLabelComponent: %s", CE_GetErrorMessage(errorCode));
+				return -1;
+			}
+
+			result = CE_TextLabelComponent_setFont(ecsContext, textLabelComponent2, fontpath);
+			if (result != CE_OK) {
+				CE_Error("Failed to set font for TextLabelComponent 2: %s", CE_GetErrorMessage(errorCode));
+				return -1;
+			}
+			
+			textLabelComponent2->m_inverted = true; // Draw in white
+
+			// Get bounds of the text
+			result = CE_TextLabelComponent_getTextBounds(ecsContext, textLabelComponent2, &x_size2, &y_size2);
+			if (result != CE_OK) {
+				CE_Error("Failed to get text bounds for TextLabelComponent 2: %s", CE_GetErrorMessage(errorCode));
+				return -1;
+			}
+
+			// Add to graph
+			CE_SceneGraph_AddChild(ecsContext, CE_SceneGraph_GetSceneRootId(ecsContext), entityId2, false, &errorCode);
+			if (result != CE_OK) {
+				CE_Error("Failed to add demo entity 2 to scene graph: %s", CE_GetErrorMessage(errorCode));
+				return -1;
+			}
+
+			CE_Debug("Text bounds: %d x %d", x_size2, y_size2);
+			CE_TransformComponent_setPosition(ecsContext, transformComponent2, (CE_GetDisplayWidth()-x_size2)/2, (CE_GetDisplayHeight()-y_size2)/2, 0);
 		}
 
 #ifdef CE_BACKEND_PLAYDATE

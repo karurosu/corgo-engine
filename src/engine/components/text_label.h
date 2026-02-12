@@ -10,9 +10,12 @@
 #include "ecs/types.h"
 #include "engine/assets.h"
 
+#define CE_ENGINE_TEXT_LABEL_BUFFER_SIZE 255
+
 //// Text Label Component
 typedef struct CETextLabelComponent {
-	char text[256];
+	bool m_inverted;
+	char text[CE_ENGINE_TEXT_LABEL_BUFFER_SIZE];
 	const char *fontName;
 	CE_ASSET_PTR(CE_ASSET_TYPE_FONT) fontPtr;
 } CE_TextLabelComponent;
