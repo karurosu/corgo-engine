@@ -212,17 +212,12 @@ CE_Result CE_Entity_FindAllComponents(INOUT CE_ECS_Context* context, IN CE_Id en
 }
 
 
-CE_Result CE_Entity_GetAllComponentsIter(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType, OUT CE_Id_Set **components, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_Entity_GetAllComponentsIter(INOUT CE_ECS_Context* context, IN CE_Id entity, OUT CE_Id_Set **components, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     CE_Result result = CE_OK;
     
     if (entity == CE_INVALID_ID) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_ENTITY_ID);
-        return CE_ERROR;
-    }
-
-    if (componentType == CE_INVALID_TYPE_ID || componentType >= CE_MAX_COMPONENT_TYPES) {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_COMPONENT_TYPE);
         return CE_ERROR;
     }
 
@@ -232,12 +227,6 @@ CE_Result CE_Entity_GetAllComponentsIter(INOUT CE_ECS_Context* context, IN CE_Id
         return CE_ERROR;
     }
 
-    // First check that the entity actually has this component
-    if (!CE_Bitset_isBitSet(&entityData->m_entityComponentBitset, componentType)) {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_COMPONENT_NOT_FOUND_IN_ENTITY);
-        return CE_ERROR;
-    }
-    
     *components = &entityData->m_components;
     
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);

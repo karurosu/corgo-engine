@@ -258,3 +258,21 @@ CE_Result CE_Entity_HasSpecificRelationship(INOUT CE_ECS_Context* context, IN CE
 
     return CE_OK;
 }
+
+CE_Result CE_Entity_GetAllRelationshipsIter(INOUT CE_ECS_Context* context, IN CE_Id entity, OUT CE_Id_Set **relationships, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    if (entity == CE_INVALID_ID) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_ENTITY_ID);
+        return CE_ERROR;
+    }
+
+    CE_ECS_EntityData* entityData = NULL;
+    if (CE_ECS_MainStorage_getEntityData(&context->m_storage, entity, &entityData, errorCode) != CE_OK) {
+        return CE_ERROR;
+    }
+
+    *relationships = &entityData->m_relationships;
+    
+    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+    return CE_OK;
+}

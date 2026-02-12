@@ -102,6 +102,21 @@ CE_Result CE_Entity_FindAllRelationships(INOUT CE_ECS_Context* context, IN CE_Id
  */
 CE_Result CE_Entity_HasSpecificRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, IN CE_Id targetEntity, OUT bool* exists, OUT_OPT CE_ERROR_CODE* errorCode);
 
+/**
+ * @brief Retrieve a cc_set reference to all relationships of an entity.
+ * 
+ * The returned container is the raw data, so it should not be altered unless you know what you are doing.
+ * 
+ * @param[in,out] context The ECS context.
+ * @param[in] entity The ID of the entity to search.
+ * @param[in] relationshipType The type ID of the relationships to find.
+ * @param[out] relationships Pointer to receive the set of relationship IDs. Do not modify the returned set.
+ * @param[out] errorCode Optional error code if retrieval fails.
+ * 
+ * @return CE_OK on success, CE_ERROR on failure.
+ */
+CE_Result CE_Entity_GetAllRelationshipsIter(INOUT CE_ECS_Context* context, IN CE_Id entity, OUT CE_Id_Set **relationships, OUT_OPT CE_ERROR_CODE* errorCode);
+
 ////////////////////////////////////
 /// Internal ECS functions, exposed here because user code may need to call them
 /// But regular should not use it directly

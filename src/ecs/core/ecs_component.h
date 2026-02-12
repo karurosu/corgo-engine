@@ -121,7 +121,7 @@ CE_Result CE_Entity_FindAllComponents(INOUT CE_ECS_Context* context, IN CE_Id en
  * 
  * @return CE_OK on success, CE_ERROR on failure.
  */
-CE_Result CE_Entity_GetAllComponentsIter(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType, OUT CE_Id_Set **components, OUT_OPT CE_ERROR_CODE* errorCode);
+CE_Result CE_Entity_GetAllComponentsIter(INOUT CE_ECS_Context* context, IN CE_Id entity, OUT CE_Id_Set **components, OUT_OPT CE_ERROR_CODE* errorCode);
 
 ////////////////////////////////////
 /// Global component access functions
@@ -135,7 +135,7 @@ CE_Result CE_Entity_GetAllComponentsIter(INOUT CE_ECS_Context* context, IN CE_Id
  * @param[in] name The name of the global component to access.
  * @return Pointer to the global component data.
  */
-#define CE_ECS_AccessGlobalComponent(context, name) &((context)->m_storage.m_globalComponents.CE_PASTE(m_, CE_GLOBAL_COMPONENT(name)))
+#define CE_ECS_AccessGlobalComponent(context, name) (&((context)->m_storage.m_globalComponents.CE_PASTE(m_, CE_GLOBAL_COMPONENT(name))))
 
 /**
  * @brief Access a global component by name and create a pointer of the appropriate type with the specified name
