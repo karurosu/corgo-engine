@@ -25,7 +25,7 @@
  *    <Run Order>: Determines what entity order the system runs on. Options are:
  *       - CE_ECS_SYSTEM_RUN_ORDER_AUTO: System runs on automatic order that maximizes performance, use this unless you have special requirements.
  *       - CE_ECS_SYSTEM_RUN_ORDER_SCENETREE: System runs in scene tree order, from root to leaves, breadth-first. Use this for systems that depend on parent-child relationships.
- *       - CE_ECS_SYSTEM_RUN_ORDER_RENDER: System runs in render order (Z index), from back to front. Use this for systems that need to process entities in the order they will be rendered.
+ *       - CE_ECS_SYSTEM_RUN_ORDER_RENDER: System runs in render order (Z index), from back to front. Use this for systems that render to screen.
  *    
  *    <Run Phase>: Determines when the system runs relative to other systems. Systems of the same phase have no guaranteed order. In general
  *      use the default phase unless you have special requirements. Options are:
@@ -38,7 +38,11 @@
  *       - CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY: System runs every other frame (less critical gameplay tasks).
  *       - CE_ECS_SYSTEM_RUN_FREQUENCY_ONCE_PER_SECOND: System runs once per second. Run times may vary slightly to accommodate frame timing (time related tasks).
  *  
- *    Note: CE_ECS_SYSTEM_RUN_ORDER_RENDER does not follow phase or frequency, instead it always runs once per frame after all other systems.
+ *    Note: CE_ECS_SYSTEM_RUN_ORDER_RENDER ignores frequency, systems will always run once per frame. Use CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY or the system won't run at all.
+ *      <Run Phase> for Render systems only affects the order they run relative to other render systems.
+ *      In general you want to use CE_ECS_SYSTEM_RUN_PHASE_DEFAULT, however CE_ECS_SYSTEM_RUN_PHASE_LATE can be used to render things on top of everything or 
+ *      CE_ECS_SYSTEM_RUN_PHASE_EARLY can be used to render things behind everything (like tileset backgrounds).
+ *      
  *    These systems should only be used for rendering-related tasks, avoid loading resources or heavy computations.
  * 
  * 3. Implement the system in a .c file using the CE_START_SYSTEM_IMPLEMENTATION and CE_END_SYSTEM_IMPLEMENTATION macros:

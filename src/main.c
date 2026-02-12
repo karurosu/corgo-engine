@@ -131,7 +131,7 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 			}
 
 			// Add to graph
-			result = CE_Entity_AddRelationship(ecsContext, entityId, CE_RELATIONSHIP_CHILD, CE_Engine_GetSceneRootId(ecsContext), &errorCode);
+			CE_SceneGraph_AddChild(ecsContext, CE_ECS_AccessGlobalComponent(ecsContext, CE_ENGINE_SCENE_GRAPH_COMPONENT)->m_rootEntityId, entityId, false, &errorCode);
 			if (result != CE_OK) {
 				CE_Error("Failed to add demo entity to scene graph: %s", CE_GetErrorMessage(errorCode));
 				return -1;

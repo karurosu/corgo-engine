@@ -12,6 +12,12 @@ void setUp(void) {
 
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Fake set up the scene graph
+    CE_ECS_AccessGlobalComponentToVariable(&context, CE_ENGINE_SCENE_GRAPH_COMPONENT, sceneGraph);
+    sceneGraph->m_rebuildZOrderCache = false;
+    sceneGraph->m_needsRedraw = false;
+
 }
 
 void tearDown(void) {
@@ -855,7 +861,7 @@ void test_Entity_MultipleComponents(void) {
     
     // Test FindAllComponentsIter
     CE_Id_Set *components = NULL;
-    result = CE_Entity_GetAllComponentsIter(&context, entity_1, CE_CORE_DEBUG_COMPONENT, &components, &errorCode);
+    result = CE_Entity_GetAllComponentsIter(&context, entity_1, &components, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_NOT_NULL(components);

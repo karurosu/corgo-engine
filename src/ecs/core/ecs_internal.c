@@ -6,6 +6,7 @@
 //
 
 #include "ecs_internal.h"
+#include "ecs/ecs.h"
 
 #include "system.h"
 
@@ -27,8 +28,6 @@ CE_Result CE_ECS_RunSystems_AutoOrder(INOUT CE_ECS_Context* context, IN float de
 
         result = CE_ECS_MainStorage_getEntityData(&context->m_storage, entityId, &entityData, errorCode);
         if (entityData == NULL || result != CE_OK) {
-            CE_Error("Failed to get entity data for entity ID %d", entityId);
-            CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
             return CE_ERROR;
         }
 
@@ -102,3 +101,38 @@ CE_Result CE_ECS_RunGlobalSystems(INOUT CE_ECS_Context* context, IN float deltaT
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
 }
+
+CE_Result CE_ECS_RunSystems_RenderOrder(INOUT CE_ECS_Context* context, IN float deltaTime, IN CE_ECS_SYSTEM_RUN_PHASE phase, IN CE_ECS_SYSTEM_RUN_FREQUENCY frequency, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    CE_Result result = CE_ERROR;
+    const CE_ECS_System_CacheList *systemList = &context->m_systemRuntimeData.m_systemsByRunOrder[CE_ECS_SYSTEM_RUN_ORDER_RENDER].m_frequency[frequency].m_phase[phase];
+
+    if (cc_size(&systemList->m_systems) == 0) {
+        // No systems to run
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+        return CE_OK;
+    }
+
+    CE_ECS_AccessGlobalComponentToVariable(context, CE_ENGINE_SCENE_GRAPH_COMPONENT, sceneGraph);
+    
+    cc_for_each(&sceneGraph->m_zOrderCache, renderNodePtr) 
+    {
+        const uint16_t entityShortId = renderNodePtr->m_entityShortId;
+        CE_ECS_EntityData* entityData;
+
+        result = CE_ECS_MainStorage_getEntityDataByUniqueId(&context->m_storage, entityShortId, &entityData, errorCode);
+        if (entityData == NULL || result != CE_OK) {
+            return CE_ERROR;
+        }
+
+        // Run each system in the cached list
+        cc_for_each(&systemList->m_systems, sysTypeIdPtr) 
+        {
+            CE_ECS_RunSystemOnEntity(context, deltaTime, *sysTypeIdPtr, entityData);
+        }
+    }
+
+    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+    return CE_OK;
+}
+

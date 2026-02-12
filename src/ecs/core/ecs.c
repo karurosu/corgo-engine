@@ -108,6 +108,11 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
     for (CE_TypeId sysType = 0; sysType < CE_SYSTEM_TYPES_COUNT; sysType++) {
         const CE_ECS_SystemStaticData* sysData = &context->m_systemDefinitions[sysType];
         if (sysData->m_isValid) {
+            if (sysData->m_runOrder == CE_ECS_SYSTEM_RUN_ORDER_RENDER && sysData->m_runFrequency != CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY) {
+                CE_Error("System %s won't run. It must be set to CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY to run as a render system", CE_ECS_GetSystemTypeNameDebugStr(sysType));
+                continue;
+            }
+
             CE_ECS_System_CacheList* cacheList = &context->m_systemRuntimeData.m_systemsByRunOrder[sysData->m_runOrder].m_frequency[sysData->m_runFrequency].m_phase[sysData->m_runPhase];
             if (cc_push(&cacheList->m_systems, sysType) == NULL) {
                 CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
@@ -251,6 +256,21 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
             if (result != CE_OK) {
                 return CE_ERROR;
             }
+        }
+    }
+
+    // Regenerate caches if needed
+    if (CE_Engine_SceneGraph_RebuildZOrderCache(context, errorCode) != CE_OK) {
+        CE_Error("Failed to rebuild scene graph Z-order cache with error code: %s", CE_GetErrorMessage(*errorCode));
+        return CE_ERROR;
+    }
+
+    // Render systems
+    for (int phase = CE_ECS_SYSTEM_RUN_PHASE_EARLY; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++)
+    {
+        result = CE_ECS_RunSystems_RenderOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode);
+        if (result != CE_OK) {
+            return CE_ERROR;
         }
     }
 

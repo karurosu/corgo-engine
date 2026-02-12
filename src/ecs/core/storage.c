@@ -427,16 +427,36 @@ CE_Result CE_ECS_MainStorage_getEntityData(INOUT CE_ECS_MainStorage* storage, IN
         return CE_ERROR;
     }
 
-    CE_ECS_EntityData* entityData = &storage->m_entityStorage.m_entityDataArray[index];
     if (!CE_Bitset_isBitSet(&storage->m_entityStorage.m_entityIndexBitset, index)) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_ENTITY_NOT_FOUND);
         return CE_ERROR;
     }
 
+    CE_ECS_EntityData* entityData = &storage->m_entityStorage.m_entityDataArray[index];
+
     // Detect if the passed id is stale (references a deleted entity)
     const uint32_t generation = CE_Id_getGeneration(entityData->m_entityId);
     if (generation != CE_Id_getGeneration(id)) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STALE_ENTITY_ID);
+        return CE_ERROR;
+    }
+
+    *outData = entityData;
+        
+    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+    return CE_OK;
+}
+
+CE_Result CE_ECS_MainStorage_getEntityDataByUniqueId(INOUT CE_ECS_MainStorage* storage, IN uint16_t uniqueId, OUT CE_ECS_EntityData** outData, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    if (storage->m_initialized == false) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_MAIN_NOT_INITIALIZED);
+        return CE_ERROR;
+    }
+
+    CE_ECS_EntityData* entityData = &storage->m_entityStorage.m_entityDataArray[uniqueId];
+    if (!CE_Bitset_isBitSet(&storage->m_entityStorage.m_entityIndexBitset, uniqueId)) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_ENTITY_NOT_FOUND);
         return CE_ERROR;
     }
 

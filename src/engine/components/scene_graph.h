@@ -46,6 +46,9 @@ CE_Result CE_Engine_SceneGraph_Init(CE_ECS_Context* context, CE_ERROR_CODE* erro
 
 /// Private API
 
+typedef CE_Result (*CE_SceneGraphTraverseCallback)(IN CE_ECS_Context* context, IN CE_Id entityId, IN CE_Id parentId, INOUT void* userData, CE_ERROR_CODE* errorCode);
+
+CE_Result CE_Engine_SceneGraph_Traverse(INOUT CE_ECS_Context* context, IN CE_Id entityId, IN CE_SceneGraphTraverseCallback callback, INOUT void* userData, CE_ERROR_CODE* errorCode);
 CE_Result CE_Engine_SceneGraph_RebuildZOrderCache(INOUT CE_ECS_Context* context, CE_ERROR_CODE* errorCode);
 
 /// Public API

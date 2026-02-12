@@ -63,6 +63,9 @@ typedef int CE_Result;
     X(ENGINE_CANNOT_INITIALIZE_SCENE_GRAPH, 70, "Engine cannot initialize scene graph") \
     X(ENGINE_ALREADY_PARENTED, 71, "New child entity already has a parent") \
     X(ENGINE_ENTITY_DOES_NOT_HAVE_CHILD, 72, "Entity does not have the specified child") \
+    X(ENGINE_SCENE_GRAPH_NOT_READY, 73, "Scene graph has not been initialized") \
+    X(ENGINE_SCENE_GRAPH_MISSING_TRANSFORM, 74, "Scene graph entity is missing a transform component") \
+
     /* Add new error codes here */
 
 // Generate enum values
