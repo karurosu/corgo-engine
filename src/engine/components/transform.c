@@ -19,7 +19,7 @@ CE_DEFINE_COMPONENT_CLEANUP(CE_TRANSFORM_COMPONENT)
     return CE_OK;
 }
 
-CE_Result CE_TransformComponent_setPosition(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN uint32_t x, IN uint32_t y, IN uint16_t z)
+CE_Result CE_TransformComponent_setPosition(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN int32_t x, IN int32_t y, IN uint16_t z)
 {
     component->x = x;
     component->y = y;
@@ -29,7 +29,7 @@ CE_Result CE_TransformComponent_setPosition(INOUT CE_ECS_Context* context, INOUT
     return CE_OK;
 }
 
-CE_Result CE_TransformComponent_setPositionXY(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN uint32_t x, IN uint32_t y)
+CE_Result CE_TransformComponent_setPositionXY(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN int32_t x, IN int32_t y)
 {
     component->x = x;
     component->y = y;
