@@ -11,6 +11,7 @@ CE_DEFINE_COMPONENT_INIT(CE_TEXT_LABEL_COMPONENT)
     component->text[0] = '\0';
     component->fontName = "";
     component->fontPtr = NULL;
+    component->m_inverted = false;
     return CE_OK;
 }
 
@@ -18,7 +19,7 @@ CE_DEFINE_COMPONENT_CLEANUP(CE_TEXT_LABEL_COMPONENT)
 {
     if (component->fontPtr)
     {
-        CE_FREE_ASSET(CE_ASSET_TYPE_FONT, component->fontPtr);
+        CE_RELEASE_ASSET(context, CE_ASSET_TYPE_FONT, component->fontPtr);
         component->fontPtr = NULL;
     }
     return CE_OK;
