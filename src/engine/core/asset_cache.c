@@ -5,10 +5,7 @@
 //
 
 #include "asset_cache.h"
-#include "ecs/ecs.h"
-#include "platform.h"
-#include "memory.h"
-#include "engine/config.h"
+#include "engine/corgo.h"
 
 // Component functions
 CE_DEFINE_GLOBAL_COMPONENT_INIT(CE_ENGINE_ASSET_CACHE)

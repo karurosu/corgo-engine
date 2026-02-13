@@ -32,4 +32,11 @@
 #define CE_PASTE_HELPER(x, y) x##y
 #define CE_PASTE(x, y) CE_PASTE_HELPER(x, y)
 
+// popcnt
+#if(_WINDLL)
+	#define CE_popcnt __popcnt
+#else
+	#define CE_popcnt __builtin_popcount
+#endif
+
 #endif // CORGO_UTILS_HELPERS_H

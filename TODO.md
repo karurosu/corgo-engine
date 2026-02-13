@@ -4,6 +4,7 @@ Mostly so I don't forget.
 TODOs:
 - SceneTree ordering
 - Optimize auto ordering
+- use builtin_ctz for iteraring over entities
 
 Ideas:
 - Change component metadata to have a bitset to track flags (requires a variable sized bitset)

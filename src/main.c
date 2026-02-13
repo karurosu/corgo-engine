@@ -64,7 +64,7 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 #endif
 		CE_Debug("Welcome to Corgo Engine!");
 		CE_Debug("Date Built: %s", CE_BUILD_DATETIME);
-
+		
 		CE_Debug("Creating ECS Context");
 		CE_ERROR_CODE errorCode;														
 		ecsContext = CE_realloc(NULL, sizeof(CE_ECS_Context));
@@ -138,7 +138,7 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 			}
 
 			CE_Debug("Text bounds: %d x %d", x_size, y_size);
-			CE_TransformComponent_setPosition(ecsContext, transformComponent, (CE_GetDisplayWidth()-x_size)/2, (CE_GetDisplayHeight()-y_size)/2, 0);
+			CE_TransformComponent_setPosition(ecsContext, transformComponent, (CE_GetDisplayWidth(ecsContext)-x_size)/2, (CE_GetDisplayHeight(ecsContext)-y_size)/2, 0);
 
 			// Create a second entity to test the scene graph Z ordering
 			CE_Id entityId2 = CE_INVALID_ID;
@@ -197,8 +197,10 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 			}
 
 			CE_Debug("Text bounds: %d x %d", x_size2, y_size2);
-			CE_TransformComponent_setPosition(ecsContext, transformComponent2, (CE_GetDisplayWidth()-x_size2)/2, (CE_GetDisplayHeight()-y_size2)/2, 0);
+			CE_TransformComponent_setPosition(ecsContext, transformComponent2, (CE_GetDisplayWidth(ecsContext)-x_size2)/2, (CE_GetDisplayHeight(ecsContext)-y_size2)/2, 0);
 		}
+
+		CE_Display_SetRefreshRate(ecsContext, 60);
 
 #ifdef CE_BACKEND_PLAYDATE
 		// Initialize timer
@@ -246,10 +248,10 @@ static int update(void* userdata)
 	{
 		x += x_speed;
 		y += y_speed;
-		if (x <= 0 || x + x_size >= CE_GetDisplayWidth()) {
+		if (x <= 0 || x + x_size >= CE_GetDisplayWidth(ecsContext)) {
 			x_speed = -x_speed;
 		}
-		if (y <= 0 || y + y_size >= CE_GetDisplayHeight()) {
+		if (y <= 0 || y + y_size >= CE_GetDisplayHeight(ecsContext)) {
 			y_speed = -y_speed;
 		}
 
