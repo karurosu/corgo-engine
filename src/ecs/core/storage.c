@@ -11,6 +11,8 @@
 #include "storage.h"
 #include "../ecs.h"
 
+#include "string.h"
+
 CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN CE_ECS_Context *context, OUT CE_ERROR_CODE *errorCode)
 {
     if (storage->m_initialized)  
@@ -56,11 +58,15 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN CE_ECS_Con
         }
 
         // Initialize component data pool
+        storageEntry->m_componentDataPool = NULL;
         storageEntry->m_componentDataPool = CE_realloc(NULL, initialCapacity * componentSize);
         if (!storageEntry->m_componentDataPool) {
             CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_ALLOCATION_FAILED);
             return CE_ERROR;
         }
+
+        // Initialize memory to zero
+        memset((void *) storageEntry->m_componentDataPool, 0, initialCapacity * componentSize);
 
         CE_Debug("Component data pool allocated at %p for type %s of size %u bytes", storageEntry->m_componentDataPool, CE_ECS_GetComponentTypeNameDebugStr(x), initialCapacity * componentSize);
         componentStorageSize += initialCapacity * componentSize;
