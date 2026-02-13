@@ -1,0 +1,8 @@
+#ifndef CE_BUILD_INFO_H
+#define CE_BUILD_INFO_H
+
+#define CE_BUILD_DATE "@BUILD_DATE@"
+#define CE_BUILD_TIME "@BUILD_TIME@"
+#define CE_BUILD_DATETIME "@BUILD_DATETIME@"
+
+#endif // CE_BUILD_INFO_H

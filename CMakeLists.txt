@@ -140,6 +140,39 @@ else()
 	target_compile_definitions(${PLAYDATE_GAME_NAME} PRIVATE CE_BACKEND_PLAYDATE)
 endif()
 
+# Generate build info header at build time
+set(BUILD_INFO_TEMPLATE "${CMAKE_SOURCE_DIR}/src/build_info.h.in")
+set(BUILD_INFO_HEADER "${CMAKE_BINARY_DIR}/build_info.h")
+set(BUILD_INFO_TIMESTAMP "${CMAKE_BINARY_DIR}/build_info.timestamp")
+
+# This target always runs because it has no OUTPUT
+add_custom_target(generate_build_info_always
+	COMMAND ${CMAKE_COMMAND}
+		-DINPUT_FILE=${BUILD_INFO_TEMPLATE}
+		-DOUTPUT_FILE=${BUILD_INFO_HEADER}
+		-P ${CMAKE_SOURCE_DIR}/generate_build_info.cmake
+	COMMAND ${CMAKE_COMMAND} -E touch ${BUILD_INFO_TIMESTAMP}
+	BYPRODUCTS ${BUILD_INFO_HEADER}
+	COMMENT "Generating build timestamp"
+	VERBATIM
+)
+
+# Make this run every time by depending on a target, not a file
+add_custom_target(generate_build_info ALL DEPENDS generate_build_info_always)
+
+# Add the generated header directory to include paths and make targets depend on it
+if (TOOLCHAIN STREQUAL "armgcc")
+	target_include_directories(${PLAYDATE_GAME_DEVICE} PRIVATE ${CMAKE_BINARY_DIR})
+	add_dependencies(${PLAYDATE_GAME_DEVICE} generate_build_info)
+else()
+	target_include_directories(${PLAYDATE_GAME_NAME} PRIVATE ${CMAKE_BINARY_DIR})
+	add_dependencies(${PLAYDATE_GAME_NAME} generate_build_info)
+	if(TARGET coretests)
+		target_include_directories(coretests PRIVATE ${CMAKE_BINARY_DIR})
+		add_dependencies(coretests generate_build_info)
+	endif()
+endif()
+
 include(${SDK}/C_API/buildsupport/playdate_game.cmake)
 
 # Convenience target to launch the Playdate Simulator (simulator builds only)
