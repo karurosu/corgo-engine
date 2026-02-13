@@ -122,8 +122,8 @@ CE_Result CE_Engine_ReleaseAsset(INOUT CE_ECS_Context* context, IN void *asset)
                 if (el->m_data == asset)
                 {
                     // Free the asset
-                    CE_Engine_FreeAsset(el->m_data, el->m_type);
                     CE_Debug("Released asset from cache: %s", *key);
+                    CE_Engine_FreeAsset(el->m_data, el->m_type);
                     // Remove from both maps
                     cc_erase_itr(&component->m_assetData, el);
                     cc_erase_itr(&component->m_assetCount, count);

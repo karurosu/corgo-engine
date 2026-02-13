@@ -202,7 +202,7 @@ CE_Result CE_Engine_SceneGraph_RebuildRenderList(INOUT CE_ECS_Context* context, 
         return CE_ERROR;
     }
 
-    CE_Debug("Rebuilt scene graph render list with %zu nodes", cc_size(&sceneGraph->m_renderList));
+    CE_Debug("Rebuilt scene graph render list with %u nodes", cc_size(&sceneGraph->m_renderList));
     sceneGraph->m_rebuildZOrderCache = false;
     return CE_OK;
 }

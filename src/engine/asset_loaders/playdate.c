@@ -55,12 +55,14 @@ CE_DEFINE_ASSET_LOADER_LOAD_FUNCTION(CE_ASSET_TYPE_FONT)
     }
 
     const char *err;
-    LCDFont* font = pd->graphics->loadFont(assetPath, &err);
-    if (!font)
+    LCDFont* font = NULL;
+    font = pd->graphics->loadFont(assetPath, &err);
+    if (font == NULL)
     {
         CE_Error("Failed to load font asset: %s. Error: %s", assetPath, err ? err : "unknown");
         return NULL;
     }
+    CE_Debug("Loaded font asset: %s to: %p", assetPath, font);
 
     return font;
 }
@@ -74,6 +76,7 @@ CE_DEFINE_ASSET_LOADER_FREE_FUNCTION(CE_ASSET_TYPE_FONT)
         return CE_ERROR;
     }
 
+    CE_Debug("Freed font asset: %p", asset);
     CE_free(asset);
     return CE_OK;
 }

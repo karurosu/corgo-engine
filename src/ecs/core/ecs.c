@@ -165,7 +165,6 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
     CE_Debug("ECS runtime data size: %u bytes", sizeof(CE_ECS_SystemRuntimeData));
     CE_Debug("ECS Entity storage size: %u bytes", sizeof(CE_ECS_EntityStorage));
     CE_Debug("Entity data size: %u bytes", sizeof(CE_ECS_EntityData));
-    CE_Debug("Size of render list nodes: %u bytes", sizeof(CESceneGraphRenderNode));
     CE_Debug("Max entities supported: %u", CE_MAX_ENTITIES);
 
     CE_Debug("ECS context initialized successfully");
@@ -185,6 +184,11 @@ CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* e
         }
     }
 
+    CE_Debug("Cleaning up ECS context");
+    if (CE_ECS_MainStorage_cleanup(&context->m_storage, context, errorCode) != CE_OK) {
+        return CE_ERROR;
+    }
+
     CE_Debug("Cleaning up global components");
     #define X(name, storage) \
         if (CE_GLOBAL_COMPONENT_CLEANUP_FUNCTION(name)(context, CE_ECS_AccessGlobalComponent(context, name)) != CE_OK) { \
@@ -196,10 +200,6 @@ CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* e
         CE_GLOBAL_COMPONENT_DESC_GAME(X)
     #endif
 
-    CE_Debug("Cleaning up ECS context");
-    if (CE_ECS_MainStorage_cleanup(&context->m_storage, context, errorCode) != CE_OK) {
-        return CE_ERROR;
-    }
     CE_Debug("ECS context cleaned up successfully");
 	CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
