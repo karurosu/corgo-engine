@@ -12,7 +12,6 @@
 
 CE_Result CE_ECS_RunSystems_AutoOrder(INOUT CE_ECS_Context* context, IN float deltaTime, CE_ECS_SYSTEM_RUN_PHASE phase, CE_ECS_SYSTEM_RUN_FREQUENCY frequency, OUT_OPT CE_ERROR_CODE* errorCode)
 {
-    CE_Result result = CE_ERROR;
     const CE_ECS_System_CacheList *systemList = &context->m_systemRuntimeData.m_systemsByRunOrder[CE_ECS_SYSTEM_RUN_ORDER_AUTO].m_frequency[frequency].m_phase[phase];
 
     if (cc_size(&systemList->m_systems) == 0) {
@@ -21,16 +20,15 @@ CE_Result CE_ECS_RunSystems_AutoOrder(INOUT CE_ECS_Context* context, IN float de
         return CE_OK;
     }
     // TODO: optimize entity order for cache access
-    cc_for_each(&context->m_storage.m_entityStorage.m_knownEntities, entityIdPtr) 
+    for (int entityIndex = 0; entityIndex < CE_MAX_ENTITIES; entityIndex++) 
     {
-        const CE_Id entityId = *entityIdPtr;
-        CE_ECS_EntityData* entityData;
-
-        result = CE_ECS_MainStorage_getEntityData(&context->m_storage, entityId, &entityData, errorCode);
-        if (entityData == NULL || result != CE_OK) {
-            return CE_ERROR;
+        if (!CE_Bitset_isBitSet(&context->m_storage.m_entityStorage.m_entityIndexBitset, entityIndex)) {
+            continue; // Skip unused entity slots
         }
 
+        // Since we are doing direct iteration we don't need to do as many checks for getting entity data
+        CE_ECS_EntityData* entityData = CE_ECS_MainStorage_getEntityDataDirectly(&context->m_storage, entityIndex);
+        
         // Run each system in the cached list
         cc_for_each(&systemList->m_systems, sysTypeIdPtr) 
         {

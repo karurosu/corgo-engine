@@ -134,9 +134,9 @@ static void test_CE_Id_Helpers(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, (CE_TypeId)5, 0, 1234, &id));
     TEST_ASSERT_TRUE(CE_Id_isComponent(id));
     TEST_ASSERT_FALSE(CE_Id_isEntity(id));
-    TEST_ASSERT_EQUAL_UINT32(1234, CE_Id_getUniqueId(id));
+    TEST_ASSERT_EQUAL_UINT16(1234, CE_Id_getUniqueId(id));
     TEST_ASSERT_EQUAL_UINT8(5, CE_Id_getComponentTypeId(id));
-    TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, CE_Id_getGeneration(id));
+    TEST_ASSERT_EQUAL_UINT8(CE_INVALID_ID, CE_Id_getGeneration(id));
     TEST_ASSERT_EQUAL_UINT8(CE_INVALID_TYPE_ID, CE_Id_getRelationshipTypeId(id));
 
     // Build direct entity id
@@ -144,8 +144,8 @@ static void test_CE_Id_Helpers(void) {
     TEST_ASSERT_TRUE(CE_Id_isEntity(id));
     TEST_ASSERT_FALSE(CE_Id_isComponent(id));
     TEST_ASSERT_FALSE(CE_Id_isRelationship(id));
-    TEST_ASSERT_EQUAL_UINT32(4321, CE_Id_getUniqueId(id));
-    TEST_ASSERT_EQUAL_UINT32(7, CE_Id_getGeneration(id));
+    TEST_ASSERT_EQUAL_UINT16(4321, CE_Id_getUniqueId(id));
+    TEST_ASSERT_EQUAL_UINT8(7, CE_Id_getGeneration(id));
     TEST_ASSERT_EQUAL_UINT8(CE_INVALID_TYPE_ID, CE_Id_getComponentTypeId(id));
     TEST_ASSERT_EQUAL_UINT8(CE_INVALID_TYPE_ID, CE_Id_getRelationshipTypeId(id));
 
@@ -153,8 +153,8 @@ static void test_CE_Id_Helpers(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)9, 3, 555, &id));
     TEST_ASSERT_TRUE(CE_Id_isRelationship(id));
     TEST_ASSERT_FALSE(CE_Id_isEntity(id));
-    TEST_ASSERT_EQUAL_UINT32(555, CE_Id_getUniqueId(id));
-    TEST_ASSERT_EQUAL_UINT32(3, CE_Id_getGeneration(id));
+    TEST_ASSERT_EQUAL_UINT16(555, CE_Id_getUniqueId(id));
+    TEST_ASSERT_EQUAL_UINT8(3, CE_Id_getGeneration(id));
     TEST_ASSERT_EQUAL_UINT8(9, CE_Id_getRelationshipTypeId(id));
     TEST_ASSERT_EQUAL_UINT8(CE_INVALID_TYPE_ID, CE_Id_getComponentTypeId(id));
 
@@ -166,11 +166,11 @@ static void test_CE_Id_Helpers(void) {
 
     // Valid modifications
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_setUniqueId(&id, 123));
-    TEST_ASSERT_EQUAL_UINT32(123, CE_Id_getUniqueId(id));
+    TEST_ASSERT_EQUAL_UINT16(123, CE_Id_getUniqueId(id));
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_setRelationshipTypeId(&id, (CE_TypeId)12));
     TEST_ASSERT_EQUAL_UINT8(12, CE_Id_getRelationshipTypeId(id));
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_setGeneration(&id, 5));
-    TEST_ASSERT_EQUAL_UINT32(5, CE_Id_getGeneration(id));
+    TEST_ASSERT_EQUAL_UINT8(5, CE_Id_getGeneration(id));
 
     // Comparison tests
     CE_Id compA, compB, entA, entB, relA, relB;
@@ -219,9 +219,9 @@ static void test_CE_Id_Helpers(void) {
     CE_Id invalidId = CE_INVALID_ID;
     TEST_ASSERT_EQUAL_INT(CE_ID_INVALID_KIND, CE_Id_getKind(invalidId));
     TEST_ASSERT_EQUAL_INT(CE_INVALID_TYPE_ID, CE_Id_getComponentTypeId(invalidId));
-    TEST_ASSERT_EQUAL_INT(0, CE_Id_getGeneration(invalidId));
+    TEST_ASSERT_EQUAL_UINT8(0, CE_Id_getGeneration(invalidId));
     TEST_ASSERT_EQUAL_INT(CE_INVALID_TYPE_ID, CE_Id_getRelationshipTypeId(invalidId));
-    TEST_ASSERT_EQUAL_INT(0, CE_Id_getUniqueId(invalidId));
+    TEST_ASSERT_EQUAL_UINT16(0, CE_Id_getUniqueId(invalidId));
     TEST_ASSERT_FALSE(CE_Id_isComponent(invalidId));
     TEST_ASSERT_FALSE(CE_Id_isEntity(invalidId));
     TEST_ASSERT_FALSE(CE_Id_isRelationship(invalidId));
@@ -556,8 +556,7 @@ static void test_CE_EntityConstruction(void) {
     TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, entityId);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_UINT32(CE_ID_ENTITY_REFERENCE_KIND, CE_Id_getKind(entityId));
-    TEST_ASSERT_EQUAL_UINT32(0, CE_Id_getGeneration(entityId));
-    TEST_ASSERT_EQUAL_size_t(1, cc_size(&context.m_storage.m_entityStorage.m_knownEntities));
+    TEST_ASSERT_EQUAL_UINT8(0, CE_Id_getGeneration(entityId));
     TEST_ASSERT_EQUAL_size_t(1, context.m_storage.m_entityStorage.m_count);
     
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_MainStorage_getEntityData(&context.m_storage, entityId, &entityData, &errorCode));
@@ -585,15 +584,11 @@ static void test_CE_EntityConstruction(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_ECS_MainStorage_getEntityData(&context.m_storage, entityId, &entityData, &errorCode));
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_ENTITY_NOT_FOUND, errorCode);
 
-    TEST_ASSERT_EQUAL_size_t(0, cc_size(&context.m_storage.m_entityStorage.m_knownEntities));
-
     // Use up all entity IDs
     for (CE_Id i = 0; i < CE_MAX_ENTITIES; i++) {
         TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &entityId, &errorCode));
         TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     }
-
-    TEST_ASSERT_EQUAL_size_t(CE_MAX_ENTITIES, cc_size(&context.m_storage.m_entityStorage.m_knownEntities));
 
     // Attempt to create one more entity should fail
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_ECS_CreateEntity(&context, &entityId, &errorCode));
@@ -608,11 +603,11 @@ static void test_CE_EntityConstruction(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 
     // Verify generation count has incremented
-    TEST_ASSERT_EQUAL_UINT32(1, CE_Id_getGeneration(newEntityId));
+    TEST_ASSERT_EQUAL_UINT8(1, CE_Id_getGeneration(newEntityId));
     
     // entityID and newEntityId should have the same index but different generations
-    TEST_ASSERT_EQUAL_UINT32(CE_Id_getUniqueId(entityId), CE_Id_getUniqueId(newEntityId));
-    TEST_ASSERT_NOT_EQUAL(CE_Id_getGeneration(entityId), CE_Id_getGeneration(newEntityId));
+    TEST_ASSERT_EQUAL_UINT16(CE_Id_getUniqueId(entityId), CE_Id_getUniqueId(newEntityId));
+    TEST_ASSERT_NOT_EQUAL_UINT8(CE_Id_getGeneration(entityId), CE_Id_getGeneration(newEntityId));
 
     // Attempting to use old entityId should fail
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_ECS_MainStorage_getEntityData(&context.m_storage, entityId, &entityData, &errorCode));
@@ -956,20 +951,20 @@ void test_ECS_Relationships(void) {
     result = CE_Entity_FindFirstRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT, &found, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_EQUAL_UINT32(CE_Id_getUniqueId(parentEntity), CE_Id_getUniqueId(found));
+    TEST_ASSERT_EQUAL_UINT16(CE_Id_getUniqueId(parentEntity), CE_Id_getUniqueId(found));
     result = CE_Entity_FindFirstRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT, &found, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_EQUAL_UINT32(CE_Id_getUniqueId(parentEntity), CE_Id_getUniqueId(found));
+    TEST_ASSERT_EQUAL_UINT16(CE_Id_getUniqueId(parentEntity), CE_Id_getUniqueId(found));
 
     CE_Id foundChildren[3];
     size_t foundCount = 0;
     result = CE_Entity_FindAllRelationships(&context, parentEntity, CE_RELATIONSHIP_CHILD, foundChildren, 3, &foundCount, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_EQUAL_UINT32(2, foundCount);
+    TEST_ASSERT_EQUAL_size_t(2, foundCount);
     for (size_t i = 0; i < foundCount; i++) {
-        const uint32_t childId = CE_Id_getUniqueId(foundChildren[i]);
+        const uint16_t childId = CE_Id_getUniqueId(foundChildren[i]);
         TEST_ASSERT_TRUE(childId == CE_Id_getUniqueId(childEntity1) || childId == CE_Id_getUniqueId(childEntity2));
     }
 
@@ -977,9 +972,9 @@ void test_ECS_Relationships(void) {
     result = CE_Entity_RemoveRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD, childEntity2, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, parentEntity));
-    TEST_ASSERT_EQUAL_UINT32(0, CE_Entity_GetRelationshipCount(&context, childEntity2));
-    TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, childEntity1));
+    TEST_ASSERT_EQUAL_size_t(1, CE_Entity_GetRelationshipCount(&context, parentEntity));
+    TEST_ASSERT_EQUAL_size_t(0, CE_Entity_GetRelationshipCount(&context, childEntity2));
+    TEST_ASSERT_EQUAL_size_t(1, CE_Entity_GetRelationshipCount(&context, childEntity1));
     TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD)); // Still has one child
     TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT)); // Still has parent
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT)); // No longer has parent
@@ -990,9 +985,9 @@ void test_ECS_Relationships(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR, result);
 
     // Nothing should have changed
-    TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, parentEntity));
-    TEST_ASSERT_EQUAL_UINT32(0, CE_Entity_GetRelationshipCount(&context, childEntity2));
-    TEST_ASSERT_EQUAL_UINT32(1, CE_Entity_GetRelationshipCount(&context, childEntity1));
+    TEST_ASSERT_EQUAL_size_t(1, CE_Entity_GetRelationshipCount(&context, parentEntity));
+    TEST_ASSERT_EQUAL_size_t(0, CE_Entity_GetRelationshipCount(&context, childEntity2));
+    TEST_ASSERT_EQUAL_size_t(1, CE_Entity_GetRelationshipCount(&context, childEntity1));
     TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD)); // Still has one child
     TEST_ASSERT_TRUE(CE_Entity_HasRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT)); // Still has parent
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT)); // No longer has parent
@@ -1003,9 +998,9 @@ void test_ECS_Relationships(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 
     // Verify all relationships removed
-    TEST_ASSERT_EQUAL_UINT32(0, CE_Entity_GetRelationshipCount(&context, parentEntity));
-    TEST_ASSERT_EQUAL_UINT32(0, CE_Entity_GetRelationshipCount(&context, childEntity2));
-    TEST_ASSERT_EQUAL_UINT32(0, CE_Entity_GetRelationshipCount(&context, childEntity1));
+    TEST_ASSERT_EQUAL_size_t(0, CE_Entity_GetRelationshipCount(&context, parentEntity));
+    TEST_ASSERT_EQUAL_size_t(0, CE_Entity_GetRelationshipCount(&context, childEntity2));
+    TEST_ASSERT_EQUAL_size_t(0, CE_Entity_GetRelationshipCount(&context, childEntity1));
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, parentEntity, CE_RELATIONSHIP_CHILD)); // No longer has children
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT)); // No longer has parent
     TEST_ASSERT_FALSE(CE_Entity_HasRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT)); // No longer has parent

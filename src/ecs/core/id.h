@@ -31,9 +31,9 @@ static inline bool CE_Id_isRelationship(IN CE_Id id) { return CE_Id_getKind(id) 
 static inline bool CE_Id_isEntity(IN CE_Id id) { return CE_Id_getKind(id) == CE_ID_ENTITY_REFERENCE_KIND; }
 
 //// Inline extractors
-static inline uint32_t CE_Id_getUniqueId(IN CE_Id id) { return (id >> CE_ID_SHIFT_UNIQUE) & CE_ID_MASK_UNIQUE; }
+static inline uint16_t CE_Id_getUniqueId(IN CE_Id id) { return (id >> CE_ID_SHIFT_UNIQUE) & CE_ID_MASK_UNIQUE; }
 
-static inline uint32_t CE_Id_getGeneration(IN CE_Id id) {
+static inline uint8_t CE_Id_getGeneration(IN CE_Id id) {
     if (CE_Id_isComponent(id)) return 0;
     return (id >> CE_ID_SHIFT_GENERATION) & CE_ID_MASK_GENERATION;
 }
@@ -50,12 +50,12 @@ static inline CE_TypeId CE_Id_getRelationshipTypeId(IN CE_Id id) {
 
 //// Mutators and utilities (implemented in core/types.c)
 CE_Result CE_Id_setKind(INOUT CE_Id* id, CE_IdKind kind);
-CE_Result CE_Id_setUniqueId(INOUT CE_Id* id, uint32_t uniqueId);
-CE_Result CE_Id_setGeneration(INOUT CE_Id* id, uint32_t generation);
+CE_Result CE_Id_setUniqueId(INOUT CE_Id* id, uint16_t uniqueId);
+CE_Result CE_Id_setGeneration(INOUT CE_Id* id, uint8_t generation);
 CE_Result CE_Id_setComponentTypeId(INOUT CE_Id* id, CE_TypeId typeId);
 CE_Result CE_Id_setRelationshipTypeId(INOUT CE_Id* id, CE_TypeId typeId);
 
-CE_Result CE_Id_make(IN CE_IdKind kind, IN CE_TypeId typeId, IN uint32_t generation, IN uint32_t uniqueId, OUT CE_Id* out);
+CE_Result CE_Id_make(IN CE_IdKind kind, IN CE_TypeId typeId, IN uint8_t generation, IN uint16_t uniqueId, OUT CE_Id* out);
 bool CE_Id_compare(IN CE_Id a, IN CE_Id b);
 
 #endif

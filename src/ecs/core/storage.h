@@ -21,18 +21,17 @@ typedef struct CE_ECS_ComponentStorageHeader {
 
 typedef struct CE_ECS_ComponentStorage {
     CE_TypeId m_typeId; // Type ID of the component
-    uint32_t m_capacity; // Total capacity of the storage for this component type
-    uint32_t m_count; // Number of currently alive components of this type
+    uint16_t m_capacity; // Total capacity of the storage for this component type
+    uint16_t m_count; // Number of currently alive components of this type
     void *m_componentDataPool; // Contiguous block of memory for component data, indexed by component unique ID
     CE_Bitset m_componentIndexBitset; // Bitset to track used indices
     cc_vec(CE_ECS_ComponentStorageHeader) m_componentMetadata; // Metadata for each component instance
 } CE_ECS_ComponentStorage;
 
 typedef struct CE_ECS_EntityStorage {
-    uint32_t m_count; // Number of currently alive entities
+    uint16_t m_count; // Number of currently alive entities
     CE_Bitset m_entityIndexBitset; // Bitset to track used indices
     CE_ECS_EntityData m_entityDataArray[CE_MAX_ENTITIES]; // Fixed-size array for entity data, indexed by entity unique ID
-    CE_Id_Set m_knownEntities; // Set of all currently alive entity IDs for quick existence checks and iteration
 } CE_ECS_EntityStorage;
 
 // Global component storage definitions
@@ -65,7 +64,7 @@ CE_Result CE_ECS_MainStorage_growStorageForComponent(INOUT CE_ECS_MainStorage* s
 
 // Component data access
 void* CE_ECS_ComponentStorage_getComponentDataPointerById(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_Id id);
-void* CE_ECS_ComponentStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN size_t index);
+void* CE_ECS_ComponentStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN uint16_t index);
 
 // Entity creation and management functions
 CE_Result CE_ECS_MainStorage_createEntity(INOUT CE_ECS_MainStorage* storage, OUT CE_Id* id, OUT_OPT CE_ERROR_CODE* errorCode);
@@ -74,5 +73,10 @@ CE_Result CE_ECS_MainStorage_destroyEntity(INOUT CE_ECS_MainStorage* storage, IN
 // Entity access functions
 CE_Result CE_ECS_MainStorage_getEntityData(INOUT CE_ECS_MainStorage* storage, IN CE_Id id, OUT CE_ECS_EntityData** outData, OUT_OPT CE_ERROR_CODE* errorCode);
 CE_Result CE_ECS_MainStorage_getEntityDataByUniqueId(INOUT CE_ECS_MainStorage* storage, IN uint16_t uniqueId, OUT CE_ECS_EntityData** outData, OUT_OPT CE_ERROR_CODE* errorCode);
+
+// Helper function to directly get entity data without error checking (for internal use)
+inline CE_ECS_EntityData* CE_ECS_MainStorage_getEntityDataDirectly(INOUT CE_ECS_MainStorage* storage, IN uint16_t id) {
+    return &(storage->m_entityStorage.m_entityDataArray[id]);
+}
 
 #endif // CORGO_ECS_CORE_STORAGE_H

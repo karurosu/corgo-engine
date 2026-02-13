@@ -101,12 +101,6 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN CE_ECS_Con
         cc_init(&storage->m_entityStorage.m_entityDataArray[i].m_relationships);
     }
 
-    cc_init(&storage->m_entityStorage.m_knownEntities);
-    if (!cc_reserve(&storage->m_entityStorage.m_knownEntities, CE_MAX_ENTITIES/4)) {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
-        return CE_ERROR;
-    }
-
     storage->m_entityStorage.m_count = 0;
     if (CE_Bitset_init(&storage->m_entityStorage.m_entityIndexBitset, CE_MAX_ENTITIES) != CE_OK) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
@@ -131,7 +125,7 @@ CE_Result CE_ECS_MainStorage_cleanup(OUT CE_ECS_MainStorage* storage, IN CE_ECS_
             CE_ECS_ComponentStorage* storageEntry = storage->m_componentTypeStorage[x];
             if (storageEntry) {
                 // Properly cleanup all components,, most likely release resources
-                for (size_t i = 0; i < storageEntry->m_capacity; i++) {
+                for (uint16_t i = 0; i < storageEntry->m_capacity; i++) {
                     if (CE_Bitset_isBitSet(&storageEntry->m_componentIndexBitset, i)) {
                         // Call cleanup function for each valid component
                         void* componentPtr = CE_ECS_ComponentStorage_getComponentDataPointer(storageEntry, componentStaticData, i);
@@ -154,7 +148,6 @@ CE_Result CE_ECS_MainStorage_cleanup(OUT CE_ECS_MainStorage* storage, IN CE_ECS_
             cc_cleanup(&storage->m_entityStorage.m_entityDataArray[i].m_relationships);
         }
 
-        cc_cleanup(&storage->m_entityStorage.m_knownEntities);
         storage->m_initialized = false;
     }
 
@@ -172,7 +165,7 @@ CE_Result CE_ECS_MainStorage_growStorageForComponent(INOUT CE_ECS_MainStorage* s
     return CE_ERROR;
 }
 
-void* CE_ECS_ComponentStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN size_t index)
+void* CE_ECS_ComponentStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN uint16_t index)
 {
     if (index >= storage->m_capacity || !CE_Bitset_isBitSet(&storage->m_componentIndexBitset, index)) {
         return NULL;
@@ -182,8 +175,7 @@ void* CE_ECS_ComponentStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStor
 
 void* CE_ECS_ComponentStorage_getComponentDataPointerById(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_Id id)
 {
-    const size_t index = CE_Id_getUniqueId(id);
-    return CE_ECS_ComponentStorage_getComponentDataPointer(storage, componentStaticData, index);
+    return CE_ECS_ComponentStorage_getComponentDataPointer(storage, componentStaticData, CE_Id_getUniqueId(id));
 }
 
 CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, IN CE_ECS_Context *context, IN const CE_ECS_ComponentStaticData *componentStaticData, OUT CE_Id* id, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
@@ -210,7 +202,7 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
     }
 
     // Find the first available slot
-    size_t index;
+    uint16_t index;
     for (index = 0; index < componentStorage->m_capacity; index++) {
         if (!CE_Bitset_isBitSet(&componentStorage->m_componentIndexBitset, index))
         {
@@ -279,7 +271,7 @@ CE_Result CE_ECS_MainStorage_destroyComponent(INOUT CE_ECS_MainStorage* storage,
         return CE_ERROR;
     }
 
-    const uint32_t index = CE_Id_getUniqueId(id);
+    const uint16_t index = CE_Id_getUniqueId(id);
 
     if (!CE_Bitset_isBitSet(&componentStorage->m_componentIndexBitset, index)) {
         return CE_OK; // Component already destroyed
@@ -368,11 +360,6 @@ CE_Result CE_ECS_MainStorage_createEntity(INOUT CE_ECS_MainStorage* storage, OUT
         return CE_ERROR;
     }
 
-    if (cc_insert(&storage->m_entityStorage.m_knownEntities, newId) == NULL) {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
-        return CE_ERROR;
-    }
-
     storage->m_entityStorage.m_count++;
     *id = entityData->m_entityId;
 
@@ -387,7 +374,7 @@ CE_Result CE_ECS_MainStorage_destroyEntity(INOUT CE_ECS_MainStorage* storage, IN
         return CE_ERROR;
     }
 
-    const uint32_t index = CE_Id_getUniqueId(id);
+    const uint16_t index = CE_Id_getUniqueId(id);
     if (index >= CE_MAX_ENTITIES) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_ENTITY_ID);
         return CE_ERROR;
@@ -398,10 +385,10 @@ CE_Result CE_ECS_MainStorage_destroyEntity(INOUT CE_ECS_MainStorage* storage, IN
         return CE_ERROR;
     }
 
-    CE_ECS_EntityData* entityData = &storage->m_entityStorage.m_entityDataArray[index];
+    CE_ECS_EntityData* entityData = CE_ECS_MainStorage_getEntityDataDirectly(storage, index);
     
     // Detect if the passed id is stale (references a deleted entity)
-    const uint32_t generation = CE_Id_getGeneration(entityData->m_entityId);
+    const uint8_t generation = CE_Id_getGeneration(entityData->m_entityId);
     if (generation != CE_Id_getGeneration(id)) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STALE_ENTITY_ID);
         return CE_ERROR;
@@ -414,8 +401,6 @@ CE_Result CE_ECS_MainStorage_destroyEntity(INOUT CE_ECS_MainStorage* storage, IN
     cc_clear(&entityData->m_components);
     cc_clear(&entityData->m_relationships);
 
-    cc_erase(&storage->m_entityStorage.m_knownEntities, id);
-
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
 }
@@ -427,7 +412,7 @@ CE_Result CE_ECS_MainStorage_getEntityData(INOUT CE_ECS_MainStorage* storage, IN
         return CE_ERROR;
     }
 
-    const uint32_t index = CE_Id_getUniqueId(id);
+    const uint16_t index = CE_Id_getUniqueId(id);
     if (index >= CE_MAX_ENTITIES) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_ENTITY_ID);
         return CE_ERROR;
@@ -438,10 +423,10 @@ CE_Result CE_ECS_MainStorage_getEntityData(INOUT CE_ECS_MainStorage* storage, IN
         return CE_ERROR;
     }
 
-    CE_ECS_EntityData* entityData = &storage->m_entityStorage.m_entityDataArray[index];
+    CE_ECS_EntityData* entityData = CE_ECS_MainStorage_getEntityDataDirectly(storage, index);
 
     // Detect if the passed id is stale (references a deleted entity)
-    const uint32_t generation = CE_Id_getGeneration(entityData->m_entityId);
+    const uint8_t generation = CE_Id_getGeneration(entityData->m_entityId);
     if (generation != CE_Id_getGeneration(id)) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STALE_ENTITY_ID);
         return CE_ERROR;
@@ -460,13 +445,12 @@ CE_Result CE_ECS_MainStorage_getEntityDataByUniqueId(INOUT CE_ECS_MainStorage* s
         return CE_ERROR;
     }
 
-    CE_ECS_EntityData* entityData = &storage->m_entityStorage.m_entityDataArray[uniqueId];
     if (!CE_Bitset_isBitSet(&storage->m_entityStorage.m_entityIndexBitset, uniqueId)) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_ENTITY_NOT_FOUND);
         return CE_ERROR;
     }
 
-    *outData = entityData;
+    *outData = CE_ECS_MainStorage_getEntityDataDirectly(storage, uniqueId);
         
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
