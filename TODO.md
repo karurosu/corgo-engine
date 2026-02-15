@@ -5,13 +5,14 @@ TODOs:
 - SceneTree ordering
 - Optimize auto ordering
 - use builtin_ctz for iteraring over entities
+- cache parent entity and transform
+- add fast relationship to entity conversion
+- fast internal system access
 
 Ideas:
 - Change component metadata to have a bitset to track flags (requires a variable sized bitset)
 - Add flags for entities, lightweight empty components that can be used to trigger systems
 - expand max entities to 512
-- separate global render system
-- small cache for transform components per entity
 
 Future:
 - Support for multiple copies of the same component/relationship
