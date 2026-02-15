@@ -194,6 +194,13 @@ static void test_CE_Id_Helpers(void) {
     //// Invalid component reference with invalid type
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, CE_INVALID_TYPE_ID, 0x1, 10, &out));
     TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, out);
+    //// Passing in a type gets ignored for entity references
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0x1, 0x2, 10, &out));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, out);
+    TEST_ASSERT_TRUE(CE_Id_isEntity(out));
+    TEST_ASSERT_EQUAL_UINT16(10, CE_Id_getUniqueId(out));
+    TEST_ASSERT_EQUAL_UINT8(2, CE_Id_getGeneration(out));
+
 
     // Invalid tests
     CE_Id invalidId = CE_INVALID_ID;
