@@ -48,7 +48,7 @@ static inline CE_TypeId CE_Id_getRelationshipTypeId(IN CE_Id id) {
     return (CE_TypeId)((id >> CE_ID_SHIFT_TYPE) & CE_ID_MASK_TYPE8);
 }
 
-//// Mutators and utilities (implemented in core/types.c)
+//// Mutators and utilities
 CE_Result CE_Id_setKind(INOUT CE_Id* id, CE_IdKind kind);
 CE_Result CE_Id_setUniqueId(INOUT CE_Id* id, uint16_t uniqueId);
 CE_Result CE_Id_setGeneration(INOUT CE_Id* id, uint8_t generation);
@@ -56,6 +56,6 @@ CE_Result CE_Id_setComponentTypeId(INOUT CE_Id* id, CE_TypeId typeId);
 CE_Result CE_Id_setRelationshipTypeId(INOUT CE_Id* id, CE_TypeId typeId);
 
 CE_Result CE_Id_make(IN CE_IdKind kind, IN CE_TypeId typeId, IN uint8_t generation, IN uint16_t uniqueId, OUT CE_Id* out);
-bool CE_Id_compare(IN CE_Id a, IN CE_Id b);
+CE_Id CE_Id_relationshipToEntityReference(IN CE_Id relationshipId);
 
 #endif

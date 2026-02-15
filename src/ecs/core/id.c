@@ -8,6 +8,8 @@
 static inline uint32_t clamp8(uint32_t v) { return v & CE_ID_MASK_TYPE8; }
 static inline uint32_t clamp16(uint32_t v) { return v & CE_ID_MASK_UNIQUE; }
 
+#define CE_ID_REL_TYPE_CLEAR_MASK (~((CE_ID_MASK_TYPE8 << CE_ID_SHIFT_TYPE) | (CE_ID_MASK_KIND << CE_ID_SHIFT_KIND)))
+
 CE_Result CE_Id_setKind(INOUT CE_Id* id, CE_IdKind kind)
 {
     if (!id) return CE_ERROR;
@@ -112,16 +114,11 @@ CE_Result CE_Id_make(IN CE_IdKind kind, IN CE_TypeId typeId, IN uint8_t generati
     return CE_OK;
 }
 
-bool CE_Id_compare(IN CE_Id a, IN CE_Id b)
+CE_Id CE_Id_relationshipToEntityReference(IN CE_Id relationshipId)
 {
-    // different kinds cannot be equal
-    if (CE_Id_getKind(a) != CE_Id_getKind(b)) return false;
+    if (!CE_Id_isRelationship(relationshipId)) return CE_INVALID_ID;
 
-    // For entities compare generations first
-    if (CE_Id_isEntity(a) && CE_Id_getGeneration(a) != CE_Id_getGeneration(b)) {
-        return false;
-    }
-
-    // Otherwise, compare components directly
-    return CE_Id_getUniqueId(a) == CE_Id_getUniqueId(b);
+    CE_Id entityId = relationshipId & CE_ID_REL_TYPE_CLEAR_MASK;
+    entityId |= ((uint32_t)CE_ID_ENTITY_REFERENCE_KIND << CE_ID_SHIFT_KIND);
+    return entityId;
 }

@@ -172,26 +172,6 @@ static void test_CE_Id_Helpers(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_setGeneration(&id, 5));
     TEST_ASSERT_EQUAL_UINT8(5, CE_Id_getGeneration(id));
 
-    // Comparison tests
-    CE_Id compA, compB, entA, entB, relA, relB;
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, (CE_TypeId)2, 0, 100, &compA));
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, (CE_TypeId)7, 0, 100, &compB));
-    TEST_ASSERT_TRUE(CE_Id_compare(compA, compB)); // same unique id
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, (CE_TypeId)2, 0, 101, &compB));
-    TEST_ASSERT_FALSE(CE_Id_compare(compA, compB));
-
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 5, 42, &entA));
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 5, 42, &entB));
-    TEST_ASSERT_TRUE(CE_Id_compare(entA, entB));
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 6, 42, &entB));
-    TEST_ASSERT_FALSE(CE_Id_compare(entA, entB));
-
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)3, 0, 77, &relA));
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)4, 0, 77, &relB));
-    TEST_ASSERT_TRUE(CE_Id_compare(relA, relB)); // type ignored, generation unused
-    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)3, 0, 78, &relB));
-    TEST_ASSERT_FALSE(CE_Id_compare(relA, relB));
-
     // Constructor failures set invalid id
     CE_Id out;
     //// Invalid kind
@@ -225,6 +205,19 @@ static void test_CE_Id_Helpers(void) {
     TEST_ASSERT_FALSE(CE_Id_isComponent(invalidId));
     TEST_ASSERT_FALSE(CE_Id_isEntity(invalidId));
     TEST_ASSERT_FALSE(CE_Id_isRelationship(invalidId));
+
+    // Relationship to entity reference conversion
+    CE_Id relId;
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)15, 4, 8888, &relId));
+    CE_Id entRefId = CE_Id_relationshipToEntityReference(relId);
+    TEST_ASSERT_TRUE(CE_Id_isEntity(entRefId));
+    TEST_ASSERT_EQUAL_UINT16(8888, CE_Id_getUniqueId(entRefId));
+    TEST_ASSERT_EQUAL_UINT8(4, CE_Id_getGeneration(entRefId));
+    
+    // Ensure we get the same entity as one constructed directly
+    CE_Id sameEntityId;
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 4, 8888, &sameEntityId));
+    TEST_ASSERT_EQUAL_UINT32(entRefId, sameEntityId);
 }
 
 static void test_ECS_ComponentStorage(void) {
