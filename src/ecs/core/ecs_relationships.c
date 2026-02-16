@@ -251,7 +251,7 @@ CE_Result CE_Entity_HasSpecificRelationship(INOUT CE_ECS_Context* context, IN CE
     cc_for_each(&entityData->m_relationships, el) 
     {
         if (CE_Id_getRelationshipTypeId(*el) == relationshipType) {
-            *exists = (CE_Id_getUniqueId(*el) == CE_Id_getUniqueId(targetEntity) && CE_Id_getGeneration(*el) == CE_Id_getGeneration(targetEntity));
+            *exists = CE_Id_entityMatches(*el, targetEntity);
             break;
         }
     }

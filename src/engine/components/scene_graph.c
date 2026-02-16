@@ -139,8 +139,7 @@ CE_Result CE_Engine_SceneGraph_Traverse(INOUT CE_ECS_Context* context, IN CE_Id 
         cc_for_each(children, childRel)
         {
             if (CE_Id_getRelationshipTypeId(*childRel) == CE_RELATIONSHIP_CHILD) {
-                NodeInfo childNode = { .entityId = 0, .parentId = currentNode->entityId };
-                CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, CE_Id_getGeneration(*childRel), CE_Id_getUniqueId(*childRel), &childNode.entityId);
+                NodeInfo childNode = { .entityId = CE_Id_relationshipToEntityReference(*childRel), .parentId = currentNode->entityId};
                 cc_push(&expansionList, childNode);
             }
         }

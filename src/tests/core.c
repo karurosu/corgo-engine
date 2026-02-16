@@ -225,6 +225,18 @@ static void test_CE_Id_Helpers(void) {
     CE_Id sameEntityId;
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 4, 8888, &sameEntityId));
     TEST_ASSERT_EQUAL_UINT32(entRefId, sameEntityId);
+    
+    // Entity matching
+    TEST_ASSERT_TRUE(CE_Id_entityMatches(entRefId, relId));
+    CE_Id_setUniqueId(&entRefId, 7777);
+    TEST_ASSERT_FALSE(CE_Id_entityMatches(entRefId, relId));
+    CE_Id compId;
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, (CE_TypeId)20, 0, 5555, &compId));
+    TEST_ASSERT_FALSE(CE_Id_entityMatches(compId, relId));
+    TEST_ASSERT_FALSE(CE_Id_entityMatches(compId, entRefId));
+    TEST_ASSERT_FALSE(CE_Id_entityMatches(relId, compId));
+    TEST_ASSERT_FALSE(CE_Id_entityMatches(entRefId, compId));
+    
 }
 
 static void test_ECS_ComponentStorage(void) {
