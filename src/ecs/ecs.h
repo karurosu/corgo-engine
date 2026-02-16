@@ -64,6 +64,29 @@ CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* e
  */
 CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode);
 
+/**
+ * @brief Macro: Get the entity being processed in the ECS context.
+ * Only valid during component init/cleanup calls.
+ * It may return NULL on program termination.
+ * Not valid for global components.
+ * 
+ * @param[in,out] context The ECS context to update.
+ * @return The current entity ID or CE_INVALID_ID if not in a valid context.
+ */
+#define CE_GetCurrentEntityId(context) \
+    ((context)->m_callingContext.m_currentEntity)
+
+/**
+ * @brief Macro: Get the current component being processed in the ECS context.
+ * Only valid during component init/cleanup calls.
+ * Not valid for global components.
+ * 
+ * @param[in,out] context The ECS context to update.
+ * @return The current component ID or CE_INVALID_ID if not in a valid context.
+ */
+#define CE_GetCurrentComponentId(context) \
+    ((context)->m_callingContext.m_currentComponent)
+
 // Include the separate headers for each module
 #include "core/ecs_component.h"
 #include "core/ecs_entity.h"

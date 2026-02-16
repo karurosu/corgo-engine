@@ -8,6 +8,7 @@ TODOs:
 - cache parent entity and transform
 - add fast relationship to entity conversion
 - fast internal system access
+- refactor storage cleanup to properly set the entity context
 
 Ideas:
 - Change component metadata to have a bitset to track flags (requires a variable sized bitset)

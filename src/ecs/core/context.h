@@ -11,6 +11,11 @@
 #include "storage.h"
 #include "system.h"
 
+typedef struct CE_ECS_CallingContext {
+    CE_Id m_currentEntity;
+    CE_Id m_currentComponent;
+} CE_ECS_CallingContext;
+
 // Main ECS Context
 struct CE_ECS_Context {
     // Static component definitions
@@ -22,6 +27,9 @@ struct CE_ECS_Context {
 
     // Runtime data
     CE_ECS_SystemRuntimeData m_systemRuntimeData;
+
+    // Calling context, used for systems to query which context they are running in
+    CE_ECS_CallingContext m_callingContext;
 };
 
 #endif // CORGO_ECS_CORE_CONTEXT_H

@@ -130,7 +130,10 @@ CE_Result CE_ECS_MainStorage_cleanup(OUT CE_ECS_MainStorage* storage, IN CE_ECS_
                         // Call cleanup function for each valid component
                         void* componentPtr = CE_ECS_ComponentStorage_getComponentDataPointer(storageEntry, componentStaticData, i);
                         if (componentPtr) {
+                            // Call the component's cleanup function with the right context
+                            CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, componentStaticData->m_type, 0, (uint32_t)i, &context->m_callingContext.m_currentComponent);
                             result = componentStaticData->m_cleanupFunction(context, componentPtr);
+                            context->m_callingContext.m_currentComponent = CE_INVALID_ID;
                             CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_CLEANUP_FAILED);
                         }
                     }
@@ -202,6 +205,7 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
     }
 
     // Find the first available slot
+    // TODO: optimize bitset traversal
     uint16_t index;
     for (index = 0; index < componentStorage->m_capacity; index++) {
         if (!CE_Bitset_isBitSet(&componentStorage->m_componentIndexBitset, index))
@@ -218,6 +222,9 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
         return CE_ERROR;
     }
 
+    // Generate new component id
+    CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, componentStaticData->m_type, 0, (uint32_t)index, id);
+
     // Initialize component
     void* componentPtr = CE_ECS_ComponentStorage_getComponentDataPointer(componentStorage, componentStaticData, index);
     if (!componentPtr) {
@@ -225,7 +232,10 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
         return CE_ERROR;
     }
 
+    // Call the component's init function with the right context
+    context->m_callingContext.m_currentComponent = *id;
     result = componentStaticData->m_initFunction(context, componentPtr);
+    context->m_callingContext.m_currentComponent = CE_INVALID_ID;
 
     if (result != CE_OK) {
         // Init failed, free the slot
@@ -243,8 +253,7 @@ CE_Result CE_ECS_MainStorage_createComponent(INOUT CE_ECS_MainStorage* storage, 
 
     header->m_isValid = true;
     componentStorage->m_count++;
-    CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, componentStaticData->m_type, 0, (uint32_t)index, id);
-
+    
     // If passed in a pointer for component data, set it
     if (componentData) {
         *componentData = componentPtr;
@@ -283,7 +292,10 @@ CE_Result CE_ECS_MainStorage_destroyComponent(INOUT CE_ECS_MainStorage* storage,
         return CE_ERROR;
     }
 
+    // Call the component's cleanup function with the right context
+    context->m_callingContext.m_currentComponent = id;
     result = componentStaticData->m_cleanupFunction(context, componentPtr);
+    context->m_callingContext.m_currentComponent = CE_INVALID_ID;
 
     if (result != CE_OK) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_CLEANUP_FAILED);
