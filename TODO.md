@@ -6,13 +6,11 @@ TODOs:
 - Optimize auto ordering
 - use builtin_ctz for iteraring over entities
 - cache parent entity and transform
-- add fast relationship to entity conversion
 - fast internal system access
 - refactor storage cleanup to properly set the entity context
+- Add zero storage components, aka flags
 
 Ideas:
-- Change component metadata to have a bitset to track flags (requires a variable sized bitset)
-- Add flags for entities, lightweight empty components that can be used to trigger systems
 - expand max entities to 512
 
 Future:

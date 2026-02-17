@@ -44,7 +44,7 @@ CE_DEFINE_GLOBAL_COMPONENT_CLEANUP(CE_ENGINE_ASSET_CACHE)
 
 void *CE_Engine_CacheAsset(INOUT CE_ECS_Context* context, IN CE_TypeId assetType, IN const char *assetPath, IN_OPT const void *loadParams)
 {
-    CE_Engine_AssetCache_Component *component = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_ASSET_CACHE);
+    CE_Engine_AssetCacheComponent *component = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_ASSET_CACHE);
     if (component == NULL)
     {
         CE_Error("Asset cache is not enabled");
@@ -52,7 +52,7 @@ void *CE_Engine_CacheAsset(INOUT CE_ECS_Context* context, IN CE_TypeId assetType
     }
     
     // Check if the asset is already cached
-    CE_Engine_AssetCache_Asset *data = cc_get(&component->m_assetData, assetPath);
+    CE_Engine_AssetCacheAsset *data = cc_get(&component->m_assetData, assetPath);
     if (data != NULL)
     {
         // Increment reference count
@@ -76,7 +76,7 @@ void *CE_Engine_CacheAsset(INOUT CE_ECS_Context* context, IN CE_TypeId assetType
         }
         // Add the new asset to the cache
         bool inserted = false;
-        CE_Engine_AssetCache_Asset newAsset = { .m_data = asset, .m_type = assetType };
+        CE_Engine_AssetCacheAsset newAsset = { .m_data = asset, .m_type = assetType };
         if (cc_insert(&component->m_assetData, assetPath, newAsset) != NULL)
         {
             if (cc_insert(&component->m_assetCount, (uintptr_t)asset, 1) != NULL)
@@ -99,7 +99,7 @@ void *CE_Engine_CacheAsset(INOUT CE_ECS_Context* context, IN CE_TypeId assetType
 
 CE_Result CE_Engine_ReleaseAsset(INOUT CE_ECS_Context* context, IN void *asset)
 {
-    CE_Engine_AssetCache_Component *component = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_ASSET_CACHE);
+    CE_Engine_AssetCacheComponent *component = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_ASSET_CACHE);
     if (component == NULL)
     {
         CE_Error("Asset cache is not enabled");

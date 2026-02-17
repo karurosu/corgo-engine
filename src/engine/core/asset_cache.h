@@ -10,15 +10,15 @@
 #include "ecs/types.h"
 #include "engine/assets.h"
 
-typedef struct CE_Engine_AssetCache_Asset {
+typedef struct CE_Engine_AssetCacheAsset {
     void *m_data;
     CE_TypeId m_type;
-} CE_Engine_AssetCache_Asset;
+} CE_Engine_AssetCacheAsset;
 
-typedef struct CE_Engine_AssetCache_Component {
+typedef struct CE_Engine_AssetCacheComponent {
     cc_map(uintptr_t, uint32_t) m_assetCount; // Cache the number of times an asset is referenced
-    cc_map(const char *, CE_Engine_AssetCache_Asset) m_assetData; // Cache the asset's info
-} CE_Engine_AssetCache_Component;
+    cc_map(const char *, CE_Engine_AssetCacheAsset) m_assetData; // Cache the asset's info
+} CE_Engine_AssetCacheComponent;
 
 /** * @brief Cache an asset in the asset cache.
  * If the asset is already cached, increments the reference count and returns the existing asset.
