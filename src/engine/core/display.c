@@ -101,3 +101,11 @@ void CE_Display_Reset(INOUT CE_ECS_Context* context)
     CE_Display_SetFlipY(context, false);
     CE_Display_SetRefreshRate(context, CE_ENGINE_REFRESH_RATE_DEFAULT);
 }
+
+void CE_Display_Clear(INOUT CE_ECS_Context* context)
+{
+#ifdef CE_BACKEND_PLAYDATE
+    PlaydateAPI* pd = CE_GetPlaydateAPI();
+    pd->graphics->clear(kColorWhite);
+#endif
+}

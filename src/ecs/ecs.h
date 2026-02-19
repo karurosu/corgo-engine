@@ -51,10 +51,10 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
 CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* errorCode);
 
 /**
- * @brief Update the ECS and execute all registered systems.
+ * @brief Update the ECS and execute all non-render systems.
  * 
  * Advances the ECS simulation by the given delta time, running all
- * registered systems to process entities and components.
+ * non-render registered systems to process entities and components.
  * 
  * @param[in,out] context The ECS context to update.
  * @param[in] deltaTime Time elapsed since the last tick, in seconds.
@@ -63,6 +63,20 @@ CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* e
  * @return CE_OK on success, CE_ERROR on failure.
  */
 CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode);
+
+/**
+ * @brief Update the ECS and execute all registered render systems.
+ * 
+ * Advances the ECS simulation by the given delta time, running all
+ * render systems. Separate from regular tick so the engine can control when to render.
+ * 
+ * @param[in,out] context The ECS context to update.
+ * @param[in] deltaTime Time elapsed since the last tick, in seconds.
+ * @param[out] errorCode Optional error code if update fails.
+ * 
+ * @return CE_OK on success, CE_ERROR on failure.
+ */
+CE_Result CE_ECS_TickRenderSystems(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode);
 
 /**
  * @brief Macro: Get the entity being processed in the ECS context.

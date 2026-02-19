@@ -15,14 +15,16 @@
 //// Text Label Component
 typedef struct CETextLabelComponent {
 	bool m_inverted;
-	char text[CE_ENGINE_TEXT_LABEL_BUFFER_SIZE];
-	const char *fontName;
-	CE_ASSET_PTR(CE_ASSET_TYPE_FONT) fontPtr;
+	char m_text[CE_ENGINE_TEXT_LABEL_BUFFER_SIZE];
+	const char *m_fontName;
+	CE_ASSET_PTR(CE_ASSET_TYPE_FONT) m_fontPtr;
 } CE_TextLabelComponent;
 
+typedef struct CE_TransformComponent CE_TransformComponent;
+
 // Helpers
-CE_Result CE_TextLabelComponent_setText(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, IN const char* text);
-CE_Result CE_TextLabelComponent_setFont(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, IN const char* fontName);
-CE_Result CE_TextLabelComponent_getTextBounds(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, OUT int* width, OUT int* height);
+CE_Result CE_TextLabelComponent_setText(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, IN CE_TransformComponent *transform, IN const char* text);
+CE_Result CE_TextLabelComponent_setFont(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, IN CE_TransformComponent *transform, IN const char* fontName);
+CE_Result CE_TextLabelComponent_getTextBounds(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, OUT uint16_t* width, OUT uint16_t* height);
 
 #endif // CORGO_ENGINE_COMPONENTS_TEXT_LABEL_H

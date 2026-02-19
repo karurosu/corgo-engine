@@ -37,4 +37,7 @@ void CE_Display_SetFlipX(INOUT CE_ECS_Context* context, IN bool flipX);
 void CE_Display_SetFlipY(INOUT CE_ECS_Context* context, IN bool flipY);
 void CE_Display_Reset(INOUT CE_ECS_Context* context);
 
+// Runtime functions
+void CE_Display_Clear(INOUT CE_ECS_Context* context);
+
 #endif // CORGO_ENGINE_CORE_DISPLAY_H

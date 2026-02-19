@@ -228,7 +228,6 @@ CE_Result CE_ECS_RunSystemsHelper(CE_ECS_Context* context, IN float deltaTime, I
 
 CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode)
 {
-    CE_Result result;
     context->m_systemRuntimeData.m_timeSinceLastRun += deltaTime;
     context->m_systemRuntimeData.m_frameCounter++;
 
@@ -237,15 +236,13 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
     for (int phase = CE_ECS_SYSTEM_RUN_PHASE_EARLY; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++)
     {
         // Display
-        result = CE_ECS_RunSystemsHelper(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode);
-        if (result != CE_OK) {
+        if (CE_ECS_RunSystemsHelper(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode) != CE_OK) {
             return CE_ERROR;
         }
 
         // Half Display
         if (context->m_systemRuntimeData.m_frameCounter % 2 == 0) {
-            result = CE_ECS_RunSystemsHelper(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY, errorCode);
-            if (result != CE_OK) {
+            if (CE_ECS_RunSystemsHelper(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY, errorCode) != CE_OK) {
                 return CE_ERROR;
             }
         }
@@ -253,25 +250,9 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
         // Once Per Second
         if (runOncePerSecond)
         {
-            result = CE_ECS_RunSystemsHelper(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_ONCE_PER_SECOND, errorCode);
-            if (result != CE_OK) {
+            if (CE_ECS_RunSystemsHelper(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_ONCE_PER_SECOND, errorCode) != CE_OK) {
                 return CE_ERROR;
             }
-        }
-    }
-
-    // Regenerate caches if needed
-    if (CE_Engine_SceneGraph_RebuildRenderList(context, errorCode) != CE_OK) {
-        CE_Error("Failed to rebuild scene graph render list with error code: %s", CE_GetErrorMessage(*errorCode));
-        return CE_ERROR;
-    }
-
-    // Render systems
-    for (int phase = CE_ECS_SYSTEM_RUN_PHASE_EARLY; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++)
-    {
-        result = CE_ECS_RunSystems_RenderOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode);
-        if (result != CE_OK) {
-            return CE_ERROR;
         }
     }
 
@@ -283,5 +264,17 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
     return CE_OK;
 }
 
+CE_Result CE_ECS_TickRenderSystems(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    // Run render systems
+    for (int phase = CE_ECS_SYSTEM_RUN_PHASE_EARLY; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++)
+    {
+        if (CE_ECS_RunSystems_RenderOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode) != CE_OK) {
+            return CE_ERROR;
+        }
+    }
 
+    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+    return CE_OK;
+}
 

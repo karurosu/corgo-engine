@@ -13,10 +13,10 @@
 struct CE_ECS_ComponentStaticData {
     bool m_isValid;
     CE_TypeId m_type;
-    uint32_t m_uid;
+    uint16_t m_uid;
+    uint16_t m_initialCapacity;
     size_t m_storageSizeOf;
-    uint32_t m_initialCapacity;
-
+    
     // Component methods
     CE_Result (*m_initFunction)(INOUT CE_ECS_Context* context, INOUT void* component);
     CE_Result (*m_cleanupFunction)(INOUT CE_ECS_Context* context, INOUT void* component);
@@ -35,9 +35,9 @@ struct CE_ECS_ComponentStaticData {
 #define CE_DECLARE_COMPONENT(name, c_uid, storage, initial_capacity) \
 void name##_description(OUT CE_ECS_ComponentStaticData *data);\
 typedef storage name##_StorageType;\
-static const uint32_t name##_UID = c_uid;\
+static const uint16_t name##_UID = c_uid;\
 static const size_t name##_StorageSize = sizeof(storage);\
-static const uint32_t name##_InitialCapacity = initial_capacity;\
+static const uint16_t name##_InitialCapacity = initial_capacity;\
 CE_DEFINE_COMPONENT_INIT(name); \
 CE_DEFINE_COMPONENT_CLEANUP(name); \
 CE_Result name##_init_wrapper(INOUT CE_ECS_Context* context, INOUT void* component);\

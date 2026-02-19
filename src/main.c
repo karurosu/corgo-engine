@@ -30,14 +30,13 @@ const char* font2path = "/System/Fonts/Roobert-10-Bold.pft";
 LCDFont* font = NULL;
 
 // Demo variables, global to keep it simple
-int x_size = 0;
-int y_size = 0;
-int x = 0;
-int y = 0;
-int x_speed = 1;
-int y_speed = 1;
+uint16_t x = 0;
+uint16_t y = 0;
+uint16_t x_speed = 1;
+uint16_t y_speed = 1;
 CE_Id transformComponentId = CE_INVALID_ID;
 CE_TransformComponent* transformComponent = NULL;
+CE_TransformComponent* transformComponent2 = NULL;
 CE_Id textLabelComponentId = CE_INVALID_ID;
 CE_TextLabelComponent* textLabelComponent = NULL;
 
@@ -112,21 +111,14 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 			}
 
 			// Set text and font
-			result = CE_TextLabelComponent_setText(ecsContext, textLabelComponent, "Hello, Corgo Engine!");
+			result = CE_TextLabelComponent_setText(ecsContext, textLabelComponent, transformComponent, "Hello, Corgo Engine!");
 			if (result != CE_OK) {
 				CE_Error("Failed to set text for TextLabelComponent: %s", CE_GetErrorMessage(errorCode));
 				return -1;
 			}
-			result = CE_TextLabelComponent_setFont(ecsContext, textLabelComponent, font2path);
+			result = CE_TextLabelComponent_setFont(ecsContext, textLabelComponent, transformComponent, font2path);
 			if (result != CE_OK) {
 				CE_Error("Failed to set font for TextLabelComponent: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
-
-			// Get bounds of the text
-			result = CE_TextLabelComponent_getTextBounds(ecsContext, textLabelComponent, &x_size, &y_size);
-			if (result != CE_OK) {
-				CE_Error("Failed to get text bounds for TextLabelComponent: %s", CE_GetErrorMessage(errorCode));
 				return -1;
 			}
 
@@ -137,17 +129,14 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 				return -1;
 			}
 
-			CE_Debug("Text bounds: %d x %d", x_size, y_size);
-			CE_TransformComponent_setPosition(ecsContext, transformComponent, (CE_GetDisplayWidth(ecsContext)-x_size)/2, (CE_GetDisplayHeight(ecsContext)-y_size)/2, 0);
+			CE_Debug("Text bounds: %d x %d", transformComponent->m_width, transformComponent->m_height);
+			CE_TransformComponent_setPosition(ecsContext, transformComponent, (CE_GetDisplayWidth(ecsContext)-transformComponent->m_width)/2, (CE_GetDisplayHeight(ecsContext)-transformComponent->m_height)/2);
 
 			// Create a second entity to test the scene graph Z ordering
 			CE_Id entityId2 = CE_INVALID_ID;
 			CE_Id transformComponentId2 = CE_INVALID_ID;
 			CE_Id textLabelComponentId2 = CE_INVALID_ID;
-			CE_TransformComponent* transformComponent2 = NULL;
 			CE_TextLabelComponent* textLabelComponent2 = NULL;
-			int x_size2 = 0;
-			int y_size2 = 0;
 
 			result = CE_ECS_CreateEntity(ecsContext, &entityId2, &errorCode);
 			if (result != CE_OK) {
@@ -168,36 +157,28 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 			}
 
 			// Set text and font
-			result = CE_TextLabelComponent_setText(ecsContext, textLabelComponent2, "WOOF!!");
+			result = CE_TextLabelComponent_setText(ecsContext, textLabelComponent2, transformComponent2, "WOOF!!");
 			if (result != CE_OK) {
 				CE_Error("Failed to set text for TextLabelComponent: %s", CE_GetErrorMessage(errorCode));
 				return -1;
 			}
 
-			result = CE_TextLabelComponent_setFont(ecsContext, textLabelComponent2, fontpath);
+			result = CE_TextLabelComponent_setFont(ecsContext, textLabelComponent2, transformComponent2, fontpath);
 			if (result != CE_OK) {
 				CE_Error("Failed to set font for TextLabelComponent 2: %s", CE_GetErrorMessage(errorCode));
 				return -1;
 			}
 			
-			textLabelComponent2->m_inverted = true; // Draw in white
-
-			// Get bounds of the text
-			result = CE_TextLabelComponent_getTextBounds(ecsContext, textLabelComponent2, &x_size2, &y_size2);
-			if (result != CE_OK) {
-				CE_Error("Failed to get text bounds for TextLabelComponent 2: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
+			textLabelComponent2->m_inverted = false; // Draw in white
 
 			// Add to graph
-			CE_SceneGraph_AddChild(ecsContext, CE_SceneGraph_GetSceneRootId(ecsContext), entityId2, false, &errorCode);
+			CE_SceneGraph_AddChild(ecsContext, entityId, entityId2, false, &errorCode);
 			if (result != CE_OK) {
 				CE_Error("Failed to add demo entity 2 to scene graph: %s", CE_GetErrorMessage(errorCode));
 				return -1;
 			}
 
-			CE_Debug("Text bounds: %d x %d", x_size2, y_size2);
-			CE_TransformComponent_setPosition(ecsContext, transformComponent2, (CE_GetDisplayWidth(ecsContext)-x_size2)/2, (CE_GetDisplayHeight(ecsContext)-y_size2)/2, 0);
+			CE_TransformComponent_setZIndex(ecsContext, transformComponent2, 1); // Set above the first text label
 		}
 
 		CE_Display_SetRefreshRate(ecsContext, 60);
@@ -228,7 +209,6 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 
 static int update(void* userdata)
 {
-	CE_Result result;
 	float currentTime = 0.0f;
 	float deltaTime = 0.0f;
 	CE_ERROR_CODE errorCode;
@@ -239,31 +219,46 @@ static int update(void* userdata)
 	currentTime = pd->system->getElapsedTime();
 	deltaTime = currentTime - lastTickTime;
 	lastTickTime = currentTime;
-
-	// Clear screen
-	pd->graphics->clear(kColorWhite);
 #endif
 
 	// Simple animation for demo
 	{
 		x += x_speed;
 		y += y_speed;
-		if (x <= 0 || x + x_size >= CE_GetDisplayWidth(ecsContext)) {
+		if (x <= 0 || x + transformComponent->m_width >= CE_GetDisplayWidth(ecsContext)) {
 			x_speed = -x_speed;
 		}
-		if (y <= 0 || y + y_size >= CE_GetDisplayHeight(ecsContext)) {
+		if (y <= 0 || y + transformComponent->m_height >= CE_GetDisplayHeight(ecsContext)) {
 			y_speed = -y_speed;
 		}
 
 		// Update transform component position
-		CE_TransformComponent_setPosition(ecsContext, transformComponent, x, y, 0);
+		CE_TransformComponent_setPosition(ecsContext, transformComponent, x, y);
+
+		// Also update the second component to test Z ordering
+		CE_TransformComponent_setPosition(ecsContext, transformComponent2, (transformComponent2->m_x + 2) % transformComponent->m_width, 0);
 	}
 
-	result = CE_ECS_Tick(ecsContext, deltaTime, &errorCode);
-	if (result != CE_OK) {
+	if (CE_ECS_Tick(ecsContext, deltaTime, &errorCode) != CE_OK) {
 		CE_Error("ECS Tick failed with result code: %d", CE_GetErrorMessage(errorCode));
 		return -1;
 	}
+
+	// Clear screen before rendering
+	CE_Display_Clear(ecsContext);
+
+	// Regenerate caches if needed
+    if (CE_Engine_SceneGraph_UpdateRenderList(ecsContext, &errorCode) != CE_OK) {
+        CE_Error("Failed to update scene graph render list with error code: %s", CE_GetErrorMessage(errorCode));
+        return CE_ERROR;
+    }
+
+	// Render
+	if (CE_ECS_TickRenderSystems(ecsContext, deltaTime, &errorCode) != CE_OK) {
+		CE_Error("ECS Tick Render Systems failed with result code: %d", CE_GetErrorMessage(errorCode));
+		return -1;
+	}
+
 
 #ifdef CE_BACKEND_PLAYDATE
 	pd->system->drawFPS(0,0);

@@ -24,8 +24,8 @@ typedef struct CE_ECS_ComponentStorage {
     uint16_t m_capacity; // Total capacity of the storage for this component type
     uint16_t m_count; // Number of currently alive components of this type
     void *m_componentDataPool; // Contiguous block of memory for component data, indexed by component unique ID
-    CE_Bitset m_componentIndexBitset; // Bitset to track used indices
     cc_vec(CE_ECS_ComponentStorageHeader) m_componentMetadata; // Metadata for each component instance
+    CE_Bitset m_componentIndexBitset; // Bitset to track used indices
 } CE_ECS_ComponentStorage;
 
 typedef struct CE_ECS_EntityStorage {

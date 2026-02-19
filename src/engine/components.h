@@ -14,6 +14,7 @@
 #include "components/scene_graph.h"
 #include "core/display.h"
 #include "engine/assets.h"
+#include "components/camera.h"
 
 // Include component headers
 #include "components/text_label.h"
@@ -27,9 +28,10 @@
 
 
 #define CE_GLOBAL_COMPONENT_DESC_ENGINE(X) \
-    X(CE_ENGINE_ASSET_CACHE, CE_Engine_AssetCache_Component)\
+    X(CE_ENGINE_ASSET_CACHE, CE_Engine_AssetCacheComponent)\
 	X(CE_ENGINE_SCENE_GRAPH_COMPONENT, CE_SceneGraphComponent)\
 	X(CE_ENGINE_DISPLAY_COMPONENT, CE_DisplayComponent)\
+	X(CE_ENGINE_CAMERA_COMPONENT, CE_CameraComponent)\
 
 
 #endif // CORGO_ENGINE_COMPONENTS_H
