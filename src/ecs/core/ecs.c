@@ -174,7 +174,7 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
 
 CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* errorCode)
 {
-    CE_Debug("Cleaning up runtime data");
+    CE_Debug("\nCleaning up runtime data");
     for (uint32_t order = 0; order < CE_ECS_SYSTEM_RUN_ORDER_COUNT; order++) {
         for (uint32_t freq = 0; freq < CE_ECS_SYSTEM_RUN_FREQUENCY_COUNT; freq++) {
             for (uint32_t phase = 0; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++) {

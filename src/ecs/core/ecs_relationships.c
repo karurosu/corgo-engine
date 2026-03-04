@@ -143,7 +143,7 @@ CE_Result CE_Entity_RemoveRelationship(INOUT CE_ECS_Context* context, IN CE_Id e
     return CE_OK;
 }
 
-CE_Result CE_Entity_FindFirstRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, OUT CE_Id* relationshipId, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_Entity_FindFirstRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, OUT CE_Id* relationshipEntityId, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     if (entity == CE_INVALID_ID) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_ENTITY_ID);
@@ -169,7 +169,7 @@ CE_Result CE_Entity_FindFirstRelationship(INOUT CE_ECS_Context* context, IN CE_I
     cc_for_each(&entityData->m_relationships, el) 
     {
         if (CE_Id_getRelationshipTypeId(*el) == relationshipType) {
-            *relationshipId = *el;
+            *relationshipEntityId = CE_Id_relationshipToEntityReference(*el);
             break;
         }
     }
@@ -206,7 +206,7 @@ CE_Result CE_Entity_FindAllRelationships(INOUT CE_ECS_Context* context, IN CE_Id
     cc_for_each(&entityData->m_relationships, el) 
     {
         if (CE_Id_getRelationshipTypeId(*el) == relationshipType) {
-            results[index++] = *el;
+            results[index++] = CE_Id_relationshipToEntityReference(*el);
             if (index >= bufsize) {
                 break;
             }

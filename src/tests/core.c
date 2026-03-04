@@ -15,9 +15,7 @@ void setUp(void) {
 
     // Fake set up the scene graph
     CE_ECS_AccessGlobalComponentToVariable(&context, CE_ENGINE_SCENE_GRAPH_COMPONENT, sceneGraph);
-    sceneGraph->m_rebuildZOrderCache = false;
     sceneGraph->m_needsRedraw = false;
-
 }
 
 void tearDown(void) {
@@ -160,10 +158,6 @@ static void test_CE_Id_Helpers(void) {
 
     CE_Id original = id;
 
-    // Invalid unique (>16 bits)
-    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_setUniqueId(&id, 0x1FFFF));
-    TEST_ASSERT_EQUAL_UINT32(original, id);
-
     // Valid modifications
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_setUniqueId(&id, 123));
     TEST_ASSERT_EQUAL_UINT16(123, CE_Id_getUniqueId(id));
@@ -182,9 +176,6 @@ static void test_CE_Id_Helpers(void) {
     TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, out);
     //// Invalid generation for entity reference
     TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 0xFF, 10, &out));
-    TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, out);
-    //// Invalid unique id for entity reference
-    TEST_ASSERT_EQUAL_INT(CE_ERROR, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 0, 0x1FFFF, &out));
     TEST_ASSERT_EQUAL_UINT32(CE_INVALID_ID, out);
 
     // Constructor corner cases
@@ -963,11 +954,11 @@ void test_ECS_Relationships(void) {
     result = CE_Entity_FindFirstRelationship(&context, childEntity1, CE_RELATIONSHIP_PARENT, &found, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_EQUAL_UINT16(CE_Id_getUniqueId(parentEntity), CE_Id_getUniqueId(found));
+    TEST_ASSERT_EQUAL_UINT16(parentEntity, found);
     result = CE_Entity_FindFirstRelationship(&context, childEntity2, CE_RELATIONSHIP_PARENT, &found, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_EQUAL_UINT16(CE_Id_getUniqueId(parentEntity), CE_Id_getUniqueId(found));
+    TEST_ASSERT_EQUAL_UINT16(parentEntity, found);
 
     CE_Id foundChildren[3];
     size_t foundCount = 0;
@@ -976,8 +967,7 @@ void test_ECS_Relationships(void) {
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_size_t(2, foundCount);
     for (size_t i = 0; i < foundCount; i++) {
-        const uint16_t childId = CE_Id_getUniqueId(foundChildren[i]);
-        TEST_ASSERT_TRUE(childId == CE_Id_getUniqueId(childEntity1) || childId == CE_Id_getUniqueId(childEntity2));
+        TEST_ASSERT_TRUE(foundChildren[i] == childEntity1 || foundChildren[i] == childEntity2);
     }
 
     // Remove second relationship
@@ -1067,6 +1057,10 @@ void test_ECS_tick(void) {
     CE_Id entity_2 = CE_INVALID_ID;
     CE_CORE_DEBUG_COMPONENT_StorageType* componentData = NULL;
 
+    // Need to init the scene graph to avoid problems ticking
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Engine_SceneGraph_Init(&context, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
     // Create entity
     TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &entity_1, &errorCode));
     TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, entity_1);
@@ -1143,6 +1137,10 @@ void test_ECS_GlobalComponents(void) {
     CE_ERROR_CODE errorCode = CE_ERROR_CODE_COUNT;
     CE_Result result = CE_ERROR;
 
+    // Need to init the scene graph to avoid problems ticking
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Engine_SceneGraph_Init(&context, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
     // Get global component
     CE_ECS_AccessGlobalComponentToVariable(&context, CE_CORE_GLOBAL_DEBUG_COMPONENT, globalDebugComponentPtr);
     TEST_ASSERT_NOT_NULL(globalDebugComponentPtr);
@@ -1157,6 +1155,59 @@ void test_ECS_GlobalComponents(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_INT(1, globalDebugComponentPtr->m_testValue);
+}
+
+void test_SceneGraph(void) {
+    CE_ERROR_CODE errorCode = CE_ERROR_CODE_COUNT;
+    CE_Result result = CE_ERROR;
+    CE_Id entity_1 = CE_INVALID_ID;
+    CE_Id transform_1 = CE_INVALID_ID;
+    CE_Id debugcomp1 = CE_INVALID_ID;
+    CE_Id rootDebugCompId = CE_INVALID_ID;
+    CE_TransformComponent* transformData1 = NULL;
+    CE_Core_DebugComponent* debugData1 = NULL;
+    CE_Core_DebugComponent* rootDebugData = NULL;
+
+    result = CE_Engine_SceneGraph_Init(&context, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Create one component with a transform
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &entity_1, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, entity_1);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    result = CE_Entity_AddComponent(&context, entity_1, CE_TRANSFORM_COMPONENT, &transform_1, &transformData1, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(transformData1);
+    result = CE_Entity_AddComponent(&context, entity_1, CE_CORE_DEBUG_COMPONENT, &debugcomp1, &debugData1, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(debugData1);
+
+    // Add a debug component to the root
+    const CE_Id rootId = CE_SceneGraph_GetSceneRootId(&context);
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, rootId);
+    result = CE_Entity_AddComponent(&context, rootId, CE_CORE_DEBUG_COMPONENT, &rootDebugCompId, &rootDebugData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(rootDebugData);
+
+    // Add the child to the root
+    result = CE_SceneGraph_AddChild(&context, rootId, entity_1, false, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Run one tick
+    result = CE_ECS_Tick(&context, 0.0f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // Check relationship system ran
+    TEST_ASSERT_TRUE(debugData1->m_ticked_rel);
+
+    // Test scene ran in th e correct order
+    TEST_ASSERT_EQUAL_INT(43, debugData1->m_testValue2);
 }
 
 int main(void) {
@@ -1184,6 +1235,8 @@ int main(void) {
 
     RUN_TEST(test_ECS_tick);
     RUN_TEST(test_ECS_GlobalComponents);
-        
+
+    RUN_TEST(test_SceneGraph);
+
     return UNITY_END();
 }

@@ -424,6 +424,11 @@ CE_Result CE_ECS_MainStorage_getEntityData(INOUT CE_ECS_MainStorage* storage, IN
         return CE_ERROR;
     }
 
+    if (!CE_Id_isEntity(id)) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_ENTITY_ID);
+        return CE_ERROR;
+    }
+
     const uint16_t index = CE_Id_getUniqueId(id);
     if (index >= CE_MAX_ENTITIES) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_ENTITY_ID);

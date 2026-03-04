@@ -30,7 +30,30 @@ CE_END_SYSTEM_IMPLEMENTATION
 
 CE_START_SYSTEM_IMPLEMENTATION(CE_CORE_TEST_SYSTEM_REL, CE_CORE_TEST_SYSTEM_DEPENDENCIES_REL)
 {
+    debugComponent->m_ticked_rel = true;
     debugComponent->m_testValue += 1;
+}
+CE_END_SYSTEM_IMPLEMENTATION
+
+CE_START_SYSTEM_IMPLEMENTATION(CE_CORE_TEST_SYSTEM_SCENE_ORDER, CE_CORE_TEST_SYSTEM_DEPENDENCIES)
+{
+    if (!CE_Entity_HasRelationship(context, entity, CE_RELATIONSHIP_PARENT))
+    {
+        debugComponent->m_testValue2 = 42;
+    }
+    else
+    {
+        CE_Id parentId = CE_INVALID_ID;
+        if (CE_Entity_FindFirstRelationship(context, entity, CE_RELATIONSHIP_PARENT, &parentId, NULL) == CE_OK)
+        {
+            CE_Id componentId = CE_INVALID_ID;
+            CE_Core_DebugComponent* parentDebugComponent = NULL;
+            if (CE_Entity_FindFirstComponent(context, parentId, CE_CORE_DEBUG_COMPONENT, &componentId, (void**)&parentDebugComponent, NULL) == CE_OK)
+            {
+                debugComponent->m_testValue2 = parentDebugComponent->m_testValue2 + 1;
+            }
+        }
+    }
 }
 CE_END_SYSTEM_IMPLEMENTATION
 

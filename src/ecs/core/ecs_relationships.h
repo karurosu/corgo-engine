@@ -60,23 +60,23 @@ CE_Result CE_Entity_RemoveRelationship(INOUT CE_ECS_Context* context, IN CE_Id e
  * @param[in,out] context The ECS context.
  * @param[in] entity The ID of the entity to search.
  * @param[in] relationshipType The type ID of the relationship to find.
- * @param[out] relationshipId Pointer to receive the ID of the found relationship.
+ * @param[out] relationshipId Pointer to receive the entity ID at the other end of the relationship.
  * @param[out] errorCode Optional error code if search fails.
  * 
  * @return CE_OK on success, CE_ERROR on failure (e.g., relationship type not found).
  */
-CE_Result CE_Entity_FindFirstRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, OUT CE_Id* relationshipId, OUT_OPT CE_ERROR_CODE* errorCode);
+CE_Result CE_Entity_FindFirstRelationship(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId relationshipType, OUT CE_Id* relationshipEntityId, OUT_OPT CE_ERROR_CODE* errorCode);
     
 /**
  * @brief Find all relationships of a specific type on an entity.
  * 
  * Searches for all relationships matching the given type ID on the entity
- * and returns their IDs in the provided buffer.
+ * and returns the entity IDs in the provided buffer.
  * 
  * @param[in,out] context The ECS context.
  * @param[in] entity The ID of the entity to search.
  * @param[in] relationshipType The type ID of the relationships to find.
- * @param[out] results Buffer to receive an array of relationship IDs.
+ * @param[out] results Buffer to receive an array of entity IDs.
  * @param[in] bufsize Maximum number of relationship IDs to return.
  * @param[out] resultCount The actual number of relationships found.
  * @param[out] errorCode Optional error code if search fails.

@@ -247,7 +247,7 @@ CE_Result CE_Entity_GetComponent(INOUT CE_ECS_Context* context, IN CE_Id entity,
         return CE_ERROR;
     }
 
-    if (componentType == CE_INVALID_TYPE_ID || componentType >= CE_MAX_COMPONENT_TYPES) {
+    if (!CE_Id_isComponent(componentId) || componentType == CE_INVALID_TYPE_ID || componentType >= CE_MAX_COMPONENT_TYPES) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INVALID_COMPONENT_TYPE);
         return CE_ERROR;
     }

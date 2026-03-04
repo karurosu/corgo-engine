@@ -42,12 +42,6 @@ CE_Result CE_ECS_RunSystems_AutoOrder(INOUT CE_ECS_Context* context, IN float de
     return CE_OK;
 }
 
-CE_Result CE_ECS_RunSystems_SceneOrder(INOUT CE_ECS_Context* context, IN float deltaTime, CE_ECS_SYSTEM_RUN_PHASE phase, CE_ECS_SYSTEM_RUN_FREQUENCY frequency, OUT_OPT CE_ERROR_CODE* errorCode)
-{
-    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
-    return CE_OK;
-}
-
 CE_Result CE_ECS_RunSystemOnEntity(INOUT CE_ECS_Context* context, IN float deltaTime, IN CE_TypeId systemTypeId, IN const CE_ECS_EntityData *entityData)
 {
     CE_Result result = CE_ERROR;
@@ -133,3 +127,60 @@ CE_Result CE_ECS_RunSystems_RenderOrder(INOUT CE_ECS_Context* context, IN float 
     return CE_OK;
 }
 
+// Internal struct used by userdata
+typedef struct {
+    CE_ECS_System_CacheList *systemList;
+    float deltaTime;
+} RunSystemUserData;
+
+CE_Result RunSystemTraverseFunc(IN CE_ECS_Context* context, IN CE_Id entityId, IN CE_Id parentId, INOUT void* userData, CE_ERROR_CODE* errorCode)
+{
+    CE_ECS_EntityData* entityData;
+
+    // Using the uniqueId directly since we know it exists as it comes from the scene graph traversal
+    CE_Result result = CE_ECS_MainStorage_getEntityDataByUniqueId(&context->m_storage, CE_Id_getUniqueId(entityId), &entityData, errorCode);
+    if (entityData == NULL || result != CE_OK) {
+        return CE_ERROR;
+    }
+
+    // Run each system in the cached list
+    RunSystemUserData* userDataStruct = (RunSystemUserData *)userData;
+    const CE_ECS_System_CacheList *systemList = userDataStruct->systemList;
+    cc_for_each(&systemList->m_systems, sysTypeIdPtr) 
+    {
+        CE_ECS_RunSystemOnEntity(context, userDataStruct->deltaTime, *sysTypeIdPtr, entityData);
+    }
+
+    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+    return CE_OK;
+}
+
+CE_Result CE_ECS_RunSystems_SceneOrder(INOUT CE_ECS_Context* context, IN float deltaTime, CE_ECS_SYSTEM_RUN_PHASE phase, CE_ECS_SYSTEM_RUN_FREQUENCY frequency, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    CE_Result result = CE_ERROR;
+    CE_ECS_System_CacheList *systemList = &context->m_systemRuntimeData.m_systemsByRunOrder[CE_ECS_SYSTEM_RUN_ORDER_SCENETREE].m_frequency[frequency].m_phase[phase];
+
+    if (cc_size(&systemList->m_systems) == 0) {
+        // No systems to run
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+        return CE_OK;
+    }
+
+    CE_SceneGraphComponent* sceneGraph = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_SCENE_GRAPH_COMPONENT);
+
+    if (sceneGraph->m_rootEntityId == CE_INVALID_ID)
+    {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_ENGINE_SCENE_GRAPH_NOT_READY);
+        return CE_ERROR;
+    }
+
+    // Traverse the scene graph and update the cache
+    RunSystemUserData userData = { .systemList = systemList, .deltaTime = deltaTime };
+    if (CE_Engine_SceneGraph_Traverse(context, sceneGraph->m_rootEntityId, RunSystemTraverseFunc, &userData, errorCode) != CE_OK)
+    {
+        return CE_ERROR;
+    }
+
+    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+    return CE_OK;
+}
