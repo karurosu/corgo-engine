@@ -4,14 +4,7 @@
 //  Copyright (c) 2025 Carlos Camacho. All rights reserved.
 //
 
-#include <stdlib.h>
-
-#include "engine/core/memory.h"
-
-#include "storage.h"
 #include "../ecs.h"
-
-#include "string.h"
 
 CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN CE_ECS_Context *context, OUT CE_ERROR_CODE *errorCode)
 {
