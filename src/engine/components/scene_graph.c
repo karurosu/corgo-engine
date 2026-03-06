@@ -54,7 +54,7 @@ CE_Result CE_Engine_SceneGraph_Init(CE_ECS_Context* context, CE_ERROR_CODE* erro
     return CE_OK;
 }
 
-CE_Result CE_SceneGraph_AddChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN CE_Id childId, IN bool move, CE_ERROR_CODE* errorCode)
+CE_Result CE_Scene_AddChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN CE_Id childId, IN bool move, CE_ERROR_CODE* errorCode)
 {
     // Check that the child has a transform component
     CE_TransformComponent* transformComponent = NULL;
@@ -96,7 +96,7 @@ CE_Result CE_SceneGraph_AddChild(INOUT CE_ECS_Context* context, IN CE_Id parentI
     return CE_OK;
 }
 
-CE_Result CE_SceneGraph_RemoveChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN CE_Id childId, CE_ERROR_CODE* errorCode)
+CE_Result CE_Scene_RemoveChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN CE_Id childId, CE_ERROR_CODE* errorCode)
 {
     CE_SceneGraphComponent* sceneGraph = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_SCENE_GRAPH_COMPONENT);
 
@@ -262,7 +262,7 @@ CE_Result CE_Engine_SceneGraph_UpdateRenderList(INOUT CE_ECS_Context* context, C
     return CE_OK;
 }
 
-CE_SceneGraphRenderNode *CE_SceneGraph_GetRenderNode(IN CE_ECS_Context* context, IN CE_Id entityId)
+CE_SceneGraphRenderNode *CE_Scene_GetRenderNode(IN CE_ECS_Context* context, IN CE_Id entityId)
 {
     CE_SceneGraphComponent* sceneGraph = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_SCENE_GRAPH_COMPONENT);
     return cc_get(&sceneGraph->m_renderList, CE_Id_getUniqueId(entityId));

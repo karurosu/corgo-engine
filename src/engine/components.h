@@ -12,6 +12,7 @@
 
 // Global components
 #include "components/scene_graph.h"
+#include "components/scene_script.h"
 #include "core/display.h"
 #include "engine/assets.h"
 #include "components/camera.h"
@@ -32,6 +33,7 @@
 	X(CE_ENGINE_SCENE_GRAPH_COMPONENT, CE_SceneGraphComponent)\
 	X(CE_ENGINE_DISPLAY_COMPONENT, CE_DisplayComponent)\
 	X(CE_ENGINE_CAMERA_COMPONENT, CE_CameraComponent)\
+	X(CE_ENGINE_SCENE_SCRIPT_COMPONENT, CE_SceneScriptComponent)\
 
 
 #endif // CORGO_ENGINE_COMPONENTS_H

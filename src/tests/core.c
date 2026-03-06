@@ -1186,7 +1186,7 @@ void test_SceneGraph(void) {
     TEST_ASSERT_NOT_NULL(debugData1);
 
     // Add a debug component to the root
-    const CE_Id rootId = CE_SceneGraph_GetSceneRootId(&context);
+    const CE_Id rootId = CE_Scene_GetRootId(&context);
     TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, rootId);
     result = CE_Entity_AddComponent(&context, rootId, CE_CORE_DEBUG_COMPONENT, &rootDebugCompId, &rootDebugData, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
@@ -1194,7 +1194,7 @@ void test_SceneGraph(void) {
     TEST_ASSERT_NOT_NULL(rootDebugData);
 
     // Add the child to the root
-    result = CE_SceneGraph_AddChild(&context, rootId, entity_1, false, &errorCode);
+    result = CE_Scene_AddChild(&context, rootId, entity_1, false, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
 

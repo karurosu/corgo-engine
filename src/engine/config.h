@@ -17,4 +17,10 @@
 // Default display scale (1,2,4,8), may be changed in runtime by calling CE_Display_SetScale
 #define CE_ENGINE_SCALE_DEFAULT 1
 
+// Include sample scenes, comment line below to exclude them from the build
+#define CE_ENGINE_INCLUDE_SAMPLE_SCENES
+
+// The default scene to load on startup, only if CE_ENGINE_SET_START_SCENE is not defined
+#define CE_ENGINE_DEFAULT_SCENE TextScroller
+
 #endif // CORGO_ENGINE_CONFIG_H

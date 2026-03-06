@@ -10,7 +10,7 @@
 CE_START_SYSTEM_IMPLEMENTATION(CE_TEXT_LABEL_RENDERER, CE_TEXT_LABEL_SYSTEM_DEPENDENCIES)
 {
 #ifdef CE_BACKEND_PLAYDATE
-    CE_SceneGraphRenderNode* renderNode = CE_SceneGraph_GetRenderNode(context, entity);
+    CE_SceneGraphRenderNode* renderNode = CE_Scene_GetRenderNode(context, entity);
     if (renderNode == NULL) {
         return CE_OK; // Entity not in scene graph, skip rendering
     }

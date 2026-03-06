@@ -37,48 +37,4 @@ CE_Result CE_Engine_SceneGraph_UpdateRenderList(INOUT CE_ECS_Context* context, C
 
 #define CE_Engine_SceneGraph_MarkDirty(contextPtr) do {CE_ECS_AccessGlobalComponent(contextPtr, CE_ENGINE_SCENE_GRAPH_COMPONENT)->m_needsRedraw = true;} while(0)
 
-/// Public API
-
-/** 
- * @brief Mecro: Get the root entity ID of the scene graph.
- * 
- * @param contextPtr[in] The ECS context.
- * @return The root entity ID.
- */
-#define CE_SceneGraph_GetSceneRootId(contextPtr) \
-    (CE_ECS_AccessGlobalComponent((contextPtr), CE_ENGINE_SCENE_GRAPH_COMPONENT)->m_rootEntityId)
-
-/** 
- * @brief Adds a child entity to a parent entity in the scene graph.
- * Ensures caches are updated accordingly.
- * 
- * @param context[in,out] The ECS context.
- * @param parentId[in] The parent entity ID.
- * @param childId[in] The child entity ID.
- * @param move[in] Whether to move the child from its current parent if it already has one.
- * @param errorCode[out] The error code in case of failure.
- */
-CE_Result CE_SceneGraph_AddChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN CE_Id childId, IN bool move, CE_ERROR_CODE* errorCode);
-
-/**
- * @brief Removes a child entity from a parent entity in the scene graph.
- * Ensures caches are updated accordingly.
- * 
- * @param context[in,out] The ECS context.
- * @param parentId[in] The parent entity ID.
- * @param childId[in] The child entity ID.
- * @param errorCode[out] The error code in case of failure.
- */
-CE_Result CE_SceneGraph_RemoveChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN CE_Id childId, CE_ERROR_CODE* errorCode);
-
-/**
- * @brief Gets the render node for a given entity ID from the scene graph cache.
- * Returns NULL if the entity does not have a render node in the cache.
- * 
- * @param context[in] The ECS context.
- * @param entityId[in] The entity ID to get the render node for.
- * @return The render node for the entity, or NULL if it does not exist in the cache.
- */
-CE_SceneGraphRenderNode *CE_SceneGraph_GetRenderNode(IN CE_ECS_Context* context, IN CE_Id entityId);
-
 #endif // CORGO_ENGINE_COMPONENTS_SCENE_GRAPH_H

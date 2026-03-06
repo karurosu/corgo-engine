@@ -32,6 +32,9 @@
 #define CE_PASTE_HELPER(x, y) x##y
 #define CE_PASTE(x, y) CE_PASTE_HELPER(x, y)
 
+#define CE_STRINGIFY_HELPER(x) #x
+#define CE_STRINGIFY(x) CE_STRINGIFY_HELPER(x)
+
 // popcnt
 #if(_WINDLL)
 	#define CE_popcnt __popcnt

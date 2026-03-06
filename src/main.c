@@ -18,6 +18,13 @@
 // Include main ECS header
 #include "ecs/ecs.h"
 
+// Include engine config
+#include "engine/config.h"
+
+#ifdef CE_ENGINE_INCLUDE_SAMPLE_SCENES
+#include "engine/scenes.h"
+#endif
+
 // Global ECS context
 CE_ECS_Context *ecsContext;
 
@@ -25,20 +32,6 @@ CE_ECS_Context *ecsContext;
 float lastTickTime = 0.0f;
 
 static int update(void* userdata);
-const char* fontpath = "/System/Fonts/Asheville-Sans-14-Bold.pft";
-const char* font2path = "/System/Fonts/Roobert-10-Bold.pft";
-LCDFont* font = NULL;
-
-// Demo variables, global to keep it simple
-uint16_t x = 0;
-uint16_t y = 0;
-uint16_t x_speed = 1;
-uint16_t y_speed = 1;
-CE_Id transformComponentId = CE_INVALID_ID;
-CE_TransformComponent* transformComponent = NULL;
-CE_TransformComponent* transformComponent2 = NULL;
-CE_Id textLabelComponentId = CE_INVALID_ID;
-CE_TextLabelComponent* textLabelComponent = NULL;
 
 #ifdef _WINDLL
 __declspec(dllexport)
@@ -57,29 +50,30 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 		pd->system->logToConsole("Playdate API: %p", pd);
 		pd->system->logToConsole("Playdate API cached: %p", CE_GetPlaydateAPI());
 		pd->system->resetElapsedTime();
-
-		// Set screen properties
-		pd->display->setScale(1);
 #endif
+
 		CE_Debug("Welcome to Corgo Engine!");
-		CE_Debug("Date Built: %s", CE_BUILD_DATETIME);
+		CE_Debug("Build Date: %s", CE_BUILD_DATETIME);
 		
 		CE_Debug("Creating ECS Context");
 		CE_ERROR_CODE errorCode;														
 		ecsContext = CE_realloc(NULL, sizeof(CE_ECS_Context));
-		CE_Debug("ECS Context allocated at %p with size %u bytes", ecsContext, sizeof(CE_ECS_Context));
-
+		
 		if (ecsContext == NULL) {
 			CE_Error("Failed to allocate memory for ECS context");
 			return -1;
 		}
 
+		CE_Debug("ECS Context allocated at %p with size %u bytes", ecsContext, sizeof(CE_ECS_Context));
+
 		if (CE_ECS_Init(ecsContext, &errorCode) != CE_OK) {
 			CE_Error("ECS Initialization failed with error code: %s", CE_GetErrorMessage(errorCode));
 			return -1;
 		}
-		
+#ifdef CE_BACKEND_PLAYDATE
 		CE_Debug("Engine Initialized in %f seconds", (double) pd->system->getElapsedTime());
+		pd->system->resetElapsedTime();
+#endif
 
 		// Initialize scene graph
 		result = CE_Engine_SceneGraph_Init(ecsContext, &errorCode);
@@ -88,100 +82,25 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 			return -1;
 		}
 
-		// Demo code to print a text label using ECS
-		// TODO: move this once scene management is implemented
-		{
-			CE_Id entityId = CE_INVALID_ID;
-			result = CE_ECS_CreateEntity(ecsContext, &entityId, &errorCode);
-			if (result != CE_OK) {
-				CE_Error("Failed to create demo entity: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
+#ifdef CE_BACKEND_PLAYDATE
+		CE_Debug("Scene Graph Initialized in %f seconds", (double) pd->system->getElapsedTime());
+#endif
 
-			result = CE_Entity_AddComponent(ecsContext, entityId, CE_TRANSFORM_COMPONENT, &transformComponentId, (void**)&transformComponent, &errorCode);
-			if (result != CE_OK) {
-				CE_Error("Failed to add TransformComponent to demo entity: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
-
-			result = CE_Entity_AddComponent(ecsContext, entityId, CE_TEXT_LABEL_COMPONENT, &textLabelComponentId, (void**)&textLabelComponent, &errorCode);
-			if (result != CE_OK) {
-				CE_Error("Failed to add TextLabelComponent to demo entity: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
-
-			// Set text and font
-			result = CE_TextLabelComponent_setText(ecsContext, textLabelComponent, transformComponent, "Hello, Corgo Engine!");
-			if (result != CE_OK) {
-				CE_Error("Failed to set text for TextLabelComponent: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
-			result = CE_TextLabelComponent_setFont(ecsContext, textLabelComponent, transformComponent, font2path);
-			if (result != CE_OK) {
-				CE_Error("Failed to set font for TextLabelComponent: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
-
-			// Add to graph
-			CE_SceneGraph_AddChild(ecsContext, CE_SceneGraph_GetSceneRootId(ecsContext), entityId, false, &errorCode);
-			if (result != CE_OK) {
-				CE_Error("Failed to add demo entity to scene graph: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
-
-			CE_Debug("Text bounds: %d x %d", transformComponent->m_width, transformComponent->m_height);
-			CE_TransformComponent_setPosition(ecsContext, transformComponent, (CE_GetDisplayWidth(ecsContext)-transformComponent->m_width)/2, (CE_GetDisplayHeight(ecsContext)-transformComponent->m_height)/2);
-
-			// Create a second entity to test the scene graph Z ordering
-			CE_Id entityId2 = CE_INVALID_ID;
-			CE_Id transformComponentId2 = CE_INVALID_ID;
-			CE_Id textLabelComponentId2 = CE_INVALID_ID;
-			CE_TextLabelComponent* textLabelComponent2 = NULL;
-
-			result = CE_ECS_CreateEntity(ecsContext, &entityId2, &errorCode);
-			if (result != CE_OK) {
-				CE_Error("Failed to create demo entity 2: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
-
-			result = CE_Entity_AddComponent(ecsContext, entityId2, CE_TRANSFORM_COMPONENT, &transformComponentId2, (void**)&transformComponent2, &errorCode);
-			if (result != CE_OK) {
-				CE_Error("Failed to add TransformComponent to demo entity 2: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
-
-			result = CE_Entity_AddComponent(ecsContext, entityId2, CE_TEXT_LABEL_COMPONENT, &textLabelComponentId2, (void**)&textLabelComponent2, &errorCode);
-			if (result != CE_OK) {
-				CE_Error("Failed to add TextLabelComponent to demo entity 2: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
-
-			// Set text and font
-			result = CE_TextLabelComponent_setText(ecsContext, textLabelComponent2, transformComponent2, "WOOF!!");
-			if (result != CE_OK) {
-				CE_Error("Failed to set text for TextLabelComponent: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
-
-			result = CE_TextLabelComponent_setFont(ecsContext, textLabelComponent2, transformComponent2, fontpath);
-			if (result != CE_OK) {
-				CE_Error("Failed to set font for TextLabelComponent 2: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
-			
-			textLabelComponent2->m_inverted = false; // Draw in white
-
-			// Add to graph
-			CE_SceneGraph_AddChild(ecsContext, entityId, entityId2, false, &errorCode);
-			if (result != CE_OK) {
-				CE_Error("Failed to add demo entity 2 to scene graph: %s", CE_GetErrorMessage(errorCode));
-				return -1;
-			}
-
-			CE_TransformComponent_setZIndex(ecsContext, transformComponent2, 1); // Set above the first text label
-		}
-
+		// Setup Screen
 		CE_Display_SetRefreshRate(ecsContext, 60);
+
+		// Load Scene
+#ifdef CE_ENGINE_SET_START_SCENE
+		CE_Debug("Loading start scene: " CE_STRINGIFY(CE_ENGINE_SET_START_SCENE));
+		result = CE_Scene_RequestLoad(ecsContext, CE_SCENE_LOAD_FUNCTION(CE_ENGINE_SET_START_SCENE), &errorCode);
+#else
+		CE_Debug("Loading default scene: " CE_STRINGIFY(CE_ENGINE_DEFAULT_SCENE));
+		result = CE_Scene_RequestLoad(ecsContext, CE_SCENE_LOAD_FUNCTION(CE_ENGINE_DEFAULT_SCENE), &errorCode);
+#endif
+		if (result != CE_OK) {
+			CE_Error("Failed to load start scene: %s", CE_GetErrorMessage(errorCode));
+			return -1;
+		}
 
 #ifdef CE_BACKEND_PLAYDATE
 		// Initialize timer
@@ -220,24 +139,6 @@ static int update(void* userdata)
 	deltaTime = currentTime - lastTickTime;
 	lastTickTime = currentTime;
 #endif
-
-	// Simple animation for demo
-	{
-		x += x_speed;
-		y += y_speed;
-		if (x <= 0 || x + transformComponent->m_width >= CE_GetDisplayWidth(ecsContext)) {
-			x_speed = -x_speed;
-		}
-		if (y <= 0 || y + transformComponent->m_height >= CE_GetDisplayHeight(ecsContext)) {
-			y_speed = -y_speed;
-		}
-
-		// Update transform component position
-		CE_TransformComponent_setPosition(ecsContext, transformComponent, x, y);
-
-		// Also update the second component to test Z ordering
-		CE_TransformComponent_setPosition(ecsContext, transformComponent2, (transformComponent2->m_x + 2) % transformComponent->m_width, 0);
-	}
 
 	if (CE_ECS_Tick(ecsContext, deltaTime, &errorCode) != CE_OK) {
 		CE_Error("ECS Tick failed with result code: %d", CE_GetErrorMessage(errorCode));
