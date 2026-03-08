@@ -4,7 +4,7 @@
 //  Copyright (c) 2025 Carlos Camacho. All rights reserved.
 //
 
-#include "ecs/ecs.h"
+#include "engine/corgo.h"
 
 CE_DEFINE_COMPONENT_INIT(CE_TRANSFORM_COMPONENT)
 {
@@ -52,4 +52,3 @@ CE_Result CE_TransformComponent_setZIndex(INOUT CE_ECS_Context* context, INOUT C
     return CE_OK;
 }
 
-CE_GENERATE_COMPONENT_IMP(CE_TRANSFORM_COMPONENT)

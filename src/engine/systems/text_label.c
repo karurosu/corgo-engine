@@ -4,8 +4,7 @@
 //  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
-#include "ecs/ecs.h"
-#include "engine/core/platform.h"
+#include "engine/corgo.h"
 
 CE_START_SYSTEM_IMPLEMENTATION(CE_TEXT_LABEL_RENDERER, CE_TEXT_LABEL_SYSTEM_DEPENDENCIES)
 {

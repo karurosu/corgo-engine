@@ -4,7 +4,11 @@
 //  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
-#include "ecs/ecs.h"
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS 1 // Disable warnings with strcpy, strncpy, etc.
+#endif
+
+#include "engine/corgo.h"
 
 CE_DEFINE_COMPONENT_INIT(CE_TEXT_LABEL_COMPONENT)
 {
@@ -98,4 +102,3 @@ CE_Result CE_TextLabelComponent_getTextBounds(INOUT CE_ECS_Context* context, INO
     return CE_OK;
 }
 
-CE_GENERATE_COMPONENT_IMP(CE_TEXT_LABEL_COMPONENT)  

@@ -1,8 +1,6 @@
 #include "unity.h"
 
-#include "ecs/types.h"
 #include "ecs/ecs.h"
-#include "utils/bitset.h"
 
 static CE_ECS_Context context;
 

@@ -2,6 +2,7 @@ Non-exhaustive scratchpad-like list of features needing implementation and ideas
 Mostly so I don't forget.
 
 Next:
+- Auto create scene component on root
 - Support unloading scenes
 - Delete tree function
 - Add zero storage components, aka flags

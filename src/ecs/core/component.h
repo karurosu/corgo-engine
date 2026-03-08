@@ -45,7 +45,7 @@ CE_Result name##_cleanup_wrapper(INOUT CE_ECS_Context* context, INOUT void* comp
 _Static_assert(initial_capacity <= CE_BITSET_MAX_BITS, #name ": Component initial capacity exceeds bitset max bits, increase CE_BITSET_MAX_BITS or reduce initial capacity.");
 
 // Component method implementation generator
-// Must be called in the component's .c file
+// Expanded from ecs/core/component_registry.c for all registered components
 #define CE_GENERATE_COMPONENT_IMP(name) \
 CE_Result name##_init_wrapper(INOUT CE_ECS_Context* context, INOUT void* component) \
 { \

@@ -4,9 +4,7 @@
 //  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
-#include "ecs/ecs.h"
-
-#include "engine/core/memory.h"
+#include "engine/corgo.h"
 #include "engine/assets.h"
 
 CE_DEFINE_GLOBAL_COMPONENT_INIT(CE_ENGINE_SCENE_GRAPH_COMPONENT)

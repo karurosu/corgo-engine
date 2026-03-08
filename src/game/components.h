@@ -41,9 +41,6 @@
  *          return CE_OK;
  *      }
  * 
- *  4. Generate the component implementation using the following macro in the c file (one per component):
- *     
- *      CE_GENERATE_COMPONENT_IMP(CE_MY_COMPONENT)
  * 
  *  Tips:
  *  - Don't forget the backslash at the end of the line when adding new components.
