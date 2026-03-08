@@ -4,7 +4,7 @@
 //  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
-#include "ecs/ecs.h"
+#include "engine/corgo.h"
 
 CE_START_GLOBAL_SYSTEM_IMPLEMENTATION(CE_ENGINE_GLOBAL_SCENE_SCRIPT_SYSTEM)
 {
@@ -41,12 +41,22 @@ CE_START_GLOBAL_SYSTEM_IMPLEMENTATION(CE_ENGINE_GLOBAL_SCENE_SCRIPT_SYSTEM)
             break;
         case CE_SCENE_STATE_LOADING:
             // TODO: Asset loading and loading screen
-            // Create the scene
+            // Create script data component if needed
+            if (sceneScriptComp->m_activeScene.m_scriptDataComponentType != CE_INVALID_ID) {
+                if (CE_Entity_AddComponent(context, CE_Scene_GetRootId(context), sceneScriptComp->m_activeScene.m_scriptDataComponentType, NULL, &sceneScriptComp->m_scriptData, errorCode) != CE_OK) {
+                    CE_Error("Failed to create script data component for scene: %s. Error: %s", sceneScriptComp->m_activeScene.m_id, CE_GetErrorMessage(*errorCode));
+                    sceneScriptComp->m_state = CE_SCENE_STATE_UNLOADED;
+                    CE_Scene_Clear(&sceneScriptComp->m_activeScene);
+                    break;
+                }
+            }
+
+            // Now run the create function to set up the scene
             if (sceneScriptComp->m_activeScene.m_createFunction != NULL) {
                 CE_Debug("Running scene creation script for: %s", sceneScriptComp->m_activeScene.m_id);
-                if (sceneScriptComp->m_activeScene.m_createFunction(context, errorCode) != CE_OK) {
+                if (sceneScriptComp->m_activeScene.m_createFunction(context, sceneScriptComp->m_scriptData, errorCode) != CE_OK) {
                     CE_Error("Failed to create scene with error: %d", CE_GetErrorMessage(*errorCode));
-                    sceneScriptComp->m_state = CE_SCENE_STATE_UNLOADED;
+                    sceneScriptComp->m_state = CE_SCENE_STATE_UNLOADING; // Go to unloading to clean up any partial entities/components created during the failed create
                     CE_Scene_Clear(&sceneScriptComp->m_activeScene);
                     break;
                 }
@@ -56,7 +66,9 @@ CE_START_GLOBAL_SYSTEM_IMPLEMENTATION(CE_ENGINE_GLOBAL_SCENE_SCRIPT_SYSTEM)
                 CE_Error("No create function set when loading the scene. Resetting.");
                 sceneScriptComp->m_state = CE_SCENE_STATE_UNLOADED;
                 CE_Scene_Clear(&sceneScriptComp->m_activeScene);
+                break;
             }
+
             break;
         case CE_SCENE_STATE_RUNNING:
             // Run the scene if there is a function defined

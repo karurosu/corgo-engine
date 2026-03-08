@@ -7,6 +7,7 @@
 #ifndef CORGO_ENGINE_COMPONENTS_H
 #define CORGO_ENGINE_COMPONENTS_H
 
+#include "engine/config.h"
 #include "../ecs/core/component.h"
 #include "core/platform.h"
 
@@ -22,10 +23,23 @@
 #include "components/transform.h"
 #include "components/sprite.h"
 
+// Include demo scene components if sample scenes are enabled
+#ifdef CE_ENGINE_INCLUDE_SAMPLE_SCENES
+#include "sample_scenes/scene_data.h"
+
+#define CE_COMPONENT_DESC_SAMPLE_COMPONENTS(X) \
+	X(CE_TEXT_SCROLLER_SCENE_DATA_COMPONENT, 50, CE_TextScrollerSceneData, 1) \
+
+#else
+#define CE_COMPONENT_DESC_SAMPLE_COMPONENTS(X)
+#endif // CE_ENGINE_INCLUDE_SAMPLE_SCENES
+
 #define CE_COMPONENT_DESC_ENGINE(X) \
 	X(CE_TRANSFORM_COMPONENT, 10, CE_TransformComponent, CE_DEFAULT_COMPONENT_CAPACITY)\
 	X(CE_SPRITE_COMPONENT, 11, CE_SpriteComponent, 32)\
 	X(CE_TEXT_LABEL_COMPONENT, 12, CE_TextLabelComponent, 16)\
+	CE_COMPONENT_DESC_SAMPLE_COMPONENTS(X)\
+
 
 
 #define CE_GLOBAL_COMPONENT_DESC_ENGINE(X) \

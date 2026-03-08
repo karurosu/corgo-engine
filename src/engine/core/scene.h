@@ -14,7 +14,7 @@ typedef const char * CE_SceneId;
 
 // Signatures for create and run functions
 typedef CE_Result (*CE_SceneRunFunction)(INOUT struct CE_ECS_Context* context, const IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode);
-typedef CE_Result (*CE_SceneCreateFunction)(INOUT struct CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* errorCode);
+typedef CE_Result (*CE_SceneCreateFunction)(INOUT struct CE_ECS_Context* context, void *dataComponent, OUT_OPT CE_ERROR_CODE* errorCode);
 
 // Tracked states of a scene
 typedef enum CE_SceneState
@@ -138,7 +138,7 @@ bool CE_Scene_IsSceneRunning(INOUT struct CE_ECS_Context* context);
  * @param sceneName[in] unique name for the scene
  */
 #define CE_DECLARE_SCENE_CREATE_FUNCTION(sceneName) \
-    CE_Result CE_SCENE_CREATE_FUNCTION(sceneName)(INOUT struct CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* errorCode)
+    CE_Result CE_SCENE_CREATE_FUNCTION(sceneName)(INOUT struct CE_ECS_Context* context, void *dataComponent, OUT_OPT CE_ERROR_CODE* errorCode)
 
 /**
  * @brief Macro to define a scene create function with the correct signature.
