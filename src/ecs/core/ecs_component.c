@@ -51,8 +51,10 @@ CE_Result CE_Entity_AddComponent(INOUT CE_ECS_Context* context, IN CE_Id entity,
         return CE_ERROR;
     };
     
-    *componentId = newComponentId;
-
+    if (componentId != NULL) {
+        *componentId = newComponentId;
+    }
+    
     if (componentData) {
         *componentData = newComponentData;
     }
@@ -120,7 +122,7 @@ CE_Result CE_Entity_RemoveComponent(INOUT CE_ECS_Context* context, IN CE_Id enti
     return CE_OK;
 }
 
-CE_Result CE_Entity_FindFirstComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType, OUT CE_Id* componentId, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_Entity_FindFirstComponent(INOUT CE_ECS_Context* context, IN CE_Id entity, IN CE_TypeId componentType, OUT_OPT CE_Id* componentId, OUT_OPT void **componentData, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     CE_Result result = CE_OK;
     
@@ -158,8 +160,12 @@ CE_Result CE_Entity_FindFirstComponent(INOUT CE_ECS_Context* context, IN CE_Id e
                 CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_COMPONENT_NOT_FOUND);
                 result = CE_ERROR;
             } else {
-                *componentId = *el;
-                *componentData = dataPtr;
+                if (componentId != NULL) {
+                    *componentId = *el;
+                }
+                if (componentData != NULL) {
+                    *componentData = dataPtr;
+                }
             }
             break;
         }
