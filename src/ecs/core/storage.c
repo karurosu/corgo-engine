@@ -368,6 +368,8 @@ CE_Result CE_ECS_MainStorage_createEntity(INOUT CE_ECS_MainStorage* storage, OUT
     storage->m_entityStorage.m_count++;
     *id = entityData->m_entityId;
 
+    CE_Debug("Created entity with ID %u", *id);
+
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;
 }

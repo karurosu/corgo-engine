@@ -1,6 +1,6 @@
 //
-//  engine/sample_scenes/text_scroller.c
-//  A simple demo with scrolling text.
+//  engine/sample_scenes/text_scroller2.c
+//  Another text scroller to test scene switching.
 //  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
@@ -13,10 +13,9 @@
 
 // Move to a component
 static CE_TransformComponent* transformComponent = NULL;
-static CE_TransformComponent* transformComponent2 = NULL;
 static float timer = 0.0f;
 
-CE_DECLARE_SCENE_CREATE_FUNCTION(TextScroller)
+CE_DECLARE_SCENE_CREATE_FUNCTION(TextScroller2)
 {
     if (dataComponent == NULL) {
         CE_Error("No scene data component provided for TextScroller scene.");
@@ -24,8 +23,8 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(TextScroller)
     } 
 
     CE_TextScrollerSceneData* sceneData = (CE_TextScrollerSceneData*)dataComponent;
-    sceneData->m_xSpeed = 1;
-    sceneData->m_ySpeed = 1;
+    sceneData->m_xSpeed = -1;
+    sceneData->m_ySpeed = -1;
 
     timer = 0.0f;
 
@@ -35,7 +34,7 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(TextScroller)
     
     // Set text and font
     CES_CHECK_RESULT(
-        CE_TextLabelComponent_setText(context, textLabelComponent, transformComponent, "Hello, Corgo Engine!"), 
+        CE_TextLabelComponent_setText(context, textLabelComponent, transformComponent, "Hello, Other Corgi!"), 
         "Failed to set text for TextLabelComponent");
 
     CES_CHECK_RESULT(
@@ -50,31 +49,11 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(TextScroller)
     CES_CHECK_RESULT(
         CE_TransformComponent_setPosition(context, transformComponent, (CE_GetDisplayWidth(context)-transformComponent->m_width)/2, (CE_GetDisplayHeight(context)-transformComponent->m_height)/2),
         "Failed to set position for TransformComponent");
-    
-    CES_CREATE_ENTITY(child);
-    CES_ADD_COMPONENT_EPTR(child, CE_TRANSFORM_COMPONENT, transformComponent2);
-    CES_ADD_COMPONENT_EPTR(child, CE_TEXT_LABEL_COMPONENT, textLabelComponent); // Reuse *textLabelComponent from the previous entity
-
-    // Set text and font
-    CES_CHECK_RESULT(
-        CE_TextLabelComponent_setText(context, textLabelComponent, transformComponent2, "WOOF!!"),
-        "Failed to set text for TextLabelComponent");
-
-    CES_CHECK_RESULT(
-        CE_TextLabelComponent_setFont(context, textLabelComponent, transformComponent2, "/System/Fonts/Asheville-Sans-14-Bold.pft"),
-        "Failed to set font for TextLabelComponent 2");
-    
-    // Add to graph
-    CES_ADD_CHILD(parent, child);
-
-    CES_CHECK_RESULT(
-        CE_TransformComponent_setZIndex(context, transformComponent2, 1),
-        "Failed to set Z index for child entity");
 
     return CE_OK;
 }
 
-CE_DECLARE_SCENE_RUN_FUNCTION(TextScroller)
+CE_DECLARE_SCENE_RUN_FUNCTION(TextScroller2)
 {
     timer += deltaTime;
     if (timer >= 5.0f) 
@@ -99,18 +78,15 @@ CE_DECLARE_SCENE_RUN_FUNCTION(TextScroller)
     // Update transform component position
     CE_TransformComponent_setPosition(context, transformComponent, x, y);
 
-    // Also update the second component to test Z ordering
-    CE_TransformComponent_setPosition(context, transformComponent2, (transformComponent2->m_x + 2) % transformComponent->m_width, 0);
-
     return CE_OK;
 }
 
-CE_DECLARE_SCENE_LOAD_DATA_FUNCTION(TextScroller)
+CE_DECLARE_SCENE_LOAD_DATA_FUNCTION(TextScroller2)
 {
     // Populate the scene data with the scene id and function pointers
-    scene->m_id = "TextScroller";
-    scene->m_createFunction = CE_SCENE_CREATE_FUNCTION(TextScroller);
-    scene->m_runFunction = CE_SCENE_RUN_FUNCTION(TextScroller);
+    scene->m_id = "TextScroller2";
+    scene->m_createFunction = CE_SCENE_CREATE_FUNCTION(TextScroller2);
+    scene->m_runFunction = CE_SCENE_RUN_FUNCTION(TextScroller2);
     scene->m_scriptDataComponentType = CE_TEXT_SCROLLER_SCENE_DATA_COMPONENT;
     return CE_OK;
 }

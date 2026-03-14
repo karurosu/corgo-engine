@@ -109,4 +109,19 @@
         return CE_ERROR;\
     }
 
+// Scene script shortcuts
+
+/**
+ * @brief Macro to request loading a scene with the given name.
+ * Prints error and returns CE_ERROR if the operation fails.
+ * 
+ * @param name[in] The name of the scene to load, must be the same as the one used in CE_DECLARE_SCENE.
+ * @return void
+ */
+#define CES_LOAD_SCENE(name) \
+    if (CE_Scene_RequestLoad(context, CE_SCENE_LOAD_FUNCTION(name), errorCode) != CE_OK) {\
+        CE_Error("Failed to load scene " #name ": %s", CE_GetErrorMessage(*errorCode));\
+        return CE_ERROR;\
+    }
+
 #endif // CORGO_ENGINE_CORE_SHORTCUTS_H

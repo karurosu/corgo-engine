@@ -13,7 +13,9 @@
 #include "engine/core/scene.h"
 
 // The following are built-in demo scenes used to test and demonstrate engine features.
-CE_DEFINE_SCENE(TextScroller)
+CE_DECLARE_SCENE(SampleMenu)
+CE_DECLARE_SCENE(TextScroller)
+CE_DECLARE_SCENE(TextScroller2)
 
 #endif // CE_ENGINE_INCLUDE_SAMPLE_SCENES
 #endif // CORGO_ENGINE_SCENES_DEMO_H

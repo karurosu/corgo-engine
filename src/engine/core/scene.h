@@ -36,10 +36,10 @@ typedef struct CE_Scene
 } CE_Scene;
 
 // Helper function to clear the scene
-static inline void CE_Scene_Clear(CE_Scene* scene)
+static inline void CE_Engine_Scene_Clear(CE_Scene* scene)
 {
     scene->m_id = NULL;
-    scene->m_scriptDataComponentType = CE_INVALID_ID;
+    scene->m_scriptDataComponentType = CE_INVALID_TYPE_ID;
     scene->m_runFunction = NULL;
     scene->m_createFunction = NULL;
 }
@@ -160,7 +160,7 @@ bool CE_Scene_IsSceneRunning(INOUT struct CE_ECS_Context* context);
  * Run function is optional. 
  * @param sceneName[in] unique name for the scene
  */
-#define CE_DEFINE_SCENE(sceneName) \
+#define CE_DECLARE_SCENE(sceneName) \
     CE_DECLARE_SCENE_LOAD_DATA_FUNCTION(sceneName); \
     CE_DECLARE_SCENE_CREATE_FUNCTION(sceneName); \
     CE_DECLARE_SCENE_RUN_FUNCTION(sceneName);

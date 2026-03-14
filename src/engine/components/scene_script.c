@@ -11,7 +11,7 @@ CE_DEFINE_GLOBAL_COMPONENT_INIT(CE_ENGINE_SCENE_SCRIPT_COMPONENT)
     component->m_state = CE_SCENE_STATE_UNLOADED;
     component->m_scriptData = NULL;
     component->m_loadSceneDataFunction = NULL;
-    CE_Scene_Clear(&component->m_activeScene);
+    CE_Engine_Scene_Clear(&component->m_activeScene);
     return CE_OK;
 }
 

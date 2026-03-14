@@ -49,6 +49,7 @@ CE_Result CE_Engine_SceneGraph_Init(CE_ECS_Context* context, CE_ERROR_CODE* erro
         transformComponent->m_inSceneGraph = true;
     }
 
+    CE_Debug("Scene graph initialized with root entity ID: %u", sceneGraph->m_rootEntityId);
     return CE_OK;
 }
 
@@ -150,19 +151,12 @@ CE_Result CE_Engine_SceneGraph_Traverse(INOUT CE_ECS_Context* context, IN CE_Id 
 
     while(cc_size(&expansionList) > 0)
     {
-        NodeInfo *currentNode = cc_last(&expansionList);
+        NodeInfo currentNode = *cc_last(&expansionList);
         cc_erase(&expansionList, cc_size(&expansionList) - 1);
-
-        // Process the current entity
-        if (callback(context, currentNode->entityId, currentNode->parentId, userData, errorCode) != CE_OK)
-        {
-            cc_cleanup(&expansionList);
-            return CE_ERROR;
-        }
 
         // Get children of the current entity and add them to the expansion list
         CE_Id_Set *children;
-        if (CE_Entity_GetAllRelationshipsIter(context, currentNode->entityId, &children, errorCode) != CE_OK)
+        if (CE_Entity_GetAllRelationshipsIter(context, currentNode.entityId, &children, errorCode) != CE_OK)
         {
             cc_cleanup(&expansionList);
             return CE_ERROR;
@@ -171,9 +165,16 @@ CE_Result CE_Engine_SceneGraph_Traverse(INOUT CE_ECS_Context* context, IN CE_Id 
         cc_for_each(children, childRel)
         {
             if (CE_Id_getRelationshipTypeId(*childRel) == CE_RELATIONSHIP_CHILD) {
-                NodeInfo childNode = { .entityId = CE_Id_relationshipToEntityReference(*childRel), .parentId = currentNode->entityId };
+                NodeInfo childNode = { .entityId = CE_Id_relationshipToEntityReference(*childRel), .parentId = currentNode.entityId };
                 cc_push(&expansionList, childNode);
             }
+        }
+
+        // Process the current entity last in case it gets deleted
+        if (callback(context, currentNode.entityId, currentNode.parentId, userData, errorCode) != CE_OK)
+        {
+            cc_cleanup(&expansionList);
+            return CE_ERROR;
         }
     }
 
@@ -207,6 +208,12 @@ CE_Result UpdateRenderListTraverseFunc(IN CE_ECS_Context* context, IN CE_Id enti
 
     CE_SceneGraphRenderNode *renderNode = cc_get(&sceneGraph->m_renderList, CE_Id_getUniqueId(entityId));
 
+    if (renderNode != NULL && (renderNode->m_z != transformComponent->m_z)) {
+        // If the Z-index has changed, we need to delete and re-add the render node to maintain correct sorting in the cache
+        cc_erase(&sceneGraph->m_renderList, CE_Id_getUniqueId(entityId));
+        renderNode = NULL;
+    }
+
     if (renderNode == NULL) {
         CE_SceneGraphRenderNode newNode = {
             .m_x = parentX + transformComponent->m_x,
@@ -221,6 +228,7 @@ CE_Result UpdateRenderListTraverseFunc(IN CE_ECS_Context* context, IN CE_Id enti
             CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_OUT_OF_MEMORY);
             return CE_ERROR;
         }
+        CE_Debug("Registered Node for Entity: %u with unique id: %u",entityId, CE_Id_getUniqueId(entityId));
     }
     else{
         renderNode->m_x = parentX + transformComponent->m_x;
@@ -237,6 +245,7 @@ CE_Result CE_Engine_SceneGraph_DeleteRenderNode(IN CE_ECS_Context* context, IN C
 {
     CE_SceneGraphComponent* sceneGraph = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_SCENE_GRAPH_COMPONENT);
     cc_erase(&sceneGraph->m_renderList, CE_Id_getUniqueId(entityId)); // Cannot fail, we don't care if its been deleted already since it will be readded on next rebuild
+    CE_Debug("Deleted render node for Entity: %u with unique id: %u",entityId, CE_Id_getUniqueId(entityId));
     sceneGraph->m_needsRedraw = true; // Mark dirty to ensure the render node is removed from the cache on the next redraw
     return CE_OK;
 }
@@ -247,8 +256,8 @@ CE_Result CE_Engine_SceneGraph_UpdateRenderList(INOUT CE_ECS_Context* context, C
 
     if (sceneGraph->m_rootEntityId == CE_INVALID_ID)
     {
-        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_ENGINE_SCENE_GRAPH_NOT_READY);
-        return CE_ERROR;
+        // Do nothing if the scene graph is unloaded
+        return CE_OK;
     }
 
     // Traverse the scene graph and update the cache
@@ -264,4 +273,38 @@ CE_SceneGraphRenderNode *CE_Scene_GetRenderNode(IN CE_ECS_Context* context, IN C
 {
     CE_SceneGraphComponent* sceneGraph = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_SCENE_GRAPH_COMPONENT);
     return cc_get(&sceneGraph->m_renderList, CE_Id_getUniqueId(entityId));
+}
+
+CE_Result ResetSceneTreeTraverseFunc(IN CE_ECS_Context* context, IN CE_Id entityId, IN CE_Id parentId, INOUT void* userData, CE_ERROR_CODE* errorCode)
+{
+    return CE_ECS_DestroyEntity(context, entityId, errorCode);
+}
+
+CE_Result CE_Engine_SceneGraph_Reset(INOUT CE_ECS_Context* context, CE_ERROR_CODE* errorCode)
+{
+    CE_SceneGraphComponent* sceneGraph = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_SCENE_GRAPH_COMPONENT);
+
+    if (sceneGraph->m_rootEntityId == CE_INVALID_ID)
+    {
+        return CE_OK; // Nothing to reset
+    }
+
+    // Traverse the scene graph and delete all entities
+    if (CE_Engine_SceneGraph_Traverse(context, sceneGraph->m_rootEntityId, ResetSceneTreeTraverseFunc, NULL, errorCode) != CE_OK)
+    {
+        return CE_ERROR;
+    }
+
+    sceneGraph->m_rootEntityId = CE_INVALID_ID;
+    sceneGraph->m_needsRedraw = true;
+
+    if (cc_size(&sceneGraph->m_renderList) != 0) {
+        CE_Error("Scene graph render list was not empty after resetting the scene graph");
+        cc_clear(&sceneGraph->m_renderList);
+
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
+        return CE_ERROR;
+    }
+
+    return CE_OK;
 }

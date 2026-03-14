@@ -12,5 +12,6 @@
 #include "core/platform.h"
 #include "core/memory.h"
 #include "ecs/ecs.h"
+#include "scenes.h"
 
 #endif // CORGO_ENGINE_CORGO_H

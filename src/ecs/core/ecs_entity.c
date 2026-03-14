@@ -26,6 +26,8 @@ CE_Result CE_ECS_DestroyEntity(INOUT CE_ECS_Context* context, IN CE_Id entity, O
     CE_ERROR_CODE localErrorCode = CE_ERROR_CODE_NONE;
     CE_ECS_EntityData* entityData = NULL;
     
+    CE_Debug("Destroying entity %u", entity);
+
     result = CE_ECS_MainStorage_getEntityData(&context->m_storage, entity, &entityData, errorCode);
     if (result != CE_OK) {
         return CE_ERROR;

@@ -34,6 +34,7 @@ CE_Result CE_Engine_SceneGraph_Init(CE_ECS_Context* context, CE_ERROR_CODE* erro
 CE_Result CE_Engine_SceneGraph_DeleteRenderNode(IN CE_ECS_Context* context, IN CE_Id entityId);
 CE_Result CE_Engine_SceneGraph_Traverse(INOUT CE_ECS_Context* context, IN CE_Id entityId, IN CE_SceneGraphTraverseCallback callback, INOUT void* userData, CE_ERROR_CODE* errorCode);
 CE_Result CE_Engine_SceneGraph_UpdateRenderList(INOUT CE_ECS_Context* context, CE_ERROR_CODE* errorCode);
+CE_Result CE_Engine_SceneGraph_Reset(INOUT CE_ECS_Context* context, CE_ERROR_CODE* errorCode);
 
 #define CE_Engine_SceneGraph_MarkDirty(contextPtr) do {CE_ECS_AccessGlobalComponent(contextPtr, CE_ENGINE_SCENE_GRAPH_COMPONENT)->m_needsRedraw = true;} while(0)
 

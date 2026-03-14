@@ -42,12 +42,8 @@ CE_Result CE_TransformComponent_setPosition(INOUT CE_ECS_Context* context, INOUT
 CE_Result CE_TransformComponent_setZIndex(INOUT CE_ECS_Context* context, INOUT CE_TransformComponent* component, IN int16_t z)
 {
     if (component->m_z != z) {
+        CE_Engine_SceneGraph_MarkDirty(context);
         component->m_z = z;
-        // Delete the render node to force it to be re-added with the new Z-index
-        if (CE_Engine_SceneGraph_DeleteRenderNode(context, CE_GetCurrentEntityId(context)) != CE_OK) {
-            CE_Error("Failed to remove TransformComponent of entity %u from scene graph during setPosition", CE_GetCurrentEntityId(context));
-            return CE_ERROR;
-        }
     }
     return CE_OK;
 }

@@ -34,6 +34,12 @@ CE_START_GLOBAL_SYSTEM_IMPLEMENTATION(CE_ENGINE_GLOBAL_SCENE_SCRIPT_SYSTEM)
                 CE_Debug("Scene data loaded successfully. Loading scene: %s", sceneScriptComp->m_activeScene.m_id);
                 sceneScriptComp->m_state = CE_SCENE_STATE_LOADING;
                 sceneScriptComp->m_loadSceneDataFunction = NULL;
+
+                // Initialize scene graph first so other systems can tick
+                if (CE_Engine_SceneGraph_Init(context, errorCode) != CE_OK) {
+                    CE_Error("Failed to initialize scene graph: %s", CE_GetErrorMessage(*errorCode));
+                    return -1;
+                }
             } else {
                 CE_Error("Scene load requested but no load function set. Resetting.");
                 sceneScriptComp->m_state = CE_SCENE_STATE_UNLOADED;
@@ -42,11 +48,11 @@ CE_START_GLOBAL_SYSTEM_IMPLEMENTATION(CE_ENGINE_GLOBAL_SCENE_SCRIPT_SYSTEM)
         case CE_SCENE_STATE_LOADING:
             // TODO: Asset loading and loading screen
             // Create script data component if needed
-            if (sceneScriptComp->m_activeScene.m_scriptDataComponentType != CE_INVALID_ID) {
+            if (sceneScriptComp->m_activeScene.m_scriptDataComponentType != CE_INVALID_TYPE_ID) {
                 if (CE_Entity_AddComponent(context, CE_Scene_GetRootId(context), sceneScriptComp->m_activeScene.m_scriptDataComponentType, NULL, &sceneScriptComp->m_scriptData, errorCode) != CE_OK) {
                     CE_Error("Failed to create script data component for scene: %s. Error: %s", sceneScriptComp->m_activeScene.m_id, CE_GetErrorMessage(*errorCode));
                     sceneScriptComp->m_state = CE_SCENE_STATE_UNLOADED;
-                    CE_Scene_Clear(&sceneScriptComp->m_activeScene);
+                    CE_Engine_Scene_Clear(&sceneScriptComp->m_activeScene);
                     break;
                 }
             }
@@ -57,7 +63,7 @@ CE_START_GLOBAL_SYSTEM_IMPLEMENTATION(CE_ENGINE_GLOBAL_SCENE_SCRIPT_SYSTEM)
                 if (sceneScriptComp->m_activeScene.m_createFunction(context, sceneScriptComp->m_scriptData, errorCode) != CE_OK) {
                     CE_Error("Failed to create scene with error: %d", CE_GetErrorMessage(*errorCode));
                     sceneScriptComp->m_state = CE_SCENE_STATE_UNLOADING; // Go to unloading to clean up any partial entities/components created during the failed create
-                    CE_Scene_Clear(&sceneScriptComp->m_activeScene);
+                    CE_Engine_Scene_Clear(&sceneScriptComp->m_activeScene);
                     break;
                 }
                 CE_Debug("Scene created successfully. Running scene: %s", sceneScriptComp->m_activeScene.m_id);
@@ -65,7 +71,7 @@ CE_START_GLOBAL_SYSTEM_IMPLEMENTATION(CE_ENGINE_GLOBAL_SCENE_SCRIPT_SYSTEM)
             } else {
                 CE_Error("No create function set when loading the scene. Resetting.");
                 sceneScriptComp->m_state = CE_SCENE_STATE_UNLOADED;
-                CE_Scene_Clear(&sceneScriptComp->m_activeScene);
+                CE_Engine_Scene_Clear(&sceneScriptComp->m_activeScene);
                 break;
             }
 
@@ -80,7 +86,23 @@ CE_START_GLOBAL_SYSTEM_IMPLEMENTATION(CE_ENGINE_GLOBAL_SCENE_SCRIPT_SYSTEM)
             }
             break;
         case CE_SCENE_STATE_UNLOADING:
-            //TODO: Unload scene, destroy entities, free resources, etc.
+            CE_Debug("Unloading scene: %s", sceneScriptComp->m_activeScene.m_id);
+            // Clear scene graph
+            if (CE_Engine_SceneGraph_Reset(context, errorCode) == CE_ERROR) {
+                CE_Error("Failed to reset scene graph when unloading scene: %s. Error: %s", sceneScriptComp->m_activeScene.m_id, CE_GetErrorMessage(*errorCode));
+            }
+
+            // Clear currrent scene
+            CE_Engine_Scene_Clear(&sceneScriptComp->m_activeScene);
+
+            // Load next scene if one is pending
+            if (sceneScriptComp->m_loadSceneDataFunction != NULL) {
+                CE_Debug("Scene unload requested by switching scenes.");
+                sceneScriptComp->m_state = CE_SCENE_STATE_START_LOAD;
+            } else {
+                CE_Debug("No new scene load requested. Scene is now unloaded.");
+                sceneScriptComp->m_state = CE_SCENE_STATE_UNLOADED;
+            }
             break;
         default:
             CE_Error("Invalid scene state");

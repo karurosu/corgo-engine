@@ -75,13 +75,6 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 		pd->system->resetElapsedTime();
 #endif
 
-		// Initialize scene graph
-		result = CE_Engine_SceneGraph_Init(ecsContext, &errorCode);
-		if (result != CE_OK) {
-			CE_Error("Failed to initialize scene graph: %s", CE_GetErrorMessage(errorCode));
-			return -1;
-		}
-
 #ifdef CE_BACKEND_PLAYDATE
 		CE_Debug("Scene Graph Initialized in %f seconds", (double) pd->system->getElapsedTime());
 #endif
