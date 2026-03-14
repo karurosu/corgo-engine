@@ -2,15 +2,12 @@ Non-exhaustive scratchpad-like list of features needing implementation and ideas
 Mostly so I don't forget.
 
 Next:
-- Auto create scene component on root
-- Support unloading scenes
-- Delete tree function
+- Input system
 - Add zero storage components, aka flags
 - Platform timer abstraction
 
 TODOs:
 - Improve separation of game code 
-- handle loading first game code scene
 - Optimize auto ordering
 - use builtin_ctz for iteraring over entities
 - fast internal access to systems

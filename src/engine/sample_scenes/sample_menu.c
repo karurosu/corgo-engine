@@ -13,11 +13,9 @@
 
 // Move to a component
 static int demo = -1;
-static float timer = 0.0f;
 
 CE_DECLARE_SCENE_CREATE_FUNCTION(SampleMenu)
 {
-    timer = 0.0f;
     return CE_OK;
 }
 
