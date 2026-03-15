@@ -17,6 +17,7 @@
 #include "core/display.h"
 #include "engine/assets.h"
 #include "components/camera.h"
+#include "components/input.h"
 
 // Include component headers
 #include "components/text_label.h"
@@ -48,6 +49,7 @@
 	X(CE_ENGINE_DISPLAY_COMPONENT, CE_DisplayComponent)\
 	X(CE_ENGINE_CAMERA_COMPONENT, CE_CameraComponent)\
 	X(CE_ENGINE_SCENE_SCRIPT_COMPONENT, CE_SceneScriptComponent)\
+	X(CE_ENGINE_INPUT_COMPONENT, CE_InputComponent)\
 
 
 #endif // CORGO_ENGINE_COMPONENTS_H
