@@ -13,5 +13,7 @@
 #include "core/memory.h"
 #include "ecs/ecs.h"
 #include "scenes.h"
+#include "input_maps.h"
+#include "input_actions.h"
 
 #endif // CORGO_ENGINE_CORGO_H

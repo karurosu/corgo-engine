@@ -9,7 +9,7 @@
 #ifdef CE_ENGINE_INCLUDE_SAMPLE_SCENES
 
 #include "engine/corgo.h"
-#include "engine/shortcuts.h"
+#include "engine/shortcuts/scene.h"
 
 // Move to a component
 static CE_TransformComponent* transformComponent = NULL;

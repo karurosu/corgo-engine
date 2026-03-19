@@ -1,5 +1,5 @@
 //
-//  engine/core/shortcuts.h
+//  engine/shortcuts/scene.h
 //  These are macro shortcuts to make it easier to write scene scripts, they are optional to use but can make code more legible.
 //  These may not work outside of scene scripts.
 //  Shortcuts are not included by default.
@@ -7,8 +7,8 @@
 //  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
-#ifndef CORGO_ENGINE_CORE_SHORTCUTS_H
-#define CORGO_ENGINE_CORE_SHORTCUTS_H
+#ifndef CORGO_ENGINE_SHORTCUTS_SCENE_H
+#define CORGO_ENGINE_SHORTCUTS_SCENE_H
 
 // Entity creation shortcut
 
@@ -124,4 +124,55 @@
         return CE_ERROR;\
     }
 
-#endif // CORGO_ENGINE_CORE_SHORTCUTS_H
+
+// Input shortcuts
+
+/**
+ * @brief Macro to access the input component in a scene script, must be called before reading input states.
+ * 
+ * @return void
+ */
+#define CES_INITIALIZE_INPUT() CE_ECS_AccessGlobalComponentToVariable(context, CE_ENGINE_INPUT_COMPONENT, inputComponent);
+
+/**
+ * @brief Helper macro to check if an input action is active.
+ * 
+ * @param action[in] The input action to check.
+ * @return true if the action is active, false otherwise.
+ */
+#define CES_IA_ISACTIVE(action) (inputComponent->m_actionStates & CE_IA_MASK(action))
+
+/**
+ * @brief Helper macro to check if an input action is not active.
+ * 
+ * @param action[in] The input action to check.
+ * @return true if the action is not active, false otherwise.
+ */
+#define CES_IA_ISNOTACTIVE(action) ((inputComponent->m_actionStates & CE_IA_MASK(action)) == 0)
+
+/**
+ * @brief Macro to push a new input action map function onto the stack and make it the current action map.
+ * Prints error and returns CE_ERROR if the operation fails.
+ * 
+ * @param map[in] The input action map function to push, must be of type CE_Input_ActionMapFunction and declared with CE_DECLARE_ACTION_MAP_FUNCTION.
+ * @return void
+ */
+#define CES_PUSH_ACTION_MAP(map) \
+    if (CE_Input_PushActionMap(context, map, errorCode) != CE_OK) {\
+        CE_Error("Failed to push action map " #map ": %s", CE_GetErrorMessage(*errorCode));\
+        return CE_ERROR;\
+    }
+
+/**
+ * @brief Macro to pop the current input action map function from the stack.
+ * Prints error and returns CE_ERROR if the operation fails.
+ * 
+ * @return void
+ */
+#define CES_POP_ACTION_MAP() \
+    if (CE_Input_PopActionMap(context, errorCode) != CE_OK) {\
+        CE_Error("Failed to pop action map: %s", CE_GetErrorMessage(*errorCode));\
+        return CE_ERROR;\
+    }
+
+#endif // CORGO_ENGINE_SHORTCUTS_SCENE_H

@@ -65,6 +65,8 @@ typedef int CE_Result;
     X(ENGINE_ENTITY_DOES_NOT_HAVE_CHILD, 72, "Entity does not have the specified child") \
     X(ENGINE_SCENE_GRAPH_NOT_READY, 73, "Scene graph has not been initialized") \
     X(ENGINE_SCENE_GRAPH_MISSING_TRANSFORM, 74, "Scene graph entity is missing a transform component") \
+    X(ENGINE_INPUT_TOO_MANY_ACTION_MAPS, 75, "Too many input mappings, increase CE_ENGINE_INPUT_MAP_STACK_SIZE") \
+    X(ENGINE_INPUT_NO_ACTION_MAPS, 76, "No input mappings available") \
 
     /* Add new error codes here */
 
