@@ -7,13 +7,15 @@
 #ifndef CORGO_ECS_TYPES_H
 #define CORGO_ECS_TYPES_H
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS 1 // Disable warnings with strcpy, strncpy, etc.
-#endif
-
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+
+#ifdef CE_ARM_BUILD
+#include <printf.h>
+#else
+#include <stdio.h>
+#endif
 
 // Convenient Containers
 #include <cc.h>

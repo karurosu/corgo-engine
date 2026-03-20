@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.24)
 set(CMAKE_C_STANDARD 11)
 
+# Game Name Customization
+set(PLAYDATE_GAME_NAME corgo_engine)
+
+project(${PLAYDATE_GAME_NAME} C ASM)
+
 # Fetch third-party dependencies
 include(FetchContent)
 
@@ -24,10 +29,43 @@ if (NOT EXISTS ${SDK})
 	return()
 endif()
 
+set(BUILD_SHARED_LIBS OFF)
+
+# Override printf cache variables before FetchContent processes the subproject.
+# These must use CACHE ... FORCE and be set before FetchContent_MakeAvailable.
+set(SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS OFF CACHE BOOL "Disable MSVC-style integer specifiers in printf" FORCE)
+set(USE_DOUBLE_INTERNALLY OFF CACHE BOOL "Disable double support" FORCE)
+if (TOOLCHAIN STREQUAL "armgcc")
+	set(ALIAS_STANDARD_FUNCTION_NAMES SOFT CACHE STRING "Alias standard printf names (SOFT) for ARM device build" FORCE)
+else()
+	set(ALIAS_STANDARD_FUNCTION_NAMES NONE CACHE STRING "Alias standard printf names" FORCE)
+endif()
+
+FetchContent_Declare(printf_library
+    GIT_REPOSITORY https://github.com/eyalroz/printf.git
+    GIT_TAG v6.4.0-b1
+	SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdParty/printf
+)
+FetchContent_MakeAvailable(printf_library)
+
+# The Playdate device target gets Cortex-M flags from playdate_game.cmake,
+# but third-party targets do not automatically inherit them.
+# Ensure printf is built as Thumb code for Cortex-M to avoid UNDEFINSTR faults.
+if (TOOLCHAIN STREQUAL "armgcc")
+	target_compile_options(printf PRIVATE
+		-mthumb
+		-mcpu=cortex-m7
+		-mfloat-abi=hard
+		-mfpu=fpv5-sp-d16
+	)
+	target_compile_definitions(printf PRIVATE __FPU_USED=1)
+endif()
+
+
 FetchContent_Declare(
   cc
   GIT_REPOSITORY https://github.com/JacksonAllan/CC.git
-  GIT_TAG main
+  GIT_TAG v1.4.3
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdParty/cc
 )
 FetchContent_MakeAvailable(cc)
@@ -35,7 +73,7 @@ FetchContent_MakeAvailable(cc)
 FetchContent_Declare(
   unity
   GIT_REPOSITORY https://github.com/ThrowTheSwitch/Unity.git
-  GIT_TAG master
+  GIT_TAG v2.6.1
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdParty/unity
 )
 FetchContent_MakeAvailable(unity)
@@ -46,11 +84,6 @@ set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 endif()
-
-# Game Name Customization
-set(PLAYDATE_GAME_NAME corgo_engine)
-
-project(${PLAYDATE_GAME_NAME} C ASM)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
 	set(PLAYDATE_GAME_DEVICE corgo_engine_RELEASE)
@@ -73,11 +106,8 @@ file(GLOB GAME "src/game/*.c" "src/game/*.h" "src/game/**/*.c" "src/game/**/*.h"
 # Tests Files
 file(GLOB TESTS "src/tests/*.c" "src/tests/*.h" "src/tests/**/*.c" "src/tests/**/*.h")
 
-# External libraries
-file(GLOB EXT_LIBS "src/external/*.c" "src/external/*.h" "src/external/**/*.c" "src/external/**/*.h")
-
 # Preserve directory structure in Visual Studio solution
-source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${UTILS} ${ENGINE} ${GAME} ${EXT_LIBS})
+source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${UTILS} ${ENGINE} ${GAME})
 
 # global compile definitions
 add_compile_definitions(CC_NO_SHORT_NAMES)
@@ -108,15 +138,15 @@ if (NOT TOOLCHAIN STREQUAL "armgcc")
 		${CORE}
 		${UTILS}
 		${ENGINE}
-		${EXT_LIBS}
 	)
 	
 	# Preserve directory structure for test project
-	source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${ENGINE} ${UTILS} ${EXT_LIBS} src/tests/core.c)
+	source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} ${ENGINE} ${UTILS} src/tests/core.c)
 	
 	target_include_directories(coretests PRIVATE 
 		${cc_SOURCE_DIR}
 		${unity_SOURCE_DIR}/src
+		${printf_library_SOURCE_DIR}/src/printf
 		${CMAKE_SOURCE_DIR}/src
 	)
 	target_link_libraries(coretests PRIVATE unity_lib)
@@ -133,14 +163,24 @@ if (NOT TOOLCHAIN STREQUAL "armgcc")
 endif()
 
 if (TOOLCHAIN STREQUAL "armgcc")
-	add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${EXT_LIBS} ${CORE} ${UTILS} ${ENGINE} ${GAME})
-	target_include_directories(${PLAYDATE_GAME_DEVICE} PRIVATE ${cc_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
-	target_compile_definitions(${PLAYDATE_GAME_DEVICE} PRIVATE CE_BACKEND_PLAYDATE)
-	target_compile_definitions(${PLAYDATE_GAME_DEVICE} PRIVATE CE_ARM_BUILD)
+	add_executable(${PLAYDATE_GAME_DEVICE} src/main.c ${CORE} ${UTILS} ${ENGINE} ${GAME})
+	target_include_directories(${PLAYDATE_GAME_DEVICE} PRIVATE
+		${cc_SOURCE_DIR}
+		${printf_library_SOURCE_DIR}/src/printf
+		${printf_library_BINARY_DIR}/include  # generated printf_config.h
+		${CMAKE_SOURCE_DIR}/src
+	)
+	target_compile_definitions(${PLAYDATE_GAME_DEVICE} PRIVATE
+		CE_BACKEND_PLAYDATE
+		CE_ARM_BUILD
+		PRINTF_INCLUDE_CONFIG_H=1  # ensure printf.c reads printf_config.h in all compile contexts
+	)
+	target_link_libraries(${PLAYDATE_GAME_DEVICE} PRIVATE printf)
 else()
-	add_library(${PLAYDATE_GAME_NAME} SHARED src/main.c ${EXT_LIBS} ${CORE} ${UTILS} ${ENGINE} ${GAME})
-	target_include_directories(${PLAYDATE_GAME_NAME} PRIVATE ${cc_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
+	add_library(${PLAYDATE_GAME_NAME} SHARED src/main.c ${CORE} ${UTILS} ${ENGINE} ${GAME})
+	target_include_directories(${PLAYDATE_GAME_NAME} PRIVATE ${cc_SOURCE_DIR} PRIVATE ${printf_library_SOURCE_DIR}/src/printf ${CMAKE_SOURCE_DIR}/src)
 	target_compile_definitions(${PLAYDATE_GAME_NAME} PRIVATE CE_BACKEND_PLAYDATE)
+	target_link_libraries(${PLAYDATE_GAME_NAME} PRIVATE printf)
 endif()
 
 # Generate build info header at build time

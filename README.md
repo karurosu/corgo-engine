@@ -79,6 +79,10 @@ Unity Test by ThrowInTheSwitch
 MIT License
 https://github.com/ThrowTheSwitch/Unity?tab=readme-ov-file
 
+printf by Eyal Rozenberg
+MIT License
+https://github.com/eyalroz/printf
+
 ## License
 
 BSD 3-Clause License. See `LICENSE` for full text.

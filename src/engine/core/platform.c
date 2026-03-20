@@ -44,3 +44,12 @@ void CE_SetLoggingEnabled(bool enabled)
 {
     CE_Logging_enabled = enabled;
 }
+
+#ifdef CE_ARM_BUILD
+// printf needs a putchar_ in order to work with armgcc
+int putchar_(int c)
+{
+    CE_GetPlaydateAPI()->system->logToConsole("%c", (char)c);
+    return c;
+}
+#endif
