@@ -7,9 +7,11 @@
         "components.h": "c",
         "ecs.h": "c"
     },
-    "cmake.buildDirectory": "${workspaceFolder}/build.nmake",
     "cmake.configureOnOpen": false,
-    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.useCMakePresets": "always",
+    "cmake.configurePreset": "vs2022-sim",
+    "cmake.buildPreset": "build-vs2022-sim",
+    "cmake.testPreset": "test-core-vs2022",
     "cmake.buildBeforeRun": true,
     "cmake.parallelJobs": 0,
     "files.exclude": {

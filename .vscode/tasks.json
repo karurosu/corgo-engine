@@ -3,8 +3,16 @@
 	"tasks": [
 		{
 			"label": "CMake: build",
-			"type": "cmake",
-			"command": "build",
+			"type": "shell",
+			"command": "cmake",
+			"args": [
+				"--build",
+				"--preset",
+				"build-vs2022-sim",
+				"--config",
+				"Debug"
+			],
+			"isBackground": false,
 			"problemMatcher": [],
 			"group": {
 				"kind": "build",
@@ -16,12 +24,29 @@
 			"type": "shell",
 			"command": "ctest",
 			"args": [
+				"--preset",
+				"test-core-vs2022",
 				"--output-on-failure"
 			],
 			"isBackground": false,
 			"problemMatcher": [
 				"$gcc"
 			],
+			"group": "build"
+		},
+		{
+			"label": "CMake: build (Release)",
+			"type": "shell",
+			"command": "cmake",
+			"args": [
+				"--build",
+				"--preset",
+				"build-vs2022-sim",
+				"--config",
+				"Release"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
 			"group": "build"
 		}
 	]

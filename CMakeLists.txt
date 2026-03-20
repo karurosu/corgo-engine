@@ -40,8 +40,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(unity)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
+
+# For single-config generators (NMake/Ninja), default to Debug when unset.
+if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+endif()
 
 # Game Name Customization
 set(PLAYDATE_GAME_NAME corgo_engine)
@@ -78,10 +82,9 @@ source_group(TREE "${CMAKE_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${CORE} 
 # global compile definitions
 add_compile_definitions(CC_NO_SHORT_NAMES)
 
-# debug build
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_compile_definitions(CE_DEBUG_BUILD)
-endif()
+# Debug define for both single-config and multi-config generators.
+# For Visual Studio, CMAKE_BUILD_TYPE is empty, so use CONFIG generator expression.
+add_compile_definitions($<$<CONFIG:Debug>:CE_DEBUG_BUILD>)
 
 # enable warnings as errors
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)

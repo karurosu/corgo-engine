@@ -84,6 +84,47 @@ All batch files auto-configure VS dev environment and pause only on errors.
 - Press F5 to launch Playdate Simulator with the generated PDX at the repo root (`corgo_engine.pdx`).
 - The CMake build task is used as the preLaunch task instead of batch files.
 
+### CMake Presets Workflow (Preferred for Tooling)
+This repository includes `CMakePresets.json` with presets matching the existing 4 build trees:
+- `vs2022-sim` -> `build.vs2022/`
+- `sim-compat` -> compatibility alias to `vs2022-sim` (for tooling reliability)
+- `nmake-sim-devshell` -> `build.nmake/` (requires VS developer environment)
+- `pd-debug` -> `build.pd/`
+- `pd-release` -> `build.pd.release/`
+
+VS Code defaults to the Visual Studio simulator presets for reliable configure/build without manual environment bootstrapping:
+- configure: `vs2022-sim`
+- build: `build-vs2022-sim`
+- test: `test-core-vs2022`
+
+Use presets from CLI:
+```batch
+cmake --preset vs2022-sim
+cmake --build --preset build-vs2022-sim
+ctest --preset test-core-vs2022
+```
+
+For NMake explicitly (developer shell only):
+```batch
+cmake --preset nmake-sim-devshell
+cmake --build --preset build-nmake-sim-devshell
+ctest --preset test-core-nmake-devshell
+```
+
+For device builds:
+```batch
+cmake --preset pd-debug
+cmake --build --preset build-pd-debug
+
+cmake --preset pd-release
+cmake --build --preset build-pd-release
+```
+
+Important for automation/agents on Windows:
+- NMake presets still require Visual Studio developer environment initialization.
+- If a tool cannot configure directly, run `UpdateSolutions.bat` first (or `cmd /c "UpdateSolutions.bat <nul"` for non-interactive runs), then build with CMake Tools or presets.
+- Do not modify `CMakeLists.txt` to work around missing shell environment; prefer preset selection plus proper environment setup.
+
 ### Debugging in Visual Studio
 1. Open `build.vs2022/corgo_engine.sln` in Visual Studio 2022
 2. Build and run (F5) - pre-configured to launch Playdate Simulator

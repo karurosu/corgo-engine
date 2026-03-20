@@ -1,0 +1,109 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 24,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "vs2022-sim",
+      "displayName": "VS2022 Simulator",
+      "description": "Simulator configure using Visual Studio 2022 generator.",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build.vs2022"
+    },
+    {
+      "name": "sim-compat",
+      "displayName": "Simulator Compatibility (VS2022)",
+      "description": "Compatibility preset for tooling; uses VS2022 generator to avoid NMake environment issues.",
+      "inherits": "vs2022-sim"
+    },
+    {
+      "name": "nmake-sim-devshell",
+      "displayName": "NMake Simulator (Dev Shell)",
+      "description": "Simulator configure using NMake Makefiles (requires VS developer environment).",
+      "generator": "NMake Makefiles",
+      "binaryDir": "${sourceDir}/build.nmake"
+    },
+    {
+      "name": "pd-debug",
+      "displayName": "Playdate Device Debug",
+      "description": "Playdate ARM debug configure using arm toolchain.",
+      "generator": "NMake Makefiles",
+      "binaryDir": "${sourceDir}/build.pd",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_TOOLCHAIN_FILE": "c:/PlaydateSDK/C_API/buildsupport/arm.cmake"
+      }
+    },
+    {
+      "name": "pd-release",
+      "displayName": "Playdate Device Release",
+      "description": "Playdate ARM release configure using arm toolchain.",
+      "generator": "NMake Makefiles",
+      "binaryDir": "${sourceDir}/build.pd.release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_TOOLCHAIN_FILE": "c:/PlaydateSDK/C_API/buildsupport/arm.cmake"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "build-vs2022-sim",
+      "displayName": "Build VS2022 Simulator",
+      "configurePreset": "vs2022-sim",
+      "configuration": "Debug"
+    },
+    {
+      "name": "build-sim-compat",
+      "displayName": "Build Simulator Compatibility (VS2022)",
+      "configurePreset": "sim-compat",
+      "configuration": "Debug"
+    },
+    {
+      "name": "build-nmake-sim-devshell",
+      "displayName": "Build NMake Simulator (Dev Shell)",
+      "configurePreset": "nmake-sim-devshell"
+    },
+    {
+      "name": "build-pd-debug",
+      "displayName": "Build Playdate Device Debug",
+      "configurePreset": "pd-debug"
+    },
+    {
+      "name": "build-pd-release",
+      "displayName": "Build Playdate Device Release",
+      "configurePreset": "pd-release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-core-sim-compat",
+      "displayName": "Run CoreTests (Simulator Compatibility)",
+      "configurePreset": "sim-compat",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "test-core-nmake-devshell",
+      "displayName": "Run CoreTests (NMake Dev Shell)",
+      "configurePreset": "nmake-sim-devshell",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "test-core-vs2022",
+      "displayName": "Run CoreTests (VS2022)",
+      "configurePreset": "vs2022-sim",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

@@ -37,6 +37,12 @@ https://github.com/karurosu/corgo-engine/blob/main/corgo_demo.gif?raw=true
 2. Set `PLAYDATE_SDK_PATH` environment variable to your SDK installation path
 3. Run `UpdateSolutions.bat` to generate CMake build configurations
 
+### CMake Presets (VS Code default)
+- This repo includes `CMakePresets.json` with presets for all build trees.
+- VS Code CMake Tools is configured to use presets by default (`vs2022-sim`, `build-vs2022-sim`, `test-core-vs2022`).
+- The `sim-compat` preset is a compatibility alias for tooling; use `nmake-sim-devshell` when you explicitly want NMake from a Visual Studio developer shell.
+- If configure fails in automation, run `cmd /c "UpdateSolutions.bat <nul"` first, then build again with presets or CMake Tools.
+
 ### Building
 - `BuildNMake.bat` - Build simulator version
 - `BuildDevice.bat` - Build device debug version
