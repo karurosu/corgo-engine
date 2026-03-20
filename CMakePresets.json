@@ -29,22 +29,24 @@
     {
       "name": "pd-debug",
       "displayName": "Playdate Device Debug",
-      "description": "Playdate ARM debug configure using arm toolchain.",
+      "description": "Playdate ARM debug configure using arm toolchain. Requires NMAKE_PATH env var (run 'Device: configure (Debug)' task once to set it).",
       "generator": "NMake Makefiles",
       "binaryDir": "${sourceDir}/build.pd",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_MAKE_PROGRAM": "$penv{NMAKE_PATH}",
         "CMAKE_TOOLCHAIN_FILE": "c:/PlaydateSDK/C_API/buildsupport/arm.cmake"
       }
     },
     {
       "name": "pd-release",
       "displayName": "Playdate Device Release",
-      "description": "Playdate ARM release configure using arm toolchain.",
+      "description": "Playdate ARM release configure using arm toolchain. Requires NMAKE_PATH env var (run 'Device: configure (Debug)' task once to set it).",
       "generator": "NMake Makefiles",
       "binaryDir": "${sourceDir}/build.pd.release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_MAKE_PROGRAM": "$penv{NMAKE_PATH}",
         "CMAKE_TOOLCHAIN_FILE": "c:/PlaydateSDK/C_API/buildsupport/arm.cmake"
       }
     }

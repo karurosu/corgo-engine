@@ -89,39 +89,13 @@ This repository includes `CMakePresets.json` with presets matching the existing 
 - `vs2022-sim` -> `build.vs2022/`
 - `sim-compat` -> compatibility alias to `vs2022-sim` (for tooling reliability)
 - `nmake-sim-devshell` -> `build.nmake/` (requires VS developer environment)
-- `pd-debug` -> `build.pd/`
-- `pd-release` -> `build.pd.release/`
-
-VS Code defaults to the Visual Studio simulator presets for reliable configure/build without manual environment bootstrapping:
-- configure: `vs2022-sim`
-- build: `build-vs2022-sim`
-- test: `test-core-vs2022`
-
-Use presets from CLI:
-```batch
-cmake --preset vs2022-sim
-cmake --build --preset build-vs2022-sim
-ctest --preset test-core-vs2022
-```
-
-For NMake explicitly (developer shell only):
-```batch
-cmake --preset nmake-sim-devshell
-cmake --build --preset build-nmake-sim-devshell
-ctest --preset test-core-nmake-devshell
-```
-
-For device builds:
-```batch
-cmake --preset pd-debug
-cmake --build --preset build-pd-debug
-
-cmake --preset pd-release
-cmake --build --preset build-pd-release
-```
+- `pd-debug` -> `build.pd/` (requires `NMAKE_PATH` to point to `nmake.exe` when not running in a developer shell)
+- `pd-release` -> `build.pd.release/` (requires `NMAKE_PATH` to point to `nmake.exe` when not running in a developer shell)
 
 Important for automation/agents on Windows:
 - NMake presets still require Visual Studio developer environment initialization.
+- Device presets can avoid a hardcoded repo path by reading `nmake.exe` from the `NMAKE_PATH` environment variable.
+- `scripts/device-cmake.ps1` is optional and intended for device preset workflows only; it may persist `NMAKE_PATH` to the user environment to help CMake Tools discover `nmake.exe`.
 - If a tool cannot configure directly, run `UpdateSolutions.bat` first (or `cmd /c "UpdateSolutions.bat <nul"` for non-interactive runs), then build with CMake Tools or presets.
 - Do not modify `CMakeLists.txt` to work around missing shell environment; prefer preset selection plus proper environment setup.
 

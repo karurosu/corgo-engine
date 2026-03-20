@@ -24,9 +24,9 @@ https://github.com/karurosu/corgo-engine/blob/main/corgo_demo.gif?raw=true
 4. SceneGraph: Done
 5. Scene management: Done
 6. Engine Main loop: Mostly clean, will be updated as needed
-7. Graphics: Demo code
+7. Graphics: **WIP**
 8. Audio: nothing yet
-9. Input: **WIP**
+9. Input: Done
 11. Playdate backend: minimal, just what is required for the demo
 12. PC backend: nothing yet
 13. Entity Streamer: nothing yet
@@ -38,12 +38,19 @@ https://github.com/karurosu/corgo-engine/blob/main/corgo_demo.gif?raw=true
 3. Run `UpdateSolutions.bat` to generate CMake build configurations
 
 ### CMake Presets (VS Code default)
-- This repo includes `CMakePresets.json` with presets for all build trees.
-- VS Code CMake Tools is configured to use presets by default (`vs2022-sim`, `build-vs2022-sim`, `test-core-vs2022`).
-- The `sim-compat` preset is a compatibility alias for tooling; use `nmake-sim-devshell` when you explicitly want NMake from a Visual Studio developer shell.
-- If configure fails in automation, run `cmd /c "UpdateSolutions.bat <nul"` first, then build again with presets or CMake Tools.
+Available Cmake presets for use within VSCode (or via CLI):
+- `vs2022-sim` -> Visual Studio 2022 simulator configure (`build.vs2022/`)
+- `nmake-sim-devshell` -> NMake simulator configure (`build.nmake/`), requires a Visual Studio Developer shell
+- `pd-debug` -> Playdate ARM debug configure (`build.pd/`), uses `NMAKE_PATH`
+- `pd-release` -> Playdate ARM release configure (`build.pd.release/`), uses `NMAKE_PATH`
 
-### Building
+In order to build using the pd-* presets `NMAKE_PATH` must be set and point to VS nmake.exe, running `scripts/device-cmake.ps1` will set it for you.
+All other presets can be built directly.
+
+### Building Manually
+I have created some simple batch scrips that can automate building:
+
+- `UpdateSolutions.bat` - Update cmake configurations
 - `BuildNMake.bat` - Build simulator version
 - `BuildDevice.bat` - Build device debug version
 - `BuildDeviceRetail.bat` - Build device release version
@@ -53,8 +60,14 @@ Build and run in VS Code
 Open `build.vs2022/corgo_engine.sln` in Visual Studio 2022 and press F5 to build and launch the Playdate Simulator.
 
 ### Running tests
-Build the coretest project
-Run coretest.exe or use the CMake target
+The engine has a small suite of unit tests for the core ECS and tools based on Unity Test. 
+To run:
+1. Build the coretest project
+2. Run coretest.exe or use the CMake target
+
+### Running Samples
+Building the source will compile all the included samples, these double as tests for the engine.
+Samples can be removed from the build by commenting out `CE_ENGINE_INCLUDE_SAMPLE_SCENES` in engine/config.h
 
 ## 3rd Party Credits
 
