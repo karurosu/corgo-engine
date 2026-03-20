@@ -25,8 +25,12 @@ CE_START_SYSTEM_IMPLEMENTATION(CE_TEXT_LABEL_RENDERER, CE_TEXT_LABEL_SYSTEM_DEPE
     } else {
         previousDrawMode = CE_GetPlaydateAPI()->graphics->setDrawMode(kDrawModeCopy);
     }
+
+    const char *text = textLabelComponent->m_staticTextPtr != NULL ? textLabelComponent->m_staticTextPtr : cc_first(&textLabelComponent->m_text);
+    const int textLength = (int)(textLabelComponent->m_staticTextPtr != NULL ? strlen(textLabelComponent->m_staticTextPtr) : cc_size(&textLabelComponent->m_text));
+
     CE_GetPlaydateAPI()->graphics->setFont(textLabelComponent->m_fontPtr);
-    CE_GetPlaydateAPI()->graphics->drawText(textLabelComponent->m_text, strlen(textLabelComponent->m_text), kASCIIEncoding, renderNode->m_x, renderNode->m_y);
+    CE_GetPlaydateAPI()->graphics->drawText(text, textLength, kASCIIEncoding, renderNode->m_x, renderNode->m_y);
     CE_GetPlaydateAPI()->graphics->setDrawMode(previousDrawMode);
 #endif
 }

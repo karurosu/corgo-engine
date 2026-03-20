@@ -157,7 +157,6 @@ CE_Result RunSystemTraverseFunc(IN CE_ECS_Context* context, IN CE_Id entityId, I
 
 CE_Result CE_ECS_RunSystems_SceneOrder(INOUT CE_ECS_Context* context, IN float deltaTime, CE_ECS_SYSTEM_RUN_PHASE phase, CE_ECS_SYSTEM_RUN_FREQUENCY frequency, OUT_OPT CE_ERROR_CODE* errorCode)
 {
-    CE_Result result = CE_ERROR;
     CE_ECS_System_CacheList *systemList = &context->m_systemRuntimeData.m_systemsByRunOrder[CE_ECS_SYSTEM_RUN_ORDER_SCENETREE].m_frequency[frequency].m_phase[phase];
 
     if (cc_size(&systemList->m_systems) == 0) {

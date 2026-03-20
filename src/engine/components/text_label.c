@@ -4,18 +4,15 @@
 //  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS 1 // Disable warnings with strcpy, strncpy, etc.
-#endif
-
 #include "engine/corgo.h"
 
 CE_DEFINE_COMPONENT_INIT(CE_TEXT_LABEL_COMPONENT)
 {
-    component->m_text[0] = '\0';
+    component->m_staticTextPtr = NULL;
     component->m_fontName = "";
     component->m_fontPtr = NULL;
     component->m_inverted = false;
+    cc_init(&component->m_text);
     return CE_OK;
 }
 
@@ -26,29 +23,21 @@ CE_DEFINE_COMPONENT_CLEANUP(CE_TEXT_LABEL_COMPONENT)
         CE_RELEASE_ASSET(context, CE_ASSET_TYPE_FONT, component->m_fontPtr);
         component->m_fontPtr = NULL;
     }
+    cc_cleanup(&component->m_text);
     return CE_OK;
 }
 
 // Helpers
 
-CE_Result CE_TextLabelComponent_setText(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, IN CE_TransformComponent *transform, IN const char* text)
+CE_Result CE_TextLabelComponent_setStaticText(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, IN CE_TransformComponent *transform, IN const char* text)
 {
-    if (text == NULL || strlen(text) >= sizeof(component->m_text)) {
-        return CE_ERROR;
-    }
+    component->m_staticTextPtr = (char *)text;
+    return CE_TextLabelComponent_update(context, component, transform);
+}
 
-    if (strncpy(component->m_text, text, sizeof(component->m_text)) == NULL) {
-        return CE_ERROR;
-    }
-
-    if (component->m_fontPtr != NULL)
-    {
-        // Update bounds based on new text
-        CE_TextLabelComponent_getTextBounds(context, component, &transform->m_width, &transform->m_height);
-        return CE_OK;
-    }
-
-    return CE_OK;
+CE_Result CE_TextLabelComponent_update(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, IN CE_TransformComponent *transform)
+{
+    return CE_TextLabelComponent_getTextBounds(context, component, &transform->m_width, &transform->m_height);
 }
 
 CE_Result CE_TextLabelComponent_setFont(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, IN CE_TransformComponent *transform, IN const char* fontName)
@@ -59,39 +48,37 @@ CE_Result CE_TextLabelComponent_setFont(INOUT CE_ECS_Context* context, INOUT CE_
 
     component->m_fontName = fontName;
 
-    // Temp code to force loading of font
+    // Release old font
     if (component->m_fontPtr)
     {
         CE_RELEASE_ASSET(context, CE_ASSET_TYPE_FONT, component->m_fontPtr);
         component->m_fontPtr = NULL;
     }
 
+    // Cache new font
     component->m_fontPtr = CE_CACHE_ASSET(context, CE_ASSET_TYPE_FONT, fontName, NULL);
     if (component->m_fontPtr == NULL)
     {
         return CE_ERROR;
     }
 
-    if (component->m_fontPtr != NULL)
-    {
-        // Update bounds based on new font
-        CE_TextLabelComponent_getTextBounds(context, component, &transform->m_width, &transform->m_height);
-        return CE_OK;
-    }
-
-    return CE_OK;
+    return CE_TextLabelComponent_getTextBounds(context, component, &transform->m_width, &transform->m_height);
 }
 
 CE_Result CE_TextLabelComponent_getTextBounds(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, OUT uint16_t* width, OUT uint16_t* height)
 {
-    if (component->m_fontPtr == NULL)
+    if (component->m_fontPtr == NULL || (component->m_staticTextPtr == NULL && cc_size(&component->m_text) == 0))
     {
-        return CE_ERROR;
+        *width = 0;
+        *height = 0;
+        return CE_OK;
     }
 
 #ifdef CE_BACKEND_PLAYDATE
-    // The playdate API uses ints, that we know will fit in uint16_t since the display is smaller than that, so we can safely cast here.
-    *width = (uint16_t)CE_GetPlaydateAPI()->graphics->getTextWidth(component->m_fontPtr, component->m_text, sizeof(component->m_text), kASCIIEncoding, 0);
+    const char *text = component->m_staticTextPtr != NULL ? component->m_staticTextPtr : cc_first(&component->m_text);
+    const int textLength = (int)(component->m_staticTextPtr != NULL ? strlen(component->m_staticTextPtr) : cc_size(&component->m_text));
+    // The playdate API uses ints for text size
+    *width = (uint16_t)CE_GetPlaydateAPI()->graphics->getTextWidth(component->m_fontPtr, text, textLength, kASCIIEncoding, 0);
     *height = (uint16_t)CE_GetPlaydateAPI()->graphics->getFontHeight(component->m_fontPtr);
 #else
     // Stub implementation for non-Playdate backends

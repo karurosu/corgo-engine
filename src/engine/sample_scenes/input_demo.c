@@ -43,7 +43,7 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(InputDemo)
         
         // Set text and font
         CES_CHECK_RESULT(
-            CE_TextLabelComponent_setText(context, pressed_text, pressed_transform, "Pressed Event: Not Triggered"), 
+            CE_TextLabelComponent_setStaticText(context, pressed_text, pressed_transform, "Pressed Event: Not Triggered"), 
             "Failed to set text for TextLabelComponent");
 
         CES_CHECK_RESULT(
@@ -65,7 +65,7 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(InputDemo)
         
         // Set text and font
         CES_CHECK_RESULT(
-            CE_TextLabelComponent_setText(context, released_text, released_transform, "Released Event: Not Triggered"), 
+            CE_TextLabelComponent_setStaticText(context, released_text, released_transform, "Released Event: Not Triggered"), 
             "Failed to set text for TextLabelComponent");
 
         CES_CHECK_RESULT(
@@ -87,7 +87,7 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(InputDemo)
         
         // Set text and font
         CES_CHECK_RESULT(
-            CE_TextLabelComponent_setText(context, held_text, held_transform, "Held Event: Not Triggered"), 
+            CE_TextLabelComponent_setStaticText(context, held_text, held_transform, "Held Event: Not Triggered"), 
             "Failed to set text for TextLabelComponent");
 
         CES_CHECK_RESULT(
@@ -109,7 +109,7 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(InputDemo)
         
         // Set text and font
         CES_CHECK_RESULT(
-            CE_TextLabelComponent_setText(context, held2_text, held2_transform, "Double Held Event: Not Triggered"), 
+            CE_TextLabelComponent_setStaticText(context, held2_text, held2_transform, "Double Held Event: Not Triggered"), 
             "Failed to set text for TextLabelComponent");
 
         CES_CHECK_RESULT(
@@ -131,7 +131,7 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(InputDemo)
         
         // Set text and font
         CES_CHECK_RESULT(
-            CE_TextLabelComponent_setText(context, mapping_text, mapping_transform, "Current Mapping: None"), 
+            CE_TextLabelComponent_setStaticText(context, mapping_text, mapping_transform, "Current Mapping: None"), 
             "Failed to set text for TextLabelComponent");
 
         CES_CHECK_RESULT(
@@ -153,7 +153,7 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(InputDemo)
         
         // Set text and font
         CES_CHECK_RESULT(
-            CE_TextLabelComponent_setText(context, instructions_text, transformComponent, "Use Up/Down to change mapping. Use A/B to test input.\nValue and 'None' mapping reset after 5 seconds."), 
+            CE_TextLabelComponent_setStaticText(context, instructions_text, transformComponent, "Use Up/Down to change mapping. Use A/B to test input.\nValue and 'None' mapping reset after 5 seconds."), 
             "Failed to set text for TextLabelComponent");
 
         CES_CHECK_RESULT(
@@ -178,47 +178,47 @@ CE_DECLARE_SCENE_RUN_FUNCTION(InputDemo)
     timer += deltaTime;
 
     if (timer >= TIMER_END) {
-        CE_TextLabelComponent_setText(context, pressed_text, pressed_transform, "Pressed Event: Not Triggered");
-        CE_TextLabelComponent_setText(context, released_text, released_transform, "Released Event: Not Triggered");
+        CE_TextLabelComponent_setStaticText(context, pressed_text, pressed_transform, "Pressed Event: Not Triggered");
+        CE_TextLabelComponent_setStaticText(context, released_text, released_transform, "Released Event: Not Triggered");
         timer = 0.0f;
 
         if (currentMapping == 0)
         {
-            CE_TextLabelComponent_setText(context, mapping_text, mapping_transform, "Current Mapping: A");
+            CE_TextLabelComponent_setStaticText(context, mapping_text, mapping_transform, "Current Mapping: A");
             CES_PUSH_ACTION_MAP(SampleInputMap1);
             currentMapping = 1;
         }
     }
 
     if(CES_IA_ISACTIVE(CE_IA_DEMO_PRESS)) {
-        CE_TextLabelComponent_setText(context, pressed_text, pressed_transform, "Pressed Event: Triggered");
+        CE_TextLabelComponent_setStaticText(context, pressed_text, pressed_transform, "Pressed Event: Triggered");
         timer = 0.0f;
     }
     
     if(CES_IA_ISACTIVE(CE_IA_DEMO_RELEASE)) {
-        CE_TextLabelComponent_setText(context, released_text, released_transform, "Released Event: Triggered");
+        CE_TextLabelComponent_setStaticText(context, released_text, released_transform, "Released Event: Triggered");
         timer = 0.0f;
     }
 
     if (held && !CES_IA_ISACTIVE(CE_IA_DEMO_HELD)) {
         held = false;
-        CE_TextLabelComponent_setText(context, held_text, held_transform, "Held Event: Not Triggered");
+        CE_TextLabelComponent_setStaticText(context, held_text, held_transform, "Held Event: Not Triggered");
     } else if (!held && CES_IA_ISACTIVE(CE_IA_DEMO_HELD)) {
         held = true;
-        CE_TextLabelComponent_setText(context, held_text, held_transform, "Held Event: Triggered");
+        CE_TextLabelComponent_setStaticText(context, held_text, held_transform, "Held Event: Triggered");
     }
 
     if (held2 && !CES_IA_ISACTIVE(CE_IA_DEMO_HELD_2)) {
         held2 = false;
-        CE_TextLabelComponent_setText(context, held2_text, held2_transform, "Double Held Event: Not Triggered");
+        CE_TextLabelComponent_setStaticText(context, held2_text, held2_transform, "Double Held Event: Not Triggered");
     } else if (!held2 && CES_IA_ISACTIVE(CE_IA_DEMO_HELD_2)) {
         held2 = true;
-        CE_TextLabelComponent_setText(context, held2_text, held2_transform, "Double Held Event: Triggered");
+        CE_TextLabelComponent_setStaticText(context, held2_text, held2_transform, "Double Held Event: Triggered");
     }
 
     if (CES_IA_ISACTIVE(CE_IA_NEXT_INPUT_MAP)) {
         if (currentMapping == 1) {
-            CE_TextLabelComponent_setText(context, mapping_text, mapping_transform, "Current Mapping: B");
+            CE_TextLabelComponent_setStaticText(context, mapping_text, mapping_transform, "Current Mapping: B");
             CES_PUSH_ACTION_MAP(SampleInputMap2);
             currentMapping = 2;
             timer = TIMER_END;
@@ -232,12 +232,12 @@ CE_DECLARE_SCENE_RUN_FUNCTION(InputDemo)
 
     if (CES_IA_ISACTIVE(CE_IA_PREVIOUS_INPUT_MAP)) {
         if (currentMapping == 1) {
-            CE_TextLabelComponent_setText(context, mapping_text, mapping_transform, "Current Mapping: None");
+            CE_TextLabelComponent_setStaticText(context, mapping_text, mapping_transform, "Current Mapping: None");
             CES_POP_ACTION_MAP();
             currentMapping = 0;
             timer = 0.0f;
         } else if (currentMapping == 2) {
-            CE_TextLabelComponent_setText(context, mapping_text, mapping_transform, "Current Mapping: A");
+            CE_TextLabelComponent_setStaticText(context, mapping_text, mapping_transform, "Current Mapping: A");
             CES_POP_ACTION_MAP();
             currentMapping = 1;
             timer = TIMER_END;

@@ -223,4 +223,18 @@
         return CE_ERROR;\
     }
 
+// Scripting helpers
+/**
+ * @brief Macro to build a formatted string into a cc_string. Clears the string before formatting. If formatting fails, prints an error and returns CE_ERROR.
+ * 
+ * @param str[in,out] The cc_string to build the formatted string into. Must be a valid cc_string variable.
+ * @param [var] List of strings or variables to append to the string
+ */
+#define CES_BUILD_STRING(str, ...)\
+    cc_clear(&str);\
+    if (!cc_push_fmt(&str, __VA_ARGS__)) {\
+        CE_Error("Failed to format string: " #str);\
+        return CE_ERROR;\
+    }
+
 #endif // CORGO_ENGINE_SHORTCUTS_SCENE_H

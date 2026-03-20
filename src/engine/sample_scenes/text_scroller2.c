@@ -34,7 +34,7 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(TextScroller2)
     
     // Set text and font
     CES_CHECK_RESULT(
-        CE_TextLabelComponent_setText(context, textLabelComponent, transformComponent, "Hello, Other Corgi!"), 
+        CE_TextLabelComponent_setStaticText(context, textLabelComponent, transformComponent, "Hello, Other Corgi!"), 
         "Failed to set text for TextLabelComponent");
 
     CES_CHECK_RESULT(

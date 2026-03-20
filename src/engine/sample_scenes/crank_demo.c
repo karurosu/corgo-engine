@@ -8,8 +8,6 @@
 #include "engine/config.h"
 #ifdef CE_ENGINE_INCLUDE_SAMPLE_SCENES
 
-#include <stdio.h>
-
 #include "engine/corgo.h"
 #include "engine/shortcuts/scene.h"
 
@@ -35,7 +33,7 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(CrankDemo)
         CES_ADD_COMPONENT_EPTR(crank_state_label, CE_TEXT_LABEL_COMPONENT, crankStateText);
 
         CES_CHECK_RESULT(
-            CE_TextLabelComponent_setText(context, crankStateText, crankStateTransform, "Crank State: docked"),
+            CE_TextLabelComponent_setStaticText(context, crankStateText, crankStateTransform, "Crank State: docked"),
             "Failed to set crank state text");
 
         CES_CHECK_RESULT(
@@ -54,8 +52,10 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(CrankDemo)
         CES_ADD_COMPONENT_EPTR(crank_angle_label, CE_TRANSFORM_COMPONENT, crankAngleTransform);
         CES_ADD_COMPONENT_EPTR(crank_angle_label, CE_TEXT_LABEL_COMPONENT, crankAngleText);
 
+        CES_BUILD_STRING(crankAngleText->m_text, "Crank Angle: 0");
+        
         CES_CHECK_RESULT(
-            CE_TextLabelComponent_setText(context, crankAngleText, crankAngleTransform, "Crank Angle: 0"),
+            CE_TextLabelComponent_update(context, crankAngleText, crankAngleTransform),
             "Failed to set crank angle text");
 
         CES_CHECK_RESULT(
@@ -85,7 +85,7 @@ CE_DECLARE_SCENE_RUN_FUNCTION(CrankDemo)
     if (!hasLastDockState || (lastDocked != isDocked)) {
         const char* stateText = isDocked ? "Crank State: docked" : "Crank State: undocked";
         CES_CHECK_RESULT(
-            CE_TextLabelComponent_setText(context, crankStateText, crankStateTransform, stateText),
+            CE_TextLabelComponent_setStaticText(context, crankStateText, crankStateTransform, stateText),
             "Failed to set crank state text");
 
         lastDocked = isDocked;
@@ -93,15 +93,10 @@ CE_DECLARE_SCENE_RUN_FUNCTION(CrankDemo)
     }
 
     if (lastAngleRounded != angleRounded) {
-        char angleBuffer[32];
-        const int written = snprintf(angleBuffer, sizeof(angleBuffer), "Crank Angle: %d", angleRounded);
-        if (written < 0 || written >= (int)sizeof(angleBuffer)) {
-            CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
-            return CE_ERROR;
-        }
-
+        CES_BUILD_STRING(crankAngleText->m_text, "Crank Angle: ", angleRounded);
+        
         CES_CHECK_RESULT(
-            CE_TextLabelComponent_setText(context, crankAngleText, crankAngleTransform, angleBuffer),
+            CE_TextLabelComponent_update(context, crankAngleText, crankAngleTransform),
             "Failed to set crank angle text");
 
         lastAngleRounded = angleRounded;

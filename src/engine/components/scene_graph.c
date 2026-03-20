@@ -56,7 +56,6 @@ CE_Result CE_Engine_SceneGraph_Init(CE_ECS_Context* context, CE_ERROR_CODE* erro
 CE_Result CE_Scene_AddChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN CE_Id childId, IN bool move, CE_ERROR_CODE* errorCode)
 {
     // Check that the child has a transform component
-    CE_TransformComponent* transformComponent = NULL;
     if (!CE_Entity_HasComponent(context, childId, CE_TRANSFORM_COMPONENT))
     {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_ENGINE_SCENE_GRAPH_MISSING_TRANSFORM);
@@ -97,8 +96,6 @@ CE_Result CE_Scene_AddChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN
 
 CE_Result CE_Scene_RemoveChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN CE_Id childId, CE_ERROR_CODE* errorCode)
 {
-    CE_SceneGraphComponent* sceneGraph = CE_ECS_AccessGlobalComponent(context, CE_ENGINE_SCENE_GRAPH_COMPONENT);
-
     bool exists = false;
     if (CE_Entity_HasSpecificRelationship(context, childId, CE_RELATIONSHIP_PARENT, parentId, &exists, errorCode) != CE_OK) {
         return CE_ERROR;
