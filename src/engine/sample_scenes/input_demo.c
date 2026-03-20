@@ -12,24 +12,24 @@
 #include "engine/shortcuts/scene.h"
 
 // Move to a component
-CE_TextLabelComponent* pressed_text = NULL;
-CE_TextLabelComponent* released_text = NULL;
-CE_TextLabelComponent* held_text = NULL;
-CE_TextLabelComponent* held2_text = NULL;
-CE_TextLabelComponent* mapping_text = NULL;
+static CE_TextLabelComponent* pressed_text = NULL;
+static CE_TextLabelComponent* released_text = NULL;
+static CE_TextLabelComponent* held_text = NULL;
+static CE_TextLabelComponent* held2_text = NULL;
+static CE_TextLabelComponent* mapping_text = NULL;
 
-CE_TransformComponent* pressed_transform = NULL;
-CE_TransformComponent* released_transform = NULL;
-CE_TransformComponent* held_transform = NULL;
-CE_TransformComponent* held2_transform = NULL;
-CE_TransformComponent* mapping_transform = NULL;
+static CE_TransformComponent* pressed_transform = NULL;
+static CE_TransformComponent* released_transform = NULL;
+static CE_TransformComponent* held_transform = NULL;
+static CE_TransformComponent* held2_transform = NULL;
+static CE_TransformComponent* mapping_transform = NULL;
 
 static float timer = 0.0f;
 #define TIMER_END 5.0f
 
-int currentMapping = 0;
-bool held = false;
-bool held2 = false;
+static int currentMapping = 0;
+static bool held = false;
+static bool held2 = false;
 
 CE_DECLARE_SCENE_CREATE_FUNCTION(InputDemo)
 {

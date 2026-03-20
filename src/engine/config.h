@@ -21,7 +21,7 @@
 #define CE_ENGINE_INCLUDE_SAMPLE_SCENES
 
 // The default scene to load on startup, only if CE_ENGINE_SET_START_SCENE is not defined
-#define CE_ENGINE_DEFAULT_SCENE InputDemo
+#define CE_ENGINE_DEFAULT_SCENE CrankDemo
 
 // Default input map size
 #define CE_ENGINE_INPUT_MAP_STACK_SIZE 4

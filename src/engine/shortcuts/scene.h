@@ -151,6 +151,54 @@
 #define CES_IA_ISNOTACTIVE(action) ((inputComponent->m_actionStates & CE_IA_MASK(action)) == 0)
 
 /**
+ * @brief Macro to enable a specific input feature.
+ * Prints error and returns CE_ERROR if the operation fails.
+ * 
+ * @param feature[in] The input feature to enable, must be a valid CE_Input_FeatureMask value.
+ * @return void
+ */
+#define CES_ENABLE_INPUT_FEATURE(feature) \
+    if (CE_Input_SetFeature(context, feature, true, errorCode) != CE_OK) {\
+        CE_Error("Failed to enable input feature " #feature ": %s", CE_GetErrorMessage(*errorCode));\
+        return CE_ERROR;\
+    }
+
+/**
+ * @brief Macro to disable a specific input feature.
+ * Prints error and returns CE_ERROR if the operation fails.
+ * 
+ * @param feature[in] The input feature to disable, must be a valid CE_Input_FeatureMask value.
+ * @return void
+ */
+#define CES_DISABLE_INPUT_FEATURE(feature) \
+    if (CE_Input_SetFeature(context, feature, false, errorCode) != CE_OK) {\
+        CE_Error("Failed to disable input feature " #feature ": %s", CE_GetErrorMessage(*errorCode));\
+        return CE_ERROR;\
+    }
+
+/**
+ * @brief Macro to check if the crank is currently docked, only valid if the crank input feature is enabled.
+ * Convenience macro to avoid having a separate IA since it has a very specific meaning
+ * 
+ * @return true if the crank is docked or feature is not enabled (default is docked)
+ */
+#define CES_IS_CRANK_DOCKED() ((inputComponent->m_rawInputsCurrent & CE_Input_Crank) == 0)
+
+/**
+ * @brief Macro to get the current angle of the crank, only valid if the crank input feature is enabled.
+ * 
+ * @return The current angle of the crank in degrees, or 0 if the feature is not enabled.
+ */
+#define CE_GET_CRANK_ANGLE() (inputComponent->m_crankAngle)
+
+/**
+ * @brief Macro to get the current angle of the crank rounded to the nearest integer, only valid if the crank input feature is enabled.
+ * 
+ * @return The current angle of the crank in degrees rounded to the nearest integer, or 0 if the feature is not enabled.
+ */
+#define CE_GET_CRANK_ANGLE_ROUNDED() ((int)(inputComponent->m_crankAngle + 0.5f))
+
+/**
  * @brief Macro to push a new input action map function onto the stack and make it the current action map.
  * Prints error and returns CE_ERROR if the operation fails.
  * 
