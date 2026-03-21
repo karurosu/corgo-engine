@@ -37,5 +37,7 @@ CE_Result CE_Engine_SceneGraph_UpdateRenderList(INOUT CE_ECS_Context* context, C
 CE_Result CE_Engine_SceneGraph_Reset(INOUT CE_ECS_Context* context, CE_ERROR_CODE* errorCode);
 
 #define CE_Engine_SceneGraph_MarkDirty(contextPtr) do {CE_ECS_AccessGlobalComponent(contextPtr, CE_ENGINE_SCENE_GRAPH_COMPONENT)->m_needsRedraw = true;} while(0)
+#define CE_Engine_SceneGraph_IsDirty(contextPtr) (CE_ECS_AccessGlobalComponent(contextPtr, CE_ENGINE_SCENE_GRAPH_COMPONENT)->m_needsRedraw)
+#define CE_Engine_SceneGraph_ClearDirty(contextPtr) do {CE_ECS_AccessGlobalComponent(contextPtr, CE_ENGINE_SCENE_GRAPH_COMPONENT)->m_needsRedraw = false;} while(0)
 
 #endif // CORGO_ENGINE_COMPONENTS_SCENE_GRAPH_H

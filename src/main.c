@@ -138,21 +138,28 @@ static int update(void* userdata)
 		return -1;
 	}
 
-	// Clear screen before rendering
-	CE_Display_Clear(ecsContext);
+#if CE_ENGINE_ENABLE_ADAPTIVE_RENDERING
+	if (CE_Engine_SceneGraph_IsDirty(ecsContext))
+#endif
+	{
+		// Clear screen before rendering
+		CE_Display_Clear(ecsContext);
 
-	// Regenerate caches if needed
-    if (CE_Engine_SceneGraph_UpdateRenderList(ecsContext, &errorCode) != CE_OK) {
-        CE_Error("Failed to update scene graph render list with error code: %s", CE_GetErrorMessage(errorCode));
-        return CE_ERROR;
-    }
+		// Regenerate caches if needed
+		if (CE_Engine_SceneGraph_UpdateRenderList(ecsContext, &errorCode) != CE_OK) {
+			CE_Error("Failed to update scene graph render list with error code: %s", CE_GetErrorMessage(errorCode));
+			return CE_ERROR;
+		}
 
-	// Render
-	if (CE_ECS_TickRenderSystems(ecsContext, deltaTime, &errorCode) != CE_OK) {
-		CE_Error("ECS Tick Render Systems failed with result code: %d", CE_GetErrorMessage(errorCode));
-		return -1;
+		// Render
+		if (CE_ECS_TickRenderSystems(ecsContext, deltaTime, &errorCode) != CE_OK) {
+			CE_Error("ECS Tick Render Systems failed with result code: %d", CE_GetErrorMessage(errorCode));
+			return -1;
+		}
+#if CE_ENGINE_ENABLE_ADAPTIVE_RENDERING
+		CE_Engine_SceneGraph_ClearDirty(ecsContext);
+#endif
 	}
-
 
 #ifdef CE_BACKEND_PLAYDATE
 	pd->system->drawFPS(0,0);

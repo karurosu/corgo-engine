@@ -22,8 +22,6 @@ CE_START_SYSTEM_IMPLEMENTATION(CE_TEXT_LABEL_RENDERER, CE_TEXT_LABEL_SYSTEM_DEPE
     LCDBitmapDrawMode previousDrawMode = kDrawModeCopy;
     if (textLabelComponent->m_inverted) {
         previousDrawMode = CE_GetPlaydateAPI()->graphics->setDrawMode(kDrawModeFillWhite);
-    } else {
-        previousDrawMode = CE_GetPlaydateAPI()->graphics->setDrawMode(kDrawModeCopy);
     }
 
     const char *text = textLabelComponent->m_staticTextPtr != NULL ? textLabelComponent->m_staticTextPtr : cc_first(&textLabelComponent->m_text);
@@ -31,7 +29,10 @@ CE_START_SYSTEM_IMPLEMENTATION(CE_TEXT_LABEL_RENDERER, CE_TEXT_LABEL_SYSTEM_DEPE
 
     CE_GetPlaydateAPI()->graphics->setFont(textLabelComponent->m_fontPtr);
     CE_GetPlaydateAPI()->graphics->drawText(text, textLength, kASCIIEncoding, renderNode->m_x, renderNode->m_y);
-    CE_GetPlaydateAPI()->graphics->setDrawMode(previousDrawMode);
+
+    if (textLabelComponent->m_inverted) {
+        CE_GetPlaydateAPI()->graphics->setDrawMode(previousDrawMode);
+    }
 #endif
 }
 CE_END_SYSTEM_IMPLEMENTATION

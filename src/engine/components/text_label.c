@@ -37,6 +37,7 @@ CE_Result CE_TextLabelComponent_setStaticText(INOUT CE_ECS_Context* context, INO
 
 CE_Result CE_TextLabelComponent_update(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, IN CE_TransformComponent *transform)
 {
+    CE_Engine_SceneGraph_MarkDirty(context);
     return CE_TextLabelComponent_getTextBounds(context, component, &transform->m_width, &transform->m_height);
 }
 
@@ -62,7 +63,7 @@ CE_Result CE_TextLabelComponent_setFont(INOUT CE_ECS_Context* context, INOUT CE_
         return CE_ERROR;
     }
 
-    return CE_TextLabelComponent_getTextBounds(context, component, &transform->m_width, &transform->m_height);
+    return CE_TextLabelComponent_update(context, component, transform);
 }
 
 CE_Result CE_TextLabelComponent_getTextBounds(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, OUT uint16_t* width, OUT uint16_t* height)
