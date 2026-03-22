@@ -46,6 +46,28 @@ typedef int CE_Result;
  */
 typedef uint32_t CE_Id;
 
+// Single struct id type, using bitfieds to quickly extract info
+typedef struct CE_Id_entityReference {
+    uint32_t m_uniqueId : 16; // Unique id
+    uint32_t _unused : 8;   // Unused bits
+    uint32_t m_generation : 4; // Generation, used to detect stale ids after deletion
+    uint32_t m_kind : 4;      // Kind of Id CE_IdKind
+} CE_Id_entityReference;
+
+typedef struct CE_Id_relationshipReference {
+    uint32_t m_uniqueId : 16; // Unique id
+    uint32_t m_relationshipType : 8;   // Relationship type (0-255)
+    uint32_t m_generation : 4; // Generation, used to detect stale ids after deletion
+    uint32_t m_kind : 4;      // Kind of Id CE_IdKind
+} CE_Id_relationshipReference;
+
+typedef struct CE_Id_componentReference {
+    uint32_t m_uniqueId : 16; // Unique id
+    uint32_t m_componentType : 8;   // Component type (0-255)
+    uint32_t _unused : 4; // Unused bits
+    uint32_t m_kind : 4;      // Kind of Id CE_IdKind
+} CE_Id_componentReference;
+
 // Component Type Id is a 8-bit unsigned integer that identifies a unique component type.
 typedef uint8_t CE_TypeId;
 

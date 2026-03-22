@@ -228,6 +228,61 @@ static void test_CE_Id_Helpers(void) {
     
 }
 
+static void test_CE_Id_StructViews(void) {
+    CE_Id id;
+
+    // --- Entity reference: decode CE_Id via CE_Id_entityReference ---
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 7, 4321, &id));
+    CE_Id_entityReference entityRef;
+    memcpy(&entityRef, &id, sizeof(CE_Id));
+    TEST_ASSERT_EQUAL_UINT16(4321, entityRef.m_uniqueId);
+    TEST_ASSERT_EQUAL_UINT8(7, entityRef.m_generation);
+    TEST_ASSERT_EQUAL_UINT8(CE_ID_ENTITY_REFERENCE_KIND, entityRef.m_kind);
+    TEST_ASSERT_EQUAL_UINT8(0, entityRef._unused);
+
+    // --- Relationship reference: decode CE_Id via CE_Id_relationshipReference ---
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)9, 3, 555, &id));
+    CE_Id_relationshipReference relRef;
+    memcpy(&relRef, &id, sizeof(CE_Id));
+    TEST_ASSERT_EQUAL_UINT16(555, relRef.m_uniqueId);
+    TEST_ASSERT_EQUAL_UINT8(9, relRef.m_relationshipType);
+    TEST_ASSERT_EQUAL_UINT8(3, relRef.m_generation);
+    TEST_ASSERT_EQUAL_UINT8(CE_ID_ENTITY_RELATIONSHIP_KIND, relRef.m_kind);
+
+    // --- Component reference: decode CE_Id via CE_Id_componentReference ---
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, (CE_TypeId)42, 0, 1234, &id));
+    CE_Id_componentReference compRef;
+    memcpy(&compRef, &id, sizeof(CE_Id));
+    TEST_ASSERT_EQUAL_UINT16(1234, compRef.m_uniqueId);
+    TEST_ASSERT_EQUAL_UINT8(42, compRef.m_componentType);
+    TEST_ASSERT_EQUAL_UINT8(CE_ID_COMPONENT_REFERENCE_KIND, compRef.m_kind);
+    TEST_ASSERT_EQUAL_UINT8(0, compRef._unused);
+
+    // --- Manually constructed CE_Id_entityReference matches CE_Id_make ---
+    CE_Id_entityReference manualEntityRef = { .m_uniqueId = 100, ._unused = 0, .m_generation = 2, .m_kind = CE_ID_ENTITY_REFERENCE_KIND };
+    CE_Id manualEntityId;
+    memcpy(&manualEntityId, &manualEntityRef, sizeof(CE_Id));
+    CE_Id expectedEntityId;
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_REFERENCE_KIND, (CE_TypeId)0, 2, 100, &expectedEntityId));
+    TEST_ASSERT_EQUAL_UINT32(expectedEntityId, manualEntityId);
+
+    // --- Manually constructed CE_Id_relationshipReference matches CE_Id_make ---
+    CE_Id_relationshipReference manualRelRef = { .m_uniqueId = 200, .m_relationshipType = 5, .m_generation = 1, .m_kind = CE_ID_ENTITY_RELATIONSHIP_KIND };
+    CE_Id manualRelId;
+    memcpy(&manualRelId, &manualRelRef, sizeof(CE_Id));
+    CE_Id expectedRelId;
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_ENTITY_RELATIONSHIP_KIND, (CE_TypeId)5, 1, 200, &expectedRelId));
+    TEST_ASSERT_EQUAL_UINT32(expectedRelId, manualRelId);
+
+    // --- Manually constructed CE_Id_componentReference matches CE_Id_make ---
+    CE_Id_componentReference manualCompRef = { .m_uniqueId = 300, .m_componentType = 7, ._unused = 0, .m_kind = CE_ID_COMPONENT_REFERENCE_KIND };
+    CE_Id manualCompId;
+    memcpy(&manualCompId, &manualCompRef, sizeof(CE_Id));
+    CE_Id expectedCompId;
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, (CE_TypeId)7, 0, 300, &expectedCompId));
+    TEST_ASSERT_EQUAL_UINT32(expectedCompId, manualCompId);
+}
+
 static void test_ECS_ComponentStorage(void) {
     CE_ERROR_CODE errorCode;
     CE_Result result;
@@ -1211,6 +1266,7 @@ void test_SceneGraph(void) {
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_CE_Id_Helpers);
+    RUN_TEST(test_CE_Id_StructViews);
 
     RUN_TEST(test_CE_Bitset_Init);
     RUN_TEST(test_CE_Bitset_SetBit);
