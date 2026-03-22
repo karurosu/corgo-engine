@@ -17,7 +17,6 @@ typedef struct CETextLabelComponent {
 	bool m_inverted;
 	char *m_staticTextPtr;
 	cc_str(char) m_text;
-	const char *m_fontName;
 	CE_ASSET_PTR(CE_ASSET_TYPE_FONT) m_fontPtr;
 } CE_TextLabelComponent;
 

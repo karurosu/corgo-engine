@@ -9,7 +9,6 @@
 CE_DEFINE_COMPONENT_INIT(CE_TEXT_LABEL_COMPONENT)
 {
     component->m_staticTextPtr = NULL;
-    component->m_fontName = "";
     component->m_fontPtr = NULL;
     component->m_inverted = false;
     cc_init(&component->m_text);
@@ -43,12 +42,6 @@ CE_Result CE_TextLabelComponent_update(INOUT CE_ECS_Context* context, INOUT CE_T
 
 CE_Result CE_TextLabelComponent_setFont(INOUT CE_ECS_Context* context, INOUT CE_TextLabelComponent* component, IN CE_TransformComponent *transform, IN const char* fontName)
 {
-    if (strcmp(component->m_fontName, fontName) == 0) {
-        return CE_OK;
-    }
-
-    component->m_fontName = fontName;
-
     // Release old font
     if (component->m_fontPtr)
     {

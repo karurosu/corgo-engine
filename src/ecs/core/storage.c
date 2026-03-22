@@ -61,7 +61,7 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN CE_ECS_Con
         // Initialize memory to zero
         memset((void *) storageEntry->m_componentDataPool, 0, initialCapacity * componentSize);
 
-        CE_Debug("Component data pool allocated at %p for type %s of size %u bytes", storageEntry->m_componentDataPool, CE_ECS_GetComponentTypeNameDebugStr(x), initialCapacity * componentSize);
+        CE_Debug("Component data pool allocated at %p for type %s of size %u Total = %u bytes", storageEntry->m_componentDataPool, CE_ECS_GetComponentTypeNameDebugStr(x), componentSize, initialCapacity * componentSize);
         componentStorageSize += initialCapacity * componentSize;
 
         // Initialize component headers
