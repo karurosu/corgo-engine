@@ -53,3 +53,18 @@ int putchar_(int c)
     return c;
 }
 #endif
+
+#ifdef CE_DEBUG_BUILD
+void CE_Debug_TriggerCrashForTesting(void)
+{
+	/*
+	 * Intentionally execute from an invalid system-space address.
+	 * This is only used to generate a reproducible crashlog sample.
+	 */
+#ifdef CE_ARM_BUILD
+    CE_Debug("Going to crash now, night night!.");
+	volatile int (*bad_instruction)(void) = (int (*)(void))0xE0000000;
+	bad_instruction();
+#endif
+}
+#endif // CE_DEBUG_BUILD

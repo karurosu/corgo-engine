@@ -30,8 +30,17 @@ void CE_SetLoggingEnabled(bool enabled);
     #else
         #define CE_Debug(...) CE_Printf(__VA_ARGS__)
     #endif
+  
+/**
+ * @brief Intentionally trigger a crash for testing crash logging and reporting.
+ * This function executes an invalid instruction to cause a crash. It should only be used in testing
+ * Literally this will cause a hard crash. Do not call this in production code or without a good reason.
+ */
+void CE_Debug_TriggerCrashForTesting(void);
+
 #else
     #define CE_Debug(...)
+    #define CE_Debug_TriggerCrashForTesting() ((void)0)
 #endif // CE_DEBUG_BUILD
 
 #ifdef CE_BACKEND_PLAYDATE
