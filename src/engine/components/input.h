@@ -118,6 +118,14 @@ bool CE_Input_IsFeatureEnabled(INOUT struct CE_ECS_Context* context, CE_Input_Fe
  * @param action[in] the input action enum value
  * @return a bitmask with the bit corresponding to the input action set, used to set/check the action state in CE_InputComponent.m_actionStates
  */
-#define CE_IA_MASK(action) (1 << (action))
+#define CE_IA_MASK(action) (1 << (CE_IA(action)))
+
+/**
+ * @brief Get the full name for an input action
+ * 
+ * @param action[in] the input action name
+ * @return fully qualified name for the input action
+ */
+#define CE_IA(name) CE_PASTE(CE_IA_, name)
 
 #endif // CE_ENGINE_COMPONENTS_INPUT_H

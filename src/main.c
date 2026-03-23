@@ -51,7 +51,7 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 		pd->system->logToConsole("Playdate API cached: %p", CE_GetPlaydateAPI());
 		pd->system->resetElapsedTime();
 #endif
-
+		
 		CE_Debug("Welcome to Corgo Engine!");
 		CE_Debug("Build Date: %s", CE_BUILD_DATETIME);
 		
