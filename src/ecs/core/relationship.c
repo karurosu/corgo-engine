@@ -11,13 +11,13 @@ const char* CE_ECS_GetRelationshipTypeNameDebugStr(IN CE_TypeId typeId)
 {
 #ifdef CE_DEBUG_BUILD
     switch (typeId) {
-#define X(name, reciprocal) case name: return #name; case reciprocal: return #reciprocal;
-	CE_RELATIONSHIP_DESC_CORE(X)
-	CE_RELATIONSHIP_DESC_ENGINE(X)
+#define CE_RELATIONSHIP_DESC(name, reciprocal) case name: return #name; case reciprocal: return #reciprocal;
+	CE_RELATIONSHIP_DESC_CORE(CE_RELATIONSHIP_DESC)
+	CE_RELATIONSHIP_DESC_ENGINE(CE_RELATIONSHIP_DESC)
 #ifndef CE_CORE_TEST_MODE
-	CE_RELATIONSHIP_DESC_GAME(X)
+	CE_RELATIONSHIP_DESC_GAME(CE_RELATIONSHIP_DESC)
 #endif
-#undef X
+#undef CE_RELATIONSHIP_DESC
         default: return "InvalidRelationshipType";
     }
 #else

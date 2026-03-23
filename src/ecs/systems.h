@@ -15,39 +15,39 @@
 // Core ECS systems
 #include "core/core_systems.h"
 #ifndef CE_SYSTEM_DESC_CORE
-#define CE_SYSTEM_DESC_CORE(X)
+#define CE_SYSTEM_DESC_CORE(CE_SYSTEM_DESC)
 #endif
 #ifndef CE_GLOBAL_SYSTEM_DESC_CORE
-#define CE_GLOBAL_SYSTEM_DESC_CORE(X)
+#define CE_GLOBAL_SYSTEM_DESC_CORE(CE_GLOBAL_SYSTEM_DESC)
 #endif
 
 // Engine systems
 #include "../engine/systems.h"
 #ifndef CE_SYSTEM_DESC_ENGINE
-#define CE_SYSTEM_DESC_ENGINE(X)
+#define CE_SYSTEM_DESC_ENGINE(CE_SYSTEM_DESC)
 #endif
 #ifndef CE_GLOBAL_SYSTEM_DESC_ENGINE
-#define CE_GLOBAL_SYSTEM_DESC_ENGINE(X)
+#define CE_GLOBAL_SYSTEM_DESC_ENGINE(CE_GLOBAL_SYSTEM_DESC)
 #endif
 
 // Game systems
 #include "../game/systems.h"
 #ifndef CE_SYSTEM_DESC_GAME
-#define CE_SYSTEM_DESC_GAME(X)
+#define CE_SYSTEM_DESC_GAME(CE_SYSTEM_DESC)
 #endif
 #ifndef CE_GLOBAL_SYSTEM_DESC_GAME
-#define CE_GLOBAL_SYSTEM_DESC_GAME(X)
+#define CE_GLOBAL_SYSTEM_DESC_GAME(CE_GLOBAL_SYSTEM_DESC)
 #endif
 
 //// Generate system Types Enum
 typedef enum CE_SYSTEM_TYPES_ENUM {
-#define X(name, run_order, run_phase, run_frequency, ...) name,
-	CE_SYSTEM_DESC_CORE(X)
-	CE_SYSTEM_DESC_ENGINE(X)
+#define CE_SYSTEM_DESC(name, run_order, run_phase, run_frequency, ...) name,
+	CE_SYSTEM_DESC_CORE(CE_SYSTEM_DESC)
+	CE_SYSTEM_DESC_ENGINE(CE_SYSTEM_DESC)
 #ifndef CE_CORE_TEST_MODE
-	CE_SYSTEM_DESC_GAME(X)
+	CE_SYSTEM_DESC_GAME(CE_SYSTEM_DESC)
 #endif
-#undef X
+#undef CE_SYSTEM_DESC
 	CE_SYSTEM_TYPES_COUNT //Invalid system count
 } CE_SYSTEM_TYPES;
 
@@ -55,34 +55,34 @@ typedef enum CE_SYSTEM_TYPES_ENUM {
 _Static_assert(CE_SYSTEM_TYPES_COUNT <= CE_MAX_SYSTEM_TYPES, "Too many system types: exceeds MAX_SYSTEM_TYPES");
 
 //// Declare system functions
-#define X(name, run_order, run_phase, run_frequency, ...) CE_DECLARE_SYSTEM(name, run_order, run_phase, run_frequency, __VA_ARGS__)
-	CE_SYSTEM_DESC_CORE(X)
-	CE_SYSTEM_DESC_ENGINE(X)
+#define CE_SYSTEM_DESC(name, run_order, run_phase, run_frequency, ...) CE_DECLARE_SYSTEM(name, run_order, run_phase, run_frequency, __VA_ARGS__)
+	CE_SYSTEM_DESC_CORE(CE_SYSTEM_DESC)
+	CE_SYSTEM_DESC_ENGINE(CE_SYSTEM_DESC)
 #ifndef CE_CORE_TEST_MODE
-	CE_SYSTEM_DESC_GAME(X)
+	CE_SYSTEM_DESC_GAME(CE_SYSTEM_DESC)
 #endif
-#undef X
+#undef CE_SYSTEM_DESC
 
 // Global systems 
 //// Generate global system Types Enum
 typedef enum CE_GLOBAL_SYSTEM_TYPES_ENUM {
-#define X(name, run_phase, run_frequency) name,
-	CE_GLOBAL_SYSTEM_DESC_CORE(X)
-	CE_GLOBAL_SYSTEM_DESC_ENGINE(X)
+#define CE_GLOBAL_SYSTEM_DESC(name, run_phase, run_frequency) name,
+	CE_GLOBAL_SYSTEM_DESC_CORE(CE_GLOBAL_SYSTEM_DESC)
+	CE_GLOBAL_SYSTEM_DESC_ENGINE(CE_GLOBAL_SYSTEM_DESC)
 #ifndef CE_CORE_TEST_MODE
-	CE_GLOBAL_SYSTEM_DESC_GAME(X)
+	CE_GLOBAL_SYSTEM_DESC_GAME(CE_GLOBAL_SYSTEM_DESC)
 #endif
-#undef X
+#undef CE_GLOBAL_SYSTEM_DESC
 	CE_GLOBAL_SYSTEM_TYPES_COUNT //Invalid system count
 } CE_GLOBAL_SYSTEM_TYPES_ENUM;
 
-#define X(name, run_phase, run_frequency) CE_DECLARE_GLOBAL_SYSTEM(name, run_phase, run_frequency)
-	CE_GLOBAL_SYSTEM_DESC_CORE(X)
-	CE_GLOBAL_SYSTEM_DESC_ENGINE(X)
+#define CE_GLOBAL_SYSTEM_DESC(name, run_phase, run_frequency) CE_DECLARE_GLOBAL_SYSTEM(name, run_phase, run_frequency)
+	CE_GLOBAL_SYSTEM_DESC_CORE(CE_GLOBAL_SYSTEM_DESC)
+	CE_GLOBAL_SYSTEM_DESC_ENGINE(CE_GLOBAL_SYSTEM_DESC)
 #ifndef CE_CORE_TEST_MODE
-	CE_GLOBAL_SYSTEM_DESC_GAME(X)
+	CE_GLOBAL_SYSTEM_DESC_GAME(CE_GLOBAL_SYSTEM_DESC)
 #endif
-#undef X
+#undef CE_GLOBAL_SYSTEM_DESC
 
 //// Debug helpers
 const char* CE_ECS_GetSystemTypeNameDebugStr(IN CE_TypeId typeId);

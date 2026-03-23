@@ -36,13 +36,13 @@ typedef struct CE_ECS_EntityStorage {
 
 // Global component storage definitions
 typedef struct CE_ECS_GlobalComponentStorage {
-#define X(name, storage) storage CE_PASTE(m_, CE_GLOBAL_COMPONENT(name));
-	CE_GLOBAL_COMPONENT_DESC_CORE(X)
-	CE_GLOBAL_COMPONENT_DESC_ENGINE(X)
+#define CE_GLOBAL_COMPONENT_DESC(name, storage) storage CE_PASTE(m_, CE_GLOBAL_COMPONENT(name));
+	CE_GLOBAL_COMPONENT_DESC_CORE(CE_GLOBAL_COMPONENT_DESC)
+	CE_GLOBAL_COMPONENT_DESC_ENGINE(CE_GLOBAL_COMPONENT_DESC)
 #ifndef CE_CORE_TEST_MODE
-	CE_GLOBAL_COMPONENT_DESC_GAME(X)
+	CE_GLOBAL_COMPONENT_DESC_GAME(CE_GLOBAL_COMPONENT_DESC)
 #endif
-#undef X
+#undef CE_GLOBAL_COMPONENT_DESC
 } CE_ECS_GlobalComponentStorage;
 
 // Main storage structure
@@ -64,7 +64,7 @@ CE_Result CE_ECS_MainStorage_growStorageForComponent(INOUT CE_ECS_MainStorage* s
 
 // Component data access
 void* CE_ECS_ComponentStorage_getComponentDataPointerById(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_Id id);
-void* CE_ECS_ComponentStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN uint16_t index);
+void* CE_ECS_ComponentStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_ShortId index);
 
 // Entity creation and management functions
 CE_Result CE_ECS_MainStorage_createEntity(INOUT CE_ECS_MainStorage* storage, OUT CE_Id* id, OUT_OPT CE_ERROR_CODE* errorCode);
@@ -72,10 +72,10 @@ CE_Result CE_ECS_MainStorage_destroyEntity(INOUT CE_ECS_MainStorage* storage, IN
 
 // Entity access functions
 CE_Result CE_ECS_MainStorage_getEntityData(INOUT CE_ECS_MainStorage* storage, IN CE_Id id, OUT CE_ECS_EntityData** outData, OUT_OPT CE_ERROR_CODE* errorCode);
-CE_Result CE_ECS_MainStorage_getEntityDataByUniqueId(INOUT CE_ECS_MainStorage* storage, IN uint16_t uniqueId, OUT CE_ECS_EntityData** outData, OUT_OPT CE_ERROR_CODE* errorCode);
+CE_Result CE_ECS_MainStorage_getEntityDataByUniqueId(INOUT CE_ECS_MainStorage* storage, IN CE_ShortId uniqueId, OUT CE_ECS_EntityData** outData, OUT_OPT CE_ERROR_CODE* errorCode);
 
 // Helper function to directly get entity data without error checking (for internal use)
-inline CE_ECS_EntityData* CE_ECS_MainStorage_getEntityDataDirectly(INOUT CE_ECS_MainStorage* storage, IN uint16_t id) {
+inline CE_ECS_EntityData* CE_ECS_MainStorage_getEntityDataDirectly(INOUT CE_ECS_MainStorage* storage, IN CE_ShortId id) {
     return &(storage->m_entityStorage.m_entityDataArray[id]);
 }
 

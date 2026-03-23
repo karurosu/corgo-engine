@@ -19,8 +19,8 @@
  * 
  * 2. Add the system to the system description macro below:
  *    
- *      #define CE_SYSTEM_DESC_GAME(X) \
- *          X(CE_MY_SYSTEM_NAME, <Run Order>, <Run Phase>, <Run Frequency>, CE_MY_SYSTEM_NAME_DEPENDENCIES)
+ *      #define CE_SYSTEM_DESC_GAME(CE_SYSTEM_DESC) \
+ *          CE_SYSTEM_DESC(CE_MY_SYSTEM_NAME, <Run Order>, <Run Phase>, <Run Frequency>, CE_MY_SYSTEM_NAME_DEPENDENCIES)
  * 
  *    <Run Order>: Determines what entity order the system runs on. Options are:
  *       - CE_ECS_SYSTEM_RUN_ORDER_AUTO: System runs on automatic order that maximizes performance, use this unless you have special requirements.
@@ -54,9 +54,9 @@
  *      CE_END_SYSTEM_IMPLEMENTATION
  */
 
-#define CE_SYSTEM_DESC_GAME(X) \
+#define CE_SYSTEM_DESC_GAME(CE_SYSTEM_DESC) \
 /**
-    X(CE_MY_SYSTEM_NAME, <Run Order>, <Run Phase>, <Run Frequency>, CE_MY_SYSTEM_NAME_DEPENDENCIES) \
+    CE_SYSTEM_DESC(CE_MY_SYSTEM_NAME, <Run Order>, <Run Phase>, <Run Frequency>, CE_MY_SYSTEM_NAME_DEPENDENCIES) \
 
 **/
 
@@ -69,9 +69,9 @@
  * 2. Implement the global system in a .c file using the CE_START_GLOBAL_SYSTEM_IMPLEMENTATION and CE_END_GLOBAL_SYSTEM_IMPLEMENTATION macros
  */
 
-#define CE_GLOBAL_SYSTEM_DESC_GAME(X) \
+#define CE_GLOBAL_SYSTEM_DESC_GAME(CE_GLOBAL_SYSTEM_DESC) \
 /**
-    X(CE_MY_GLOBAL_SYSTEM_NAME, <Run Phase>, <Run Frequency>) \
+    CE_GLOBAL_SYSTEM_DESC(CE_MY_GLOBAL_SYSTEM_NAME, <Run Phase>, <Run Frequency>) \
 
 **/
 

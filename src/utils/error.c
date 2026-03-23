@@ -8,9 +8,9 @@
 
 const char* CE_GetErrorMessage(CE_ERROR_CODE errorCode) {
     switch (errorCode) {
-#define CE_ERROR_MESSAGE_CASE(name, code, msg) case CE_ERROR_CODE_##name: return msg;
-        CE_ERROR_CODE_LIST(CE_ERROR_MESSAGE_CASE)
-#undef CE_ERROR_MESSAGE_CASE
+#define CE_ERROR_CODE_DESC(name, code, msg) case CE_ERROR_CODE_##name: return msg;
+        CE_ERROR_CODE_LIST(CE_ERROR_CODE_DESC)
+#undef CE_ERROR_CODE_DESC
         default: return "Unknown error";
     }
 }

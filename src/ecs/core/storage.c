@@ -26,6 +26,12 @@ CE_Result CE_ECS_MainStorage_init(OUT CE_ECS_MainStorage *storage, IN CE_ECS_Con
             return CE_ERROR;
         }
 
+        if (initialCapacity == 0) {
+            // No storage needed for this component, skip allocation and just set to NULL
+            storage->m_componentTypeStorage[x] = NULL;
+            continue;
+        }
+
         // Initialize each component type storage
         storage->m_componentTypeStorage[x] = NULL;
         CE_ECS_ComponentStorage *storageEntry = CE_realloc(NULL, sizeof(CE_ECS_ComponentStorage));
@@ -161,9 +167,9 @@ CE_Result CE_ECS_MainStorage_growStorageForComponent(INOUT CE_ECS_MainStorage* s
     return CE_ERROR;
 }
 
-void* CE_ECS_ComponentStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN uint16_t index)
+void* CE_ECS_ComponentStorage_getComponentDataPointer(INOUT CE_ECS_ComponentStorage* storage, IN const CE_ECS_ComponentStaticData *componentStaticData, IN CE_ShortId index)
 {
-    if (index >= storage->m_capacity || !CE_Bitset_isBitSet(&storage->m_componentIndexBitset, index)) {
+    if (index >= storage->m_capacity || !CE_Bitset_isBitSet(&storage->m_componentIndexBitset, index) || index == CE_NO_STORAGE_COMPONENT_ID) {
         return NULL;
     }
     return (uint8_t*)storage->m_componentDataPool + (index * componentStaticData->m_storageSizeOf);
@@ -450,7 +456,7 @@ CE_Result CE_ECS_MainStorage_getEntityData(INOUT CE_ECS_MainStorage* storage, IN
     return CE_OK;
 }
 
-CE_Result CE_ECS_MainStorage_getEntityDataByUniqueId(INOUT CE_ECS_MainStorage* storage, IN uint16_t uniqueId, OUT CE_ECS_EntityData** outData, OUT_OPT CE_ERROR_CODE* errorCode)
+CE_Result CE_ECS_MainStorage_getEntityDataByUniqueId(INOUT CE_ECS_MainStorage* storage, IN CE_ShortId uniqueId, OUT CE_ECS_EntityData** outData, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     if (storage->m_initialized == false) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_STORAGE_MAIN_NOT_INITIALIZED);

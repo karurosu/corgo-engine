@@ -12,8 +12,8 @@
  * 
  * 1. Add the relationship to the relationship description macro below:
  * 
- *   #define CE_RELATIONSHIP_DESC_GAME(X) \
- *    X(CE_RELATIONSHIP_NAME)
+ *   #define CE_RELATIONSHIP_DESC_GAME(CE_RELATIONSHIP_DESC) \
+ *    CE_RELATIONSHIP_DESC(CE_RELATIONSHIP_NAME)
  * 
  * 2. Use the relationship in your game systems or components as needed.
  *   See docs for details on defining and using relationships.
@@ -23,9 +23,9 @@
  *  - Add relationships in pairs with their reciprocal (e.g., parent-child). 
  */
 
-#define CE_RELATIONSHIP_DESC_GAME(X) \
+#define CE_RELATIONSHIP_DESC_GAME(CE_RELATIONSHIP_DESC) \
 /**
-    X(CE_RELATIONSHIP_NAME) \
+    CE_RELATIONSHIP_DESC(CE_RELATIONSHIP_NAME) \
 
 **/
 

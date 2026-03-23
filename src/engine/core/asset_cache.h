@@ -69,8 +69,8 @@ CE_Result CE_Engine_ReleaseAsset(INOUT CE_ECS_Context* context, IN void *asset);
 #define CE_RELEASE_ASSET(context, type, asset) \
     CE_Engine_ReleaseAsset_##type(context, asset);
 
-#define X(type, pointer_type, load_params) CE_DECLARE_ASSET_CACHE_FUNCS(type, pointer_type, load_params)
-    CE_ASSET_LOADERS(X)
-#undef X
+#define CE_ASSET_LOADER(type, pointer_type, load_params) CE_DECLARE_ASSET_CACHE_FUNCS(type, pointer_type, load_params)
+    CE_ASSET_LOADERS(CE_ASSET_LOADER)
+#undef CE_ASSET_LOADER
 
 #endif // CORGO_ENGINE_CORE_ASSET_CACHE_H

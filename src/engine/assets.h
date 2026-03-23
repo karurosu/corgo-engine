@@ -12,7 +12,7 @@
 
 #include "game/assets.h"
 #ifndef CE_ASSET_TYPES_GAME
-#define CE_ASSET_TYPES_GAME(X)
+#define CE_ASSET_TYPES_GAME(CE_ASSET_TYPE)
 #endif
 
 ////////////////////////////////////
@@ -25,9 +25,9 @@ typedef enum CE_ASSET_TYPES {
     CE_ASSET_TYPE_SOUND,
     CE_ASSET_TYPE_MUSIC,
     CE_ASSET_TYPE_FONT,
-#define X(type) type,
-    CE_ASSET_TYPES_GAME(X)
-#undef X
+#define CE_ASSET_TYPE(type) type,
+    CE_ASSET_TYPES_GAME(CE_ASSET_TYPE)
+#undef CE_ASSET_TYPE
     CE_ASSET_TYPE_COUNT
 } CE_ASSET_TYPES;
 
@@ -43,19 +43,19 @@ typedef void CE_Asset_LoadParams_None; // Indicate the loader takes no parameter
 
 #ifdef CE_BACKEND_PLAYDATE
     // Playdate backend asset loaders
-    #define CE_ASSET_LOADERS_ENGINE(X) \
-        X(CE_ASSET_TYPE_BITMAP, LCDBitmap, CE_Asset_LoadParams_None) \
-        X(CE_ASSET_TYPE_FONT, LCDFont, CE_Asset_LoadParams_None) \
-        X(CE_ASSET_TYPE_SOUND, void, void) \
-        X(CE_ASSET_TYPE_MUSIC, void, void)
+    #define CE_ASSET_LOADERS_ENGINE(CE_ASSET_LOADER) \
+        CE_ASSET_LOADER(CE_ASSET_TYPE_BITMAP, LCDBitmap, CE_Asset_LoadParams_None) \
+        CE_ASSET_LOADER(CE_ASSET_TYPE_FONT, LCDFont, CE_Asset_LoadParams_None) \
+        CE_ASSET_LOADER(CE_ASSET_TYPE_SOUND, void, void) \
+        CE_ASSET_LOADER(CE_ASSET_TYPE_MUSIC, void, void)
 
 #else 
     // Default loaders (stubs)
-    #define CE_ASSET_LOADERS_ENGINE(X) \
-        X(CE_ASSET_TYPE_BITMAP, void, void) \
-        X(CE_ASSET_TYPE_SOUND, void, void) \
-        X(CE_ASSET_TYPE_MUSIC, void, void) \
-        X(CE_ASSET_TYPE_FONT, void, void)
+    #define CE_ASSET_LOADERS_ENGINE(CE_ASSET_LOADER) \
+        CE_ASSET_LOADER(CE_ASSET_TYPE_BITMAP, void, void) \
+        CE_ASSET_LOADER(CE_ASSET_TYPE_SOUND, void, void) \
+        CE_ASSET_LOADER(CE_ASSET_TYPE_MUSIC, void, void) \
+        CE_ASSET_LOADER(CE_ASSET_TYPE_FONT, void, void)
 
 #endif // CE_BACKEND_PLAYDATE
 
@@ -64,16 +64,16 @@ typedef void CE_Asset_LoadParams_None; // Indicate the loader takes no parameter
 ////////////////////////////////////
 
 #ifndef CE_ASSET_LOADERS_ENGINE
-#define CE_ASSET_LOADERS_ENGINE(X)
+#define CE_ASSET_LOADERS_ENGINE(CE_ASSET_LOADER)
 #endif
 
 #ifndef CE_ASSET_LOADERS_GAME
-#define CE_ASSET_LOADERS_GAME(X)
+#define CE_ASSET_LOADERS_GAME(CE_ASSET_LOADER)
 #endif
 
-#define CE_ASSET_LOADERS(X) \
-    CE_ASSET_LOADERS_ENGINE(X) \
-    CE_ASSET_LOADERS_GAME(X)
+#define CE_ASSET_LOADERS(CE_ASSET_LOADER) \
+    CE_ASSET_LOADERS_ENGINE(CE_ASSET_LOADER) \
+    CE_ASSET_LOADERS_GAME(CE_ASSET_LOADER)
 
 ////////////////////////////////////
 // Auto generated declarations

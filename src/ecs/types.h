@@ -106,6 +106,9 @@ typedef enum CE_IdKind {
 // Maximum generation count for entities and relationships (4 bits: 0-15)
 #define CE_MAX_GENERATION_COUNT 15
 
+// Zero storage component id
+#define CE_NO_STORAGE_COMPONENT_ID (CE_ShortId)0xFFFF
+
 //// Exposed structures
 typedef struct CE_ECS_ComponentStaticData CE_ECS_ComponentStaticData;
 typedef struct CE_ECS_Context CE_ECS_Context;

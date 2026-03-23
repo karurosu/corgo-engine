@@ -2,7 +2,6 @@ Non-exhaustive scratchpad-like list of features needing implementation and ideas
 Mostly so I don't forget.
 
 Next:
-- Input system
 - Add zero storage components, aka flags
 - Platform timer abstraction
 

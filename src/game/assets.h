@@ -38,17 +38,17 @@
 
 // Custom asset types go here.
 // Don't forget the trailing slash.
-#define CE_ASSET_TYPES_GAME(X) \
+#define CE_ASSET_TYPES_GAME(CE_ASSET_TYPE) \
 /**
-    X(CE_ASSET_TYPE_<my name>) \
+    CE_ASSET_TYPE(CE_ASSET_TYPE_<my name>) \
 
 **/
 
 // Asset loaders for custom assets, one per type.
 // Don't forget the trailing slash.
-#define CE_ASSET_LOADERS_GAME(X) \
+#define CE_ASSET_LOADERS_GAME(CE_ASSET_LOADER) \
 /**
-    X(<asset type>, <pointer type>, <load parameters>) \
+    CE_ASSET_LOADER(<asset type>, <pointer type>, <load parameters>) \
 
 **/
 

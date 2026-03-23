@@ -34,13 +34,13 @@ void name##_description(OUT CE_ECS_SystemStaticData *data) \
     __VA_ARGS__ \
 }
 
-#define X(name, run_order, run_phase, run_frequency, ...) CE_GENERATE_SYSTEM_DESCRIPTION_FUNCTION(name, __VA_ARGS__)
-	CE_SYSTEM_DESC_CORE(X)
-	CE_SYSTEM_DESC_ENGINE(X)
+#define CE_SYSTEM_DESC(name, run_order, run_phase, run_frequency, ...) CE_GENERATE_SYSTEM_DESCRIPTION_FUNCTION(name, __VA_ARGS__)
+	CE_SYSTEM_DESC_CORE(CE_SYSTEM_DESC)
+	CE_SYSTEM_DESC_ENGINE(CE_SYSTEM_DESC)
 #ifndef CE_CORE_TEST_MODE
-	CE_SYSTEM_DESC_GAME(X)
+	CE_SYSTEM_DESC_GAME(CE_SYSTEM_DESC)
 #endif
-#undef X
+#undef CE_SYSTEM_DESC
 
 #undef REQUIRE_COMPONENT
 #undef REQUIRE_RELATIONSHIP
@@ -49,13 +49,13 @@ const char* CE_ECS_GetSystemTypeNameDebugStr(IN CE_TypeId typeId)
 {
 #ifdef CE_DEBUG_BUILD
     switch (typeId) {
-#define X(name, run_order, run_phase, run_frequency, ...) case name: return #name;
-        CE_SYSTEM_DESC_CORE(X)
-        CE_SYSTEM_DESC_ENGINE(X)
+#define CE_SYSTEM_DESC(name, run_order, run_phase, run_frequency, ...) case name: return #name;
+        CE_SYSTEM_DESC_CORE(CE_SYSTEM_DESC)
+        CE_SYSTEM_DESC_ENGINE(CE_SYSTEM_DESC)
 #ifndef CE_CORE_TEST_MODE
-        CE_SYSTEM_DESC_GAME(X)
+        CE_SYSTEM_DESC_GAME(CE_SYSTEM_DESC)
 #endif
-    #undef X
+    #undef CE_SYSTEM_DESC
         default: return "InvalidSystemType";
     }
 #else
@@ -67,13 +67,13 @@ const char* CE_ECS_GetGlobalSystemTypeNameDebugStr(IN CE_TypeId typeId)
 {
 #ifdef CE_DEBUG_BUILD
     switch (typeId) {
-#define X(name, run_phase, run_frequency) case name: return #name;
-        CE_GLOBAL_SYSTEM_DESC_CORE(X)
-        CE_GLOBAL_SYSTEM_DESC_ENGINE(X)
+#define CE_GLOBAL_SYSTEM_DESC(name, run_phase, run_frequency) case name: return #name;
+        CE_GLOBAL_SYSTEM_DESC_CORE(CE_GLOBAL_SYSTEM_DESC)
+        CE_GLOBAL_SYSTEM_DESC_ENGINE(CE_GLOBAL_SYSTEM_DESC)
 #ifndef CE_CORE_TEST_MODE
-        CE_GLOBAL_SYSTEM_DESC_GAME(X)
+        CE_GLOBAL_SYSTEM_DESC_GAME(CE_GLOBAL_SYSTEM_DESC)
 #endif
-    #undef X
+#undef CE_GLOBAL_SYSTEM_DESC
         default: return "InvalidGlobalSystemType";
     }
 #else

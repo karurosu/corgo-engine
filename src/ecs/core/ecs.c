@@ -30,22 +30,22 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
 
     CE_Debug("Initializing ECS context");
     // Gather component descriptions into the context
-#define X(name, uid, storage, initial_capacity) name##_description(&context->m_componentDefinitions[name]);
-    CE_COMPONENT_DESC_CORE(X)
-    CE_COMPONENT_DESC_ENGINE(X)
+#define CE_COMPONENT_DESC(name, uid, storage, initial_capacity, ...) name##_description(&context->m_componentDefinitions[name]);
+    CE_COMPONENT_DESC_CORE(CE_COMPONENT_DESC)
+    CE_COMPONENT_DESC_ENGINE(CE_COMPONENT_DESC)
     #ifndef CE_CORE_TEST_MODE
-    CE_COMPONENT_DESC_GAME(X)
+    CE_COMPONENT_DESC_GAME(CE_COMPONENT_DESC)
     #endif
-#undef X
+#undef CE_COMPONENT_DESC
 
 #ifdef CE_DEBUG_BUILD
-    #define X(name, uid, storage, initial_capacity) CE_Debug("Registered component: %s (Type: %d, UID: %d, Initial Capacity: %u)", #name, name, name##_UID, name##_InitialCapacity);
-        CE_COMPONENT_DESC_CORE(X)
-        CE_COMPONENT_DESC_ENGINE(X)
+    #define CE_COMPONENT_DESC(name, uid, storage, initial_capacity, ...) CE_Debug("Registered component: %s (Type: %d, UID: %d, Initial Capacity: %u)", #name, name, name##_UID, initial_capacity);
+        CE_COMPONENT_DESC_CORE(CE_COMPONENT_DESC)
+        CE_COMPONENT_DESC_ENGINE(CE_COMPONENT_DESC)
         #ifndef CE_CORE_TEST_MODE
-        CE_COMPONENT_DESC_GAME(X)
+        CE_COMPONENT_DESC_GAME(CE_COMPONENT_DESC)
         #endif
-    #undef X
+    #undef CE_COMPONENT_DESC
 #endif
     
     // Load system descriptions into context
@@ -61,24 +61,24 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
         };
     }
 
-#define X(name, run_order, run_phase, run_frequency, ...) \
+#define CE_SYSTEM_DESC(name, run_order, run_phase, run_frequency, ...) \
     name##_description(&context->m_systemDefinitions[name]);\
     systemCount[run_order][run_frequency][run_phase]++;
-    CE_SYSTEM_DESC_CORE(X)
-    CE_SYSTEM_DESC_ENGINE(X)
+    CE_SYSTEM_DESC_CORE(CE_SYSTEM_DESC)
+    CE_SYSTEM_DESC_ENGINE(CE_SYSTEM_DESC)
     #ifndef CE_CORE_TEST_MODE
-    CE_SYSTEM_DESC_GAME(X)
+    CE_SYSTEM_DESC_GAME(CE_SYSTEM_DESC)
     #endif
-#undef X
+#undef CE_SYSTEM_DESC
 
 #ifdef CE_DEBUG_BUILD
-    #define X(name, run_order, run_phase, run_frequency, ...) CE_Debug("Registered system: %s (Type: %d, Run Order: %d, Run Phase: %d, Run Frequency: %d)", #name, name, name##_runOrder, name##_runPhase, name##_runFrequency);
-        CE_SYSTEM_DESC_CORE(X)
-        CE_SYSTEM_DESC_ENGINE(X)
+    #define CE_SYSTEM_DESC(name, run_order, run_phase, run_frequency, ...) CE_Debug("Registered system: %s (Type: %d, Run Order: %d, Run Phase: %d, Run Frequency: %d)", #name, name, name##_runOrder, name##_runPhase, name##_runFrequency);
+        CE_SYSTEM_DESC_CORE(CE_SYSTEM_DESC)
+        CE_SYSTEM_DESC_ENGINE(CE_SYSTEM_DESC)
         #ifndef CE_CORE_TEST_MODE
-        CE_SYSTEM_DESC_GAME(X)
+        CE_SYSTEM_DESC_GAME(CE_SYSTEM_DESC)
         #endif
-    #undef X
+    #undef CE_SYSTEM_DESC
 #endif
 
 	// Initialize storage structure
@@ -126,36 +126,36 @@ CE_Result CE_ECS_Init(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE *erro
     context->m_systemRuntimeData.m_frameCounter = 0;
 
     // Initialize global components
-    #define X(name, storage) \
+    #define CE_GLOBAL_COMPONENT_DESC(name, storage) \
         if (CE_GLOBAL_COMPONENT_INIT_FUNCTION(name)(context, CE_ECS_AccessGlobalComponent(context, name)) != CE_OK) { \
             CE_Error("Failed to initialize global component: " #name); \
             return CE_ERROR; \
         }
-        CE_GLOBAL_COMPONENT_DESC_CORE(X)
-        CE_GLOBAL_COMPONENT_DESC_ENGINE(X)
+        CE_GLOBAL_COMPONENT_DESC_CORE(CE_GLOBAL_COMPONENT_DESC)
+        CE_GLOBAL_COMPONENT_DESC_ENGINE(CE_GLOBAL_COMPONENT_DESC)
         #ifndef CE_CORE_TEST_MODE
-        CE_GLOBAL_COMPONENT_DESC_GAME(X)
+        CE_GLOBAL_COMPONENT_DESC_GAME(CE_GLOBAL_COMPONENT_DESC)
         #endif
-    #undef X 
+    #undef CE_GLOBAL_COMPONENT_DESC
 
     #ifdef CE_DEBUG_BUILD
-    #define X(name, storage) CE_Debug("Registered global component: %s (Type: %d)", #name, CE_GLOBAL_COMPONENT(name));
-        CE_GLOBAL_COMPONENT_DESC_CORE(X)
-        CE_GLOBAL_COMPONENT_DESC_ENGINE(X)
+    #define CE_GLOBAL_COMPONENT_DESC(name, storage) CE_Debug("Registered global component: %s (Type: %d)", #name, CE_GLOBAL_COMPONENT(name));
+        CE_GLOBAL_COMPONENT_DESC_CORE(CE_GLOBAL_COMPONENT_DESC)
+        CE_GLOBAL_COMPONENT_DESC_ENGINE(CE_GLOBAL_COMPONENT_DESC)
         #ifndef CE_CORE_TEST_MODE
-        CE_GLOBAL_COMPONENT_DESC_GAME(X)
+        CE_GLOBAL_COMPONENT_DESC_GAME(CE_GLOBAL_COMPONENT_DESC)
         #endif
-    #undef X
+    #undef CE_GLOBAL_COMPONENT_DESC
     #endif
 
     #ifdef CE_DEBUG_BUILD
-        #define X(name, run_phase, run_frequency) CE_Debug("Registered global system: %s (Type: %d, Run Phase: %d, Run Frequency: %d)", #name, name, run_phase, run_frequency);
-            CE_GLOBAL_SYSTEM_DESC_CORE(X)
-            CE_GLOBAL_SYSTEM_DESC_ENGINE(X)
+        #define CE_GLOBAL_SYSTEM_DESC(name, run_phase, run_frequency) CE_Debug("Registered global system: %s (Type: %d, Run Phase: %d, Run Frequency: %d)", #name, name, run_phase, run_frequency);
+            CE_GLOBAL_SYSTEM_DESC_CORE(CE_GLOBAL_SYSTEM_DESC)
+            CE_GLOBAL_SYSTEM_DESC_ENGINE(CE_GLOBAL_SYSTEM_DESC)
             #ifndef CE_CORE_TEST_MODE
-            CE_GLOBAL_SYSTEM_DESC_GAME(X)
+            CE_GLOBAL_SYSTEM_DESC_GAME(CE_GLOBAL_SYSTEM_DESC)
             #endif
-        #undef X
+        #undef CE_GLOBAL_SYSTEM_DESC
     #endif
 
     CE_Debug("ECS context initialized with %u components and %u systems", CE_COMPONENT_TYPES_COUNT, CE_SYSTEM_TYPES_COUNT);
@@ -190,15 +190,16 @@ CE_Result CE_ECS_Cleanup(INOUT CE_ECS_Context* context, OUT_OPT CE_ERROR_CODE* e
     }
 
     CE_Debug("Cleaning up global components");
-    #define X(name, storage) \
+    #define CE_GLOBAL_COMPONENT_DESC(name, storage) \
         if (CE_GLOBAL_COMPONENT_CLEANUP_FUNCTION(name)(context, CE_ECS_AccessGlobalComponent(context, name)) != CE_OK) { \
             CE_Error("Failed to cleanup global component: " #name); \
         }
-        CE_GLOBAL_COMPONENT_DESC_CORE(X)
-        CE_GLOBAL_COMPONENT_DESC_ENGINE(X)
+        CE_GLOBAL_COMPONENT_DESC_CORE(CE_GLOBAL_COMPONENT_DESC)
+        CE_GLOBAL_COMPONENT_DESC_ENGINE(CE_GLOBAL_COMPONENT_DESC)
         #ifndef CE_CORE_TEST_MODE
-        CE_GLOBAL_COMPONENT_DESC_GAME(X)
-    #endif
+        CE_GLOBAL_COMPONENT_DESC_GAME(CE_GLOBAL_COMPONENT_DESC)
+        #endif
+    #undef CE_GLOBAL_COMPONENT_DESC
 
     CE_Debug("ECS context cleaned up successfully");
 	CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);

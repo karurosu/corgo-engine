@@ -82,13 +82,13 @@ CE_Result CE_ECS_RunGlobalSystems(INOUT CE_ECS_Context* context, IN float deltaT
 {
     CE_Result result = CE_ERROR;
 
-#define X(name, run_phase, run_frequency) GENERATE_RUN_GLOBAL_SYSTEM_CASE(name, run_phase, run_frequency, runOrder, phase, frequency)
-	CE_GLOBAL_SYSTEM_DESC_CORE(X)
-	CE_GLOBAL_SYSTEM_DESC_ENGINE(X)
+#define CE_GLOBAL_SYSTEM_DESC(name, run_phase, run_frequency) GENERATE_RUN_GLOBAL_SYSTEM_CASE(name, run_phase, run_frequency, runOrder, phase, frequency)
+	CE_GLOBAL_SYSTEM_DESC_CORE(CE_GLOBAL_SYSTEM_DESC)
+	CE_GLOBAL_SYSTEM_DESC_ENGINE(CE_GLOBAL_SYSTEM_DESC)
 #ifndef CE_CORE_TEST_MODE
-	CE_GLOBAL_SYSTEM_DESC_GAME(X)
+	CE_GLOBAL_SYSTEM_DESC_GAME(CE_GLOBAL_SYSTEM_DESC)
 #endif
-#undef X
+#undef CE_GLOBAL_SYSTEM_DESC
 
     CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
     return CE_OK;

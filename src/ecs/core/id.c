@@ -20,7 +20,7 @@ CE_Result CE_Id_setKind(INOUT CE_Id* id, CE_IdKind kind)
     return CE_OK;
 }
 
-CE_Result CE_Id_setUniqueId(INOUT CE_Id* id, uint16_t uniqueId)
+CE_Result CE_Id_setUniqueId(INOUT CE_Id* id, CE_ShortId uniqueId)
 {
     if (!id) return CE_ERROR;
     if (uniqueId > CE_ID_MASK_UNIQUE) return CE_ERROR;
@@ -62,7 +62,7 @@ CE_Result CE_Id_setRelationshipTypeId(INOUT CE_Id* id, CE_TypeId typeId)
     return CE_OK;
 }
 
-CE_Result CE_Id_make(IN CE_IdKind kind, IN CE_TypeId typeId, IN uint8_t generation, IN uint16_t uniqueId, OUT CE_Id* out)
+CE_Result CE_Id_make(IN CE_IdKind kind, IN CE_TypeId typeId, IN uint8_t generation, IN CE_ShortId uniqueId, OUT CE_Id* out)
 {
     if (!out) return CE_ERROR;
     

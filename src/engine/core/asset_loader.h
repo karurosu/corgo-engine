@@ -98,8 +98,8 @@ CE_Result CE_Engine_FreeAsset(IN void *asset, IN CE_TypeId assetType);
     CE_DEFINE_ASSET_LOADER_LOAD_FUNCTION(type); \
     CE_DEFINE_ASSET_LOADER_FREE_FUNCTION(type);
 
-#define X(type, pointerType, loadParams) CE_DECLARE_ASSET_LOADER(type, pointerType, loadParams)
-    CE_ASSET_LOADERS(X)
-#undef X
+#define CE_ASSET_LOADER(type, pointerType, loadParams) CE_DECLARE_ASSET_LOADER(type, pointerType, loadParams)
+    CE_ASSET_LOADERS(CE_ASSET_LOADER)
+#undef CE_ASSET_LOADER
 
 #endif // CORGO_ENGINE_CORE_ASSET_LOADER_H

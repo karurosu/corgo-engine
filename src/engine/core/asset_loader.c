@@ -10,11 +10,11 @@ void *CE_Engine_LoadAsset(IN CE_TypeId assetType, IN const char* assetPath, IN c
 {
     switch (assetType)
     {
-        #define X(type, ...) \
+        #define CE_ASSET_LOADER(type, ...) \
         case type: \
             return (void *)CE_Engine_LoadAsset_##type(assetPath, (const type##_load_params_t *)loadParams);
-        CE_ASSET_LOADERS(X)
-        #undef X
+        CE_ASSET_LOADERS(CE_ASSET_LOADER)
+        #undef CE_ASSET_LOADER
         default:
             CE_Error("Unknown asset type %d", assetType);
             return NULL;
@@ -25,11 +25,11 @@ CE_Result CE_Engine_FreeAsset(IN void *asset, IN CE_TypeId assetType)
 {
     switch (assetType)
     {
-        #define X(type, ...) \
+        #define CE_ASSET_LOADER(type, ...) \
         case type: \
             return CE_Engine_FreeAsset_##type((CE_ASSET_PTR(type))asset);
-        CE_ASSET_LOADERS(X)
-        #undef X
+        CE_ASSET_LOADERS(CE_ASSET_LOADER)
+        #undef CE_ASSET_LOADER
         default:
             CE_Error("Unknown asset type %d", assetType);
             return CE_ERROR;
