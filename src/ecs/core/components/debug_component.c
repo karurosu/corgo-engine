@@ -10,6 +10,7 @@ CE_DEFINE_COMPONENT_INIT(CE_CORE_DEBUG_COMPONENT)
 {
     component->m_enabled = false;
 #ifdef CE_CORE_TEST_MODE
+    component->m_flagSystemTriggered = false;
     component->m_testValue = 0;
     component->m_testValue2 = 0;
     component->m_ticked_display = false;

@@ -1210,6 +1210,99 @@ void test_ECS_GlobalComponents(void) {
     TEST_ASSERT_EQUAL_INT(1, globalDebugComponentPtr->m_testValue);
 }
 
+void test_ECS_NoStorageSystemTick(void) {
+    CE_ERROR_CODE errorCode = CE_ERROR_CODE_NONE;
+    CE_Result result = CE_ERROR;
+    CE_Id entity = CE_INVALID_ID;
+    CE_Id debugComponentId = CE_INVALID_ID;
+    CE_Id noStorageComponentId = CE_INVALID_ID;
+    CE_Id foundNoStorageComponentId = CE_INVALID_ID;
+    CE_Core_DebugComponent* debugComponent = NULL;
+    void* noStorageComponentData = (void*)1;
+    void* foundNoStorageComponentData = (void*)1;
+
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Engine_SceneGraph_Init(&context, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &entity, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, entity);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    result = CE_Entity_AddComponent(&context, entity, CE_CORE_DEBUG_COMPONENT, &debugComponentId, (void**)&debugComponent, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(debugComponent);
+    TEST_ASSERT_FALSE(debugComponent->m_flagSystemTriggered);
+
+    result = CE_ECS_Tick(&context, 0.0f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_FALSE(debugComponent->m_flagSystemTriggered);
+
+    result = CE_Entity_AddComponent(&context, entity, CE_CORE_NO_STORAGE_COMPONENT_TEST, &noStorageComponentId, &noStorageComponentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_UINT16(CE_NO_STORAGE_COMPONENT_ID, CE_Id_getUniqueId(noStorageComponentId));
+    TEST_ASSERT_NULL(noStorageComponentData);
+
+    result = CE_Entity_FindFirstComponent(&context, entity, CE_CORE_NO_STORAGE_COMPONENT_TEST, &foundNoStorageComponentId, &foundNoStorageComponentData, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_UINT32(noStorageComponentId, foundNoStorageComponentId);
+    TEST_ASSERT_NULL(foundNoStorageComponentData);
+
+    debugComponent->m_flagSystemTriggered = false;
+
+    result = CE_ECS_Tick(&context, 0.0f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_TRUE(debugComponent->m_flagSystemTriggered);
+}
+
+void test_ECS_NoStorageSystemFiltersEntities(void) {
+    CE_ERROR_CODE errorCode = CE_ERROR_CODE_NONE;
+    CE_Result result = CE_ERROR;
+    CE_Id entityWithNoStorage = CE_INVALID_ID;
+    CE_Id entityWithoutNoStorage = CE_INVALID_ID;
+    CE_Id debugComponentId = CE_INVALID_ID;
+    CE_Id secondDebugComponentId = CE_INVALID_ID;
+    CE_Id noStorageComponentId = CE_INVALID_ID;
+    CE_Core_DebugComponent* matchingDebugComponent = NULL;
+    CE_Core_DebugComponent* nonMatchingDebugComponent = NULL;
+
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Engine_SceneGraph_Init(&context, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &entityWithNoStorage, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &entityWithoutNoStorage, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    result = CE_Entity_AddComponent(&context, entityWithNoStorage, CE_CORE_DEBUG_COMPONENT, &debugComponentId, (void**)&matchingDebugComponent, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(matchingDebugComponent);
+
+    result = CE_Entity_AddComponent(&context, entityWithoutNoStorage, CE_CORE_DEBUG_COMPONENT, &secondDebugComponentId, (void**)&nonMatchingDebugComponent, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(nonMatchingDebugComponent);
+
+    result = CE_Entity_AddComponent(&context, entityWithNoStorage, CE_CORE_NO_STORAGE_COMPONENT_TEST, &noStorageComponentId, NULL, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_UINT16(CE_NO_STORAGE_COMPONENT_ID, CE_Id_getUniqueId(noStorageComponentId));
+
+    matchingDebugComponent->m_flagSystemTriggered = false;
+    nonMatchingDebugComponent->m_flagSystemTriggered = false;
+
+    result = CE_ECS_Tick(&context, 0.0f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_TRUE(matchingDebugComponent->m_flagSystemTriggered);
+    TEST_ASSERT_FALSE(nonMatchingDebugComponent->m_flagSystemTriggered);
+}
+
 void test_SceneGraph(void) {
     CE_ERROR_CODE errorCode = CE_ERROR_CODE_COUNT;
     CE_Result result = CE_ERROR;
@@ -1289,6 +1382,8 @@ int main(void) {
 
     RUN_TEST(test_ECS_tick);
     RUN_TEST(test_ECS_GlobalComponents);
+    RUN_TEST(test_ECS_NoStorageSystemTick);
+    RUN_TEST(test_ECS_NoStorageSystemFiltersEntities);
 
     RUN_TEST(test_SceneGraph);
 

@@ -13,6 +13,7 @@
 typedef struct CE_Core_DebugComponent {
     bool m_enabled;
 #ifdef CE_CORE_TEST_MODE
+    bool m_flagSystemTriggered;
     uint8_t m_testValue;
     uint8_t m_testValue2;
     bool m_ticked_display;
@@ -31,9 +32,16 @@ typedef struct CE_Core_GlobalDebugComponent {
 
 // Core components uid range: 0-9
 
+#ifdef CE_CORE_TEST_MODE
+#define CE_COMPONENT_TEST_CORE(CE_COMPONENT_DESC) \
+    CE_NS_COMPONENT_DESC(CE_CORE_NO_STORAGE_COMPONENT_TEST, 1)
+#else
+#define CE_COMPONENT_TEST_CORE(CE_COMPONENT_DESC)
+#endif
+
 #define CE_COMPONENT_DESC_CORE(CE_COMPONENT_DESC) \
 	CE_COMPONENT_DESC(CE_CORE_DEBUG_COMPONENT, 0, CE_Core_DebugComponent, CE_DEFAULT_COMPONENT_CAPACITY)\
-    CE_NS_COMPONENT_DESC(CE_CORE_NO_STORAGE_COMPONENT_TEST, 1)\
+    CE_COMPONENT_TEST_CORE(CE_COMPONENT_DESC)
 
 
 #define CE_GLOBAL_COMPONENT_DESC_CORE(CE_GLOBAL_COMPONENT_DESC) \

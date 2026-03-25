@@ -77,10 +77,11 @@ CE_Result name##_global_run(INOUT struct CE_ECS_Context* context, const IN float
 
 // Called by the dependency list to setup variables
 #define REQUIRE_COMPONENT(componentType, varName) \
+    const CE_ECS_ComponentStaticData* varName##_Desc = &context->m_componentDefinitions[componentType];\
     componentType##_StorageType* varName = NULL;\
     CE_Id varName##_Id = CE_INVALID_ID;\
     CE_ECS_GetComponentForSystem(context, entity, componentType, systemDesc, &varName##_Id, (void**)&varName, errorCode);\
-    if (*errorCode != CE_ERROR_CODE_NONE || varName##_Id == CE_INVALID_ID || varName == NULL) {\
+    if (*errorCode != CE_ERROR_CODE_NONE || varName##_Id == CE_INVALID_ID || (varName == NULL && varName##_Desc->m_initialCapacity != 0)) {\
         CE_Error("Entity %u missing required component type" #componentType " for system", entity);\
         return CE_ERROR;\
     }\
