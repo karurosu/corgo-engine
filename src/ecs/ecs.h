@@ -79,6 +79,21 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
 CE_Result CE_ECS_TickRenderSystems(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode);
 
 /**
+ * @brief Update the ECS and execute all registered debug systems.
+ * 
+ * Advances the ECS simulation by the given delta time, running all
+ * debug systems. Separate from regular tick so debug systems can run at a different frequency or be toggled on/off.
+ * 
+ * @param[in,out] context The ECS context to update.
+ * @param[in] deltaTime Time elapsed since the last tick, in seconds.
+ * @param[out] errorCode Optional error code if update fails.
+ * 
+ * @return CE_OK on success, CE_ERROR on failure.
+
+ */
+CE_Result CE_ECS_TickDebugSystems(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode);
+
+/**
  * @brief Macro: Get the entity being processed in the ECS context.
  * Only valid during component init/cleanup calls.
  * It may return NULL on program termination.

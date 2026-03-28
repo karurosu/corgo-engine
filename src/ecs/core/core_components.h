@@ -20,6 +20,7 @@ typedef struct CE_Core_DebugComponent {
     bool m_ticked_half;
     bool m_ticked_second;
     bool m_ticked_rel;
+    bool m_tickedDebugSystem;
 #endif
 } CE_Core_DebugComponent;
 
@@ -27,6 +28,7 @@ typedef struct CE_Core_GlobalDebugComponent {
     bool m_enabled;
 #ifdef CE_CORE_TEST_MODE
     uint32_t m_testValue;
+    bool m_tickedDebugSystem;
 #endif
 } CE_Core_GlobalDebugComponent;
 

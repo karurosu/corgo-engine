@@ -234,7 +234,7 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
 
     const bool runOncePerSecond = context->m_systemRuntimeData.m_timeSinceLastRun >= 1.0f;
 
-    for (int phase = CE_ECS_SYSTEM_RUN_PHASE_EARLY; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++)
+    for (int phase = CE_ECS_SYSTEM_RUN_PHASE_EARLY; phase < CE_ECS_SYSTEM_RUN_PHASE_DEBUG; phase++)
     {
         // Display
         if (CE_ECS_RunSystemsHelper(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode) != CE_OK) {
@@ -244,6 +244,11 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
         // Half Display
         if (context->m_systemRuntimeData.m_frameCounter % 2 == 0) {
             if (CE_ECS_RunSystemsHelper(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY, errorCode) != CE_OK) {
+                return CE_ERROR;
+            }
+        }
+        else{
+            if (CE_ECS_RunSystemsHelper(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY_ODD, errorCode) != CE_OK) {
                 return CE_ERROR;
             }
         }
@@ -268,7 +273,7 @@ CE_Result CE_ECS_Tick(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT
 CE_Result CE_ECS_TickRenderSystems(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode)
 {
     // Run render systems
-    for (int phase = CE_ECS_SYSTEM_RUN_PHASE_EARLY; phase < CE_ECS_SYSTEM_RUN_PHASE_COUNT; phase++)
+    for (int phase = CE_ECS_SYSTEM_RUN_PHASE_EARLY; phase < CE_ECS_SYSTEM_RUN_PHASE_DEBUG; phase++)
     {
         if (CE_ECS_RunSystems_RenderOrder(context, deltaTime, phase, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode) != CE_OK) {
             return CE_ERROR;
@@ -279,3 +284,30 @@ CE_Result CE_ECS_TickRenderSystems(INOUT CE_ECS_Context* context, IN float delta
     return CE_OK;
 }
 
+CE_Result CE_ECS_TickDebugSystems(INOUT CE_ECS_Context* context, IN float deltaTime, OUT_OPT CE_ERROR_CODE* errorCode)
+{
+    if (!CE_ECS_AccessGlobalComponent(context, CE_CORE_GLOBAL_DEBUG_COMPONENT)->m_enabled) {
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+        return CE_OK;
+    }
+
+    // Display
+    if (CE_ECS_RunSystemsHelper(context, deltaTime, CE_ECS_SYSTEM_RUN_PHASE_DEBUG, CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, errorCode) != CE_OK) {
+        return CE_ERROR;
+    }
+
+    // Half Display
+    if (context->m_systemRuntimeData.m_frameCounter % 2 == 0) {
+        if (CE_ECS_RunSystemsHelper(context, deltaTime, CE_ECS_SYSTEM_RUN_PHASE_DEBUG, CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY, errorCode) != CE_OK) {
+            return CE_ERROR;
+        }
+    }
+    else{
+        if (CE_ECS_RunSystemsHelper(context, deltaTime, CE_ECS_SYSTEM_RUN_PHASE_DEBUG, CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY_ODD, errorCode) != CE_OK) {
+            return CE_ERROR;
+        }
+    }
+
+    CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+    return CE_OK;
+}

@@ -6,6 +6,8 @@
 
 #include "ecs/components.h"
 
+#ifdef CE_DEBUG_BUILD
+
 CE_DEFINE_COMPONENT_INIT(CE_CORE_DEBUG_COMPONENT)
 {
     component->m_enabled = false;
@@ -17,6 +19,7 @@ CE_DEFINE_COMPONENT_INIT(CE_CORE_DEBUG_COMPONENT)
     component->m_ticked_half = false;
     component->m_ticked_second = false;
     component->m_ticked_rel = false;
+    component->m_tickedDebugSystem = false;
 #endif
     return CE_OK;
 }
@@ -30,6 +33,10 @@ CE_DEFINE_COMPONENT_CLEANUP(CE_CORE_DEBUG_COMPONENT)
 CE_DEFINE_GLOBAL_COMPONENT_INIT(CE_CORE_GLOBAL_DEBUG_COMPONENT)
 {
     component->m_enabled = false;
+#ifdef CE_CORE_TEST_MODE
+    component->m_testValue = 0;
+    component->m_tickedDebugSystem = false;
+#endif
     return CE_OK;
 }
 
@@ -39,3 +46,4 @@ CE_DEFINE_GLOBAL_COMPONENT_CLEANUP(CE_CORE_GLOBAL_DEBUG_COMPONENT)
     return CE_OK;
 }
 
+#endif // CE_DEBUG_BUILD

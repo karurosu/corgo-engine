@@ -2,8 +2,8 @@ Non-exhaustive scratchpad-like list of features needing implementation and ideas
 Mostly so I don't forget.
 
 Next:
-- Add zero storage components, aka flags
 - Platform timer abstraction
+- Bitmaps
 
 TODOs:
 - Improve separation of game code 

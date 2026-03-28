@@ -161,6 +161,13 @@ static int update(void* userdata)
 #endif
 	}
 
+#ifdef CE_DEBUG_BUILD
+	if (CE_ECS_TickDebugSystems(ecsContext, deltaTime, &errorCode) != CE_OK) {
+		CE_Error("ECS Tick Debug Systems failed with result code: %d", CE_GetErrorMessage(errorCode));
+		return -1;
+	}
+#endif
+
 #ifdef CE_BACKEND_PLAYDATE
 	pd->system->drawFPS(0,0);
 #endif

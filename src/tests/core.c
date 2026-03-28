@@ -50,8 +50,8 @@ void test_ECS_ContextSetup(void) {
     TEST_ASSERT_TRUE(sysDesc->m_isValid);
     TEST_ASSERT_EQUAL_UINT8(CE_CORE_ENTITY_DEBUG_SYSTEM, sysDesc->m_systemId);
     TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_ORDER_AUTO, sysDesc->m_runOrder);
-    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_PHASE_LATE, sysDesc->m_runPhase);
-    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_FREQUENCY_HALF_DISPLAY, sysDesc->m_runFrequency);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_PHASE_DEBUG, sysDesc->m_runPhase);
+    TEST_ASSERT_EQUAL_INT(CE_ECS_SYSTEM_RUN_FREQUENCY_DISPLAY, sysDesc->m_runFrequency);
     TEST_ASSERT_NOT_NULL(sysDesc->m_runFunction);
     TEST_ASSERT_TRUE(CE_Bitset_isBitSet(&sysDesc->m_requiredComponentBitset, CE_CORE_DEBUG_COMPONENT));
 
