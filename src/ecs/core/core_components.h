@@ -28,7 +28,9 @@ typedef struct CE_Core_GlobalDebugComponent {
     bool m_enabled;
 #ifdef CE_CORE_TEST_MODE
     uint32_t m_testValue;
+    bool m_tickedGlobalSystem;
     bool m_tickedDebugSystem;
+    bool m_tickedComponentDebugSystem;
 #endif
 } CE_Core_GlobalDebugComponent;
 

@@ -35,7 +35,9 @@ CE_DEFINE_GLOBAL_COMPONENT_INIT(CE_CORE_GLOBAL_DEBUG_COMPONENT)
     component->m_enabled = false;
 #ifdef CE_CORE_TEST_MODE
     component->m_testValue = 0;
+    component->m_tickedGlobalSystem = false;
     component->m_tickedDebugSystem = false;
+    component->m_tickedComponentDebugSystem = false;
 #endif
     return CE_OK;
 }

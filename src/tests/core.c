@@ -1200,6 +1200,12 @@ void test_ECS_GlobalComponents(void) {
     TEST_ASSERT_FALSE(globalDebugComponentPtr->m_enabled);
     TEST_ASSERT_EQUAL_INT(0, globalDebugComponentPtr->m_testValue);
 
+    // Tick with a delta of 1.1 seconds, which should trigger the global system, but not change the test value since the global component is disabled
+    result = CE_ECS_Tick(&context, 1.1f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_EQUAL_INT(0, globalDebugComponentPtr->m_testValue);
+
     // Enable debug mode
     globalDebugComponentPtr->m_enabled = true;
 
@@ -1208,6 +1214,83 @@ void test_ECS_GlobalComponents(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_EQUAL_INT(1, globalDebugComponentPtr->m_testValue);
+}
+
+void test_ECS_DebugSystems(void) {
+    CE_ERROR_CODE errorCode = CE_ERROR_CODE_NONE;
+    CE_Result result = CE_ERROR;
+    CE_Id entity = CE_INVALID_ID;
+    CE_Id debugComponentId = CE_INVALID_ID;
+    CE_Core_DebugComponent* debugComponent = NULL;
+
+    // Need to init the scene graph to avoid problems ticking
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_Engine_SceneGraph_Init(&context, &errorCode));
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    CE_ECS_AccessGlobalComponentToVariable(&context, CE_CORE_GLOBAL_DEBUG_COMPONENT, globalDebugComponentPtr);
+    TEST_ASSERT_NOT_NULL(globalDebugComponentPtr);
+    TEST_ASSERT_FALSE(globalDebugComponentPtr->m_tickedDebugSystem);
+    TEST_ASSERT_FALSE(globalDebugComponentPtr->m_tickedComponentDebugSystem);
+    TEST_ASSERT_FALSE(globalDebugComponentPtr->m_tickedGlobalSystem);
+
+    // Need to enable debug mode to tick debug systems
+    globalDebugComponentPtr->m_enabled = true;
+
+    // Tick regular systems and verify debug systems don't tick
+    result = CE_ECS_Tick(&context, 1.1f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_FALSE(globalDebugComponentPtr->m_tickedDebugSystem);
+    TEST_ASSERT_FALSE(globalDebugComponentPtr->m_tickedComponentDebugSystem);
+    TEST_ASSERT_TRUE(globalDebugComponentPtr->m_tickedGlobalSystem);
+
+    // Reset
+    globalDebugComponentPtr->m_tickedDebugSystem = false;
+    globalDebugComponentPtr->m_tickedGlobalSystem = false;
+    globalDebugComponentPtr->m_tickedComponentDebugSystem = false;
+
+    // Ticking debug system should tick global debug system but not component or the global test system
+    result = CE_ECS_TickDebugSystems(&context, 0.0f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_TRUE(globalDebugComponentPtr->m_tickedDebugSystem);
+    TEST_ASSERT_FALSE(globalDebugComponentPtr->m_tickedComponentDebugSystem);
+    TEST_ASSERT_FALSE(globalDebugComponentPtr->m_tickedGlobalSystem);
+
+    // Reset just the global debug marker to isolate regular-system assertions.
+    globalDebugComponentPtr->m_tickedDebugSystem = false;
+    globalDebugComponentPtr->m_tickedGlobalSystem = false;
+    globalDebugComponentPtr->m_tickedComponentDebugSystem = false;
+
+    TEST_ASSERT_EQUAL_INT(CE_OK, CE_ECS_CreateEntity(&context, &entity, &errorCode));
+    TEST_ASSERT_NOT_EQUAL_UINT32(CE_INVALID_ID, entity);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    // No debug component yet, so regular debug system should not trigger.
+    result = CE_ECS_TickDebugSystems(&context, 0.0f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_TRUE(globalDebugComponentPtr->m_tickedDebugSystem);
+    TEST_ASSERT_FALSE(globalDebugComponentPtr->m_tickedComponentDebugSystem);
+    TEST_ASSERT_FALSE(globalDebugComponentPtr->m_tickedGlobalSystem);
+
+    result = CE_Entity_AddComponent(&context, entity, CE_CORE_DEBUG_COMPONENT, &debugComponentId, (void**)&debugComponent, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_NOT_NULL(debugComponent);
+    TEST_ASSERT_FALSE(debugComponent->m_tickedDebugSystem);
+
+    // Reset just the global debug marker to isolate regular-system assertions.
+    globalDebugComponentPtr->m_tickedDebugSystem = false;
+    globalDebugComponentPtr->m_tickedGlobalSystem = false;
+    globalDebugComponentPtr->m_tickedComponentDebugSystem = false;
+
+    result = CE_ECS_TickDebugSystems(&context, 0.0f, &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+    TEST_ASSERT_TRUE(globalDebugComponentPtr->m_tickedComponentDebugSystem);
+    TEST_ASSERT_TRUE(debugComponent->m_tickedDebugSystem);
+    TEST_ASSERT_FALSE(globalDebugComponentPtr->m_tickedGlobalSystem);
 }
 
 void test_ECS_NoStorageSystemTick(void) {
@@ -1382,6 +1465,7 @@ int main(void) {
 
     RUN_TEST(test_ECS_tick);
     RUN_TEST(test_ECS_GlobalComponents);
+    RUN_TEST(test_ECS_DebugSystems);
     RUN_TEST(test_ECS_NoStorageSystemTick);
     RUN_TEST(test_ECS_NoStorageSystemFiltersEntities);
 
