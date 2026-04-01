@@ -24,9 +24,13 @@
 #define CE_ENGINE_ENABLE_ADAPTIVE_RENDERING 1
 
 // The default scene to load on startup, only if CE_ENGINE_SET_START_SCENE is not defined
-#define CE_ENGINE_DEFAULT_SCENE CrankDemo
+#define CE_ENGINE_DEFAULT_SCENE InputDemo
 
 // Default input map size
 #define CE_ENGINE_INPUT_MAP_STACK_SIZE 4
+
+// Debug options (only for debug builds)
+// Show FPS counter
+#define CE_SHOW_FPS 1 
 
 #endif // CORGO_ENGINE_CONFIG_H

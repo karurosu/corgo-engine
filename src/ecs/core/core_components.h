@@ -26,6 +26,7 @@ typedef struct CE_Core_DebugComponent {
 
 typedef struct CE_Core_GlobalDebugComponent {
     bool m_enabled;
+    bool m_showFPS;
 #ifdef CE_CORE_TEST_MODE
     uint32_t m_testValue;
     bool m_tickedGlobalSystem;

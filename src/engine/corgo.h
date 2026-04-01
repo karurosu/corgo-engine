@@ -16,4 +16,9 @@
 #include "input_maps.h"
 #include "input_actions.h"
 
+// Include debug tools
+#ifdef CE_DEBUG_BUILD
+#include "core/debug.h"
+#endif // CE_DEBUG_BUILD
+
 #endif // CORGO_ENGINE_CORGO_H

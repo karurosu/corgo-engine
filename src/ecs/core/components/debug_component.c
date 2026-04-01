@@ -33,6 +33,7 @@ CE_DEFINE_COMPONENT_CLEANUP(CE_CORE_DEBUG_COMPONENT)
 CE_DEFINE_GLOBAL_COMPONENT_INIT(CE_CORE_GLOBAL_DEBUG_COMPONENT)
 {
     component->m_enabled = false;
+    component->m_showFPS = false;
 #ifdef CE_CORE_TEST_MODE
     component->m_testValue = 0;
     component->m_tickedGlobalSystem = false;

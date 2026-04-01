@@ -16,10 +16,7 @@
 #include "engine/core/display.h"
 
 // Include main ECS header
-#include "ecs/ecs.h"
-
-// Include engine config
-#include "engine/config.h"
+#include "engine/corgo.h"
 
 #ifdef CE_ENGINE_INCLUDE_SAMPLE_SCENES
 #include "engine/scenes.h"
@@ -95,6 +92,18 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 			return -1;
 		}
 
+		// Enable debug if in a debug build
+#ifdef CE_DEBUG_BUILD
+		CE_Debug("Enabling debug mode");
+
+		CE_Engine_SetGlobalDebug(ecsContext, true);
+
+#if CE_SHOW_FPS
+		CE_Engine_ShowFPSCounter(ecsContext, true);
+#endif // CE_SHOW_FPS
+
+#endif // CE_DEBUG_BUILD
+
 #ifdef CE_BACKEND_PLAYDATE
 		// Initialize timer
 		pd->system->resetElapsedTime();
@@ -166,10 +175,6 @@ static int update(void* userdata)
 		CE_Error("ECS Tick Debug Systems failed with result code: %d", CE_GetErrorMessage(errorCode));
 		return -1;
 	}
-#endif
-
-#ifdef CE_BACKEND_PLAYDATE
-	pd->system->drawFPS(0,0);
 #endif
 
 	return 1;

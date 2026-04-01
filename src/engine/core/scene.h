@@ -36,7 +36,7 @@ typedef struct CE_Scene
 } CE_Scene;
 
 // Helper function to clear the scene
-static inline void CE_Engine_Scene_Clear(CE_Scene* scene)
+static inline void CE_Engine_Scene_Clear(IN CE_Scene* scene)
 {
     scene->m_id = NULL;
     scene->m_scriptDataComponentType = CE_INVALID_TYPE_ID;
