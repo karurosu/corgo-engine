@@ -24,12 +24,35 @@ void CE_SetPlaydateAPI(PlaydateAPI* pd);
 void CE_Printf(const char* format, ...);
 void CE_SetLoggingEnabled(bool enabled);
 
+#ifdef CE_BACKEND_PLAYDATE
+    #define CE_Error(...) CE_GetPlaydateAPI()->system->error(__VA_ARGS__)
+#else
+    #define CE_Error(...) CE_Printf(__VA_ARGS__)
+#endif
+
+// Timer functions
+/**
+ * @brief Get the elapsed time in seconds since the last reset.
+ * This is useful for measuring frame time and other time intervals.
+ * 
+ * @return Elapsed time in seconds.
+ */
+float CE_GetElapsedTime();
+
+/**
+ * @brief Reset the elapsed time counter to zero.
+ */
+void CE_ResetElapsedTime();
+
+
+// Debug functions
 #ifdef CE_DEBUG_BUILD
-    #ifdef CE_BACKEND_PLAYDATE
-        #define CE_Debug(...) CE_GetPlaydateAPI()->system->logToConsole(__VA_ARGS__)
-    #else
-        #define CE_Debug(...) CE_Printf(__VA_ARGS__)
-    #endif
+
+#ifdef CE_BACKEND_PLAYDATE
+    #define CE_Debug(...) CE_GetPlaydateAPI()->system->logToConsole(__VA_ARGS__)
+#else
+    #define CE_Debug(...) CE_Printf(__VA_ARGS__)
+#endif
   
 /**
  * @brief Intentionally trigger a crash for testing crash logging and reporting.
@@ -42,12 +65,6 @@ void CE_Debug_TriggerCrashForTesting(void);
     #define CE_Debug(...)
     #define CE_Debug_TriggerCrashForTesting() ((void)0)
 #endif // CE_DEBUG_BUILD
-
-#ifdef CE_BACKEND_PLAYDATE
-    #define CE_Error(...) CE_GetPlaydateAPI()->system->error(__VA_ARGS__)
-#else
-    #define CE_Error(...) CE_Printf(__VA_ARGS__)
-#endif
 
 
 #endif // CORGO_ENGINE_CORE_PLATFORM_H

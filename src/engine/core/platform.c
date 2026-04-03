@@ -54,6 +54,24 @@ int putchar_(int c)
 }
 #endif
 
+float CE_GetElapsedTime()
+{
+#ifdef CE_BACKEND_PLAYDATE
+    return CE_GetPlaydateAPI()->system->getElapsedTime();
+#else
+    return 0.0f; // TODO: Implement a proper timer for non-Playdate platforms
+#endif
+}
+
+void CE_ResetElapsedTime()
+{
+#ifdef CE_BACKEND_PLAYDATE
+    CE_GetPlaydateAPI()->system->resetElapsedTime();
+#else
+    // TODO: Implement a proper timer reset for non-Playdate platforms
+#endif
+}
+
 #ifdef CE_DEBUG_BUILD
 void CE_Debug_TriggerCrashForTesting(void)
 {

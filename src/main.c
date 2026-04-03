@@ -1,6 +1,6 @@
 //
 //  main.c
-//  Copyright (c) 2025 Carlos Camacho. All rights reserved.
+//  Copyright (c) 2026 Carlos Camacho. All rights reserved.
 //
 
 #include <stdlib.h>
@@ -46,9 +46,9 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 		CE_SetPlaydateAPI(pd);
 		pd->system->logToConsole("Playdate API: %p", pd);
 		pd->system->logToConsole("Playdate API cached: %p", CE_GetPlaydateAPI());
-		pd->system->resetElapsedTime();
 #endif
-		
+		CE_ResetElapsedTime();		
+
 		CE_Debug("Welcome to Corgo Engine!");
 		CE_Debug("Build Date: %s", CE_BUILD_DATETIME);
 		
@@ -67,14 +67,11 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 			CE_Error("ECS Initialization failed with error code: %s", CE_GetErrorMessage(errorCode));
 			return -1;
 		}
-#ifdef CE_BACKEND_PLAYDATE
-		CE_Debug("Engine Initialized in %f seconds", (double) pd->system->getElapsedTime());
-		pd->system->resetElapsedTime();
-#endif
 
-#ifdef CE_BACKEND_PLAYDATE
-		CE_Debug("Scene Graph Initialized in %f seconds", (double) pd->system->getElapsedTime());
-#endif
+		CE_Debug("Engine Initialized in %f seconds", (double) CE_GetElapsedTime());
+		CE_ResetElapsedTime();
+
+		CE_Debug("Scene Graph Initialized in %f seconds", (double) CE_GetElapsedTime());
 
 		// Setup Screen
 		CE_Display_SetRefreshRate(ecsContext, 60);
@@ -104,11 +101,11 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 
 #endif // CE_DEBUG_BUILD
 
-#ifdef CE_BACKEND_PLAYDATE
 		// Initialize timer
-		pd->system->resetElapsedTime();
+		CE_ResetElapsedTime();
 		lastTickTime = 0.0f;
 
+#ifdef CE_BACKEND_PLAYDATE
 		// Set update callback
 		pd->system->setUpdateCallback(update, pd);
 #endif
@@ -134,13 +131,9 @@ static int update(void* userdata)
 	float deltaTime = 0.0f;
 	CE_ERROR_CODE errorCode;
 
-#ifdef CE_BACKEND_PLAYDATE
-	PlaydateAPI* pd = userdata;
-	
-	currentTime = pd->system->getElapsedTime();
+	currentTime = CE_GetElapsedTime();
 	deltaTime = currentTime - lastTickTime;
 	lastTickTime = currentTime;
-#endif
 
 	if (CE_ECS_Tick(ecsContext, deltaTime, &errorCode) != CE_OK) {
 		CE_Error("ECS Tick failed with result code: %d", CE_GetErrorMessage(errorCode));
