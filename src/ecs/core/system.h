@@ -64,6 +64,7 @@ typedef struct CE_ECS_SystemRuntimeData {
     CE_ECS_System_CacheList_Frequency m_systemsByRunOrder[CE_ECS_SYSTEM_RUN_ORDER_COUNT]; // Cached systems per run order
     float m_timeSinceLastRun; // Time accumulator for systems that run once per second
     uint32_t m_frameCounter; // Frame counter to help with frequency calculations
+    float m_lastTickTime; // Time of last tick, used for delta time calculations
 } CE_ECS_SystemRuntimeData;
 
 // Generate the systems declarations
