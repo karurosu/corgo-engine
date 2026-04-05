@@ -123,6 +123,16 @@ CE_Result CE_Entity_FindAllComponents(INOUT CE_ECS_Context* context, IN CE_Id en
  */
 CE_Result CE_Entity_GetAllComponentsIter(INOUT CE_ECS_Context* context, IN CE_Id entity, OUT CE_Id_Set **components, OUT_OPT CE_ERROR_CODE* errorCode);
 
+/**
+ * @brief Generate a component ID for a no-storage component type.  
+ * No-storage components do not have actual data or storage, so they do not have real component instances. 
+ * This function generates a pseudo-component ID that can be used to represent the presence of a no-storage component on an entity.
+ * 
+ * @param[in] component The component type ID for which to generate the no-storage component ID.
+ * @return A pseudo-component ID representing an instance of the no-storage component type.
+ */
+#define CE_Id_NoStorageComponentId(component) ((component << CE_ID_SHIFT_TYPE) | (CE_ID_COMPONENT_REFERENCE_KIND << CE_ID_SHIFT_KIND) | (CE_NO_STORAGE_COMPONENT_ID << CE_ID_SHIFT_UNIQUE))
+
 ////////////////////////////////////
 /// Global component access functions
 ////////////////////////////////////

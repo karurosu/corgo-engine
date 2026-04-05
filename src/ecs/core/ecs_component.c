@@ -33,10 +33,7 @@ CE_Result CE_Entity_AddComponent(INOUT CE_ECS_Context* context, IN CE_Id entity,
     void *newComponentData = NULL;
 
     // Handle zero storage components
-    if (componentDataPtr->m_initialCapacity == 0) {
-        CE_Id_make(CE_ID_COMPONENT_REFERENCE_KIND, componentType, 0, CE_NO_STORAGE_COMPONENT_ID, &newComponentId);
-    } 
-    else {
+    if (componentDataPtr->m_initialCapacity != 0) {
         context->m_callingContext.m_currentEntity = entity; // Set context to current entity
         result = CE_ECS_MainStorage_createComponent(&context->m_storage, context, componentDataPtr, &newComponentId, &newComponentData, errorCode);
         context->m_callingContext.m_currentEntity = CE_INVALID_ID; // Clear current entity context before possible early return
@@ -50,6 +47,15 @@ CE_Result CE_Entity_AddComponent(INOUT CE_ECS_Context* context, IN CE_Id entity,
     if (result != CE_OK) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_BITSET_INDEX_OUT_OF_BOUNDS);
         return CE_ERROR;
+    }
+
+    // Zero storage components will short circuit everything else for speed
+    if (componentDataPtr->m_initialCapacity == 0) {
+        if (componentId != NULL) {
+            *componentId = CE_Id_NoStorageComponentId(componentType);
+        }
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+        return CE_OK;
     }
 
     if (cc_insert(&entityData->m_components, newComponentId) == NULL)
@@ -92,24 +98,27 @@ CE_Result CE_Entity_RemoveComponent(INOUT CE_ECS_Context* context, IN CE_Id enti
         return CE_ERROR;
     }
 
+    const CE_ECS_ComponentStaticData *componentDataPtr = &context->m_componentDefinitions[componentType];
+    // Handle zero storage components, delete directly and return
+    if (componentDataPtr->m_initialCapacity == 0) {
+        CE_Bitset_clearBit(&entityData->m_entityComponentBitset, componentType);
+        CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_NONE);
+        return CE_OK;
+    }
+
     if (cc_get(&entityData->m_components, componentId) == NULL) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_COMPONENT_NOT_FOUND_IN_ENTITY);
         return CE_ERROR;
     }
 
     // All good, delete
-    const CE_ECS_ComponentStaticData *componentDataPtr = &context->m_componentDefinitions[componentType];
-
-    // Check if its a zero storage component
-    if (componentDataPtr->m_initialCapacity != 0) {
-        context->m_callingContext.m_currentEntity = entity; // Set context to current entity
-        result = CE_ECS_MainStorage_destroyComponent(&context->m_storage, context, componentDataPtr, componentId, errorCode);
-        context->m_callingContext.m_currentEntity = CE_INVALID_ID; // Clear current entity context before possible early return
-        if (result != CE_OK) {
-            return CE_ERROR;
-        }
+    context->m_callingContext.m_currentEntity = entity; // Set context to current entity
+    result = CE_ECS_MainStorage_destroyComponent(&context->m_storage, context, componentDataPtr, componentId, errorCode);
+    context->m_callingContext.m_currentEntity = CE_INVALID_ID; // Clear current entity context before possible early return
+    if (result != CE_OK) {
+        return CE_ERROR;
     }
-
+    
     if (!cc_erase(&entityData->m_components, componentId)) {
         CE_SET_ERROR_CODE(errorCode, CE_ERROR_CODE_INTERNAL_ERROR);
         return CE_ERROR;

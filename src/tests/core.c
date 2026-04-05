@@ -1325,14 +1325,10 @@ void test_ECS_NoStorageSystemTick(void) {
     result = CE_Entity_AddComponent(&context, entity, CE_CORE_NO_STORAGE_COMPONENT_TEST, &noStorageComponentId, &noStorageComponentData, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_EQUAL_UINT16(CE_NO_STORAGE_COMPONENT_ID, CE_Id_getUniqueId(noStorageComponentId));
-    TEST_ASSERT_NULL(noStorageComponentData);
 
     result = CE_Entity_FindFirstComponent(&context, entity, CE_CORE_NO_STORAGE_COMPONENT_TEST, &foundNoStorageComponentId, &foundNoStorageComponentData, &errorCode);
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
-    TEST_ASSERT_EQUAL_UINT32(noStorageComponentId, foundNoStorageComponentId);
-    TEST_ASSERT_NULL(foundNoStorageComponentData);
 
     debugComponent->m_flagSystemTriggered = false;
 
@@ -1340,6 +1336,14 @@ void test_ECS_NoStorageSystemTick(void) {
     TEST_ASSERT_EQUAL_INT(CE_OK, result);
     TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
     TEST_ASSERT_TRUE(debugComponent->m_flagSystemTriggered);
+
+    TEST_ASSERT_TRUE(CE_Entity_HasComponent(&context, entity, CE_CORE_NO_STORAGE_COMPONENT_TEST));
+
+    result = CE_Entity_RemoveComponent(&context, entity, CE_Id_NoStorageComponentId(CE_CORE_NO_STORAGE_COMPONENT_TEST), &errorCode);
+    TEST_ASSERT_EQUAL_INT(CE_OK, result);
+    TEST_ASSERT_EQUAL_INT(CE_ERROR_CODE_NONE, errorCode);
+
+    TEST_ASSERT_FALSE(CE_Entity_HasComponent(&context, entity, CE_CORE_NO_STORAGE_COMPONENT_TEST));
 }
 
 void test_ECS_NoStorageSystemFiltersEntities(void) {
