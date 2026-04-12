@@ -109,6 +109,15 @@
         return CE_ERROR;\
     }
 
+/**
+ * @brief Macro to add an entity to the root of the scene graph.
+ * Prints error and returns CE_ERROR if the operation fails.
+ * 
+ * @param child[in] The child entity ID.
+ * @return void
+ */
+#define CES_ADD_TO_ROOT(child) CES_ADD_CHILD(CES_ROOT_ENTITY, child)
+
 // Scene script shortcuts
 
 /**
@@ -149,6 +158,15 @@
  * @return true if the action is not active, false otherwise.
  */
 #define CES_IA_ISNOTACTIVE(action) ((inputComponent->m_actionStates & CE_IA_MASK(action)) == 0)
+
+/**
+ * @brief Helper macro to check if an input button is currently pressed in the raw input state.
+ * Input Actions are preferred, but this is exposed for simplicity
+ * 
+ * @param button[in] The input button bitmask to check, must be a valid CE_Input_FeatureMask value.
+ * @return true if the button is currently pressed, false otherwise.
+ */
+#define CES_INPUT_IS_PRESSED(button) (inputComponent->m_rawInputsCurrent & button)
 
 /**
  * @brief Macro to enable a specific input feature.
