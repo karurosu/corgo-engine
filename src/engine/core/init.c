@@ -53,6 +53,10 @@ CE_Result CE_Engine_Init(INOUT CE_ECS_Context *context, OUT CE_ERROR_CODE *error
     CE_Engine_ShowFPSCounter(context, true);
 #endif // CE_SHOW_FPS
 
+#if CE_ENGINE_ENABLE_ADAPTIVE_RENDERING
+    CE_Debug("Adaptive rendering enabled");
+#endif // CE_ENGINE_ENABLE_ADAPTIVE_RENDERING
+
 #endif // CE_DEBUG_BUILD
 
     // Initialize timer
@@ -67,7 +71,7 @@ CE_Result CE_Engine_Shutdown(INOUT CE_ECS_Context *context, OUT CE_ERROR_CODE *e
     return CE_ECS_Cleanup(context, errorCode);
 }
 
-CE_Result CE_Engine_Tick(INOUT CE_ECS_Context *context, OUT CE_ERROR_CODE *errorCode)
+CE_Result CE_Engine_Tick(INOUT CE_ECS_Context *context, OUT bool *needsRedraw, OUT CE_ERROR_CODE *errorCode)
 {
     const float currentTime = CE_GetElapsedTime();
 	const float deltaTime = currentTime - context->m_systemRuntimeData.m_lastTickTime;
@@ -82,7 +86,9 @@ CE_Result CE_Engine_Tick(INOUT CE_ECS_Context *context, OUT CE_ERROR_CODE *error
 	if (CE_Engine_SceneGraph_IsDirty(context))
 #endif
 	{
-		// Clear screen before rendering
+        *needsRedraw = true;
+        
+        // Clear screen before rendering
 		CE_Display_Clear(context);
 
 		// Regenerate caches if needed

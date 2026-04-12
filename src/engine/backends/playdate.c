@@ -69,12 +69,13 @@ int eventHandler(PlaydateAPI* pd, PDSystemEvent event, uint32_t arg)
 static int update(void* userdata)
 {
 	CE_ERROR_CODE errorCode;
-    if (CE_Engine_Tick(ecsContext, &errorCode) != CE_OK) {
+	bool needsRedraw = false;
+	if (CE_Engine_Tick(ecsContext, &needsRedraw, &errorCode) != CE_OK) {
         CE_Error("Engine Tick failed with error code: %s", CE_GetErrorMessage(errorCode));
         return -1;
     }
 
-    return 0;
+    return needsRedraw;
 }
 
 #endif // CE_BACKEND_PLAYDATE
