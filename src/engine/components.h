@@ -23,6 +23,7 @@
 #include "components/text_label.h"
 #include "components/transform.h"
 #include "components/sprite.h"
+#include "components/image.h"
 
 // Include demo scene components if sample scenes are enabled
 #ifdef CE_ENGINE_INCLUDE_SAMPLE_SCENES
@@ -41,6 +42,7 @@
 	CE_COMPONENT_DESC(CE_TRANSFORM_COMPONENT, 10, CE_TransformComponent, CE_DEFAULT_COMPONENT_CAPACITY)\
 	CE_COMPONENT_DESC(CE_SPRITE_COMPONENT, 11, CE_SpriteComponent, 32)\
 	CE_COMPONENT_DESC(CE_TEXT_LABEL_COMPONENT, 12, CE_TextLabelComponent, 16)\
+	CE_COMPONENT_DESC(CE_IMAGE_COMPONENT, 13, CE_ImageComponent, 32)\
 	CE_COMPONENT_DESC_SAMPLE_COMPONENTS(CE_COMPONENT_DESC)\
 
 

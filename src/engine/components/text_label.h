@@ -10,8 +10,6 @@
 #include "ecs/types.h"
 #include "engine/assets.h"
 
-#define CE_ENGINE_TEXT_LABEL_BUFFER_SIZE 255
-
 //// Text Label Component
 typedef struct CETextLabelComponent {
 	bool m_inverted;
