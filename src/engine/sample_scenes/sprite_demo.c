@@ -64,7 +64,7 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(SpriteDemo)
         CES_ADD_COMPONENT_EPTR(label, CE_TRANSFORM_COMPONENT, labelTransformComponent);
 
         CES_CHECK_RESULT(
-            CE_TextLabelComponent_setStaticText(context, labelTextComponent, labelTransformComponent, "Moving: Corny"), 
+            CE_TextLabelComponent_setStaticText(context, labelTextComponent, labelTransformComponent, "(A) to switch. Now moving: Corny"), 
             "Failed to set text for TextLabelComponent");
 
         CES_CHECK_RESULT(
@@ -75,6 +75,8 @@ CE_DECLARE_SCENE_CREATE_FUNCTION(SpriteDemo)
             CE_TransformComponent_setPosition(context, labelTransformComponent, 5, CE_GetDisplayHeight(context) - labelTransformComponent->m_height),
             "Failed to set position for TransformComponent");
         
+        CE_TransformComponent_setFlags(labelTransformComponent, CE_TransformComponent_Flags_FixedPosition); // Make the label have a fixed position that doesn't move with the scene graph
+
         CES_ADD_TO_ROOT(label);
 
     }
@@ -90,13 +92,13 @@ CE_DECLARE_SCENE_RUN_FUNCTION(SpriteDemo)
         mode = (mode + 1) % 3; // Cycle through modes
         switch(mode) {
             case 0:
-                CE_TextLabelComponent_setStaticText(context, labelTextComponent, labelTransformComponent, "Moving: Corny");
+                CE_TextLabelComponent_setStaticText(context, labelTextComponent, labelTransformComponent, "(A) to switch. Now moving: Corny");
                 break;
             case 1:
-                CE_TextLabelComponent_setStaticText(context, labelTextComponent, labelTransformComponent, "Moving: Belly");
+                CE_TextLabelComponent_setStaticText(context, labelTextComponent, labelTransformComponent, "(A) to switch. Now moving: Belly");
                 break;
             case 2:
-                CE_TextLabelComponent_setStaticText(context, labelTextComponent, labelTransformComponent, "Moving: Camera");
+                CE_TextLabelComponent_setStaticText(context, labelTextComponent, labelTransformComponent, "(A) to switch. Now moving: Camera");
                 break;
         }
     }

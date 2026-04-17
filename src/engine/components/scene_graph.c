@@ -46,7 +46,7 @@ CE_Result CE_Engine_SceneGraph_Init(CE_ECS_Context* context, CE_ERROR_CODE* erro
             CE_Error("Failed to add TransformComponent to root entity of scene graph");
             return CE_ERROR;
         }
-        transformComponent->m_inSceneGraph = true;
+        CE_TransformComponent_setFlags(transformComponent, CE_TransformComponent_Flags_InSceneGraph);
     }
 
     CE_Debug("Scene graph initialized with root entity ID: %u", sceneGraph->m_rootEntityId);
@@ -86,7 +86,7 @@ CE_Result CE_Scene_AddChild(INOUT CE_ECS_Context* context, IN CE_Id parentId, IN
     if (CE_Entity_FindFirstComponent(context, childId, CE_TRANSFORM_COMPONENT, &componentId, (void**)&transformComp, errorCode) != CE_OK) {
         return CE_ERROR;
     }
-    transformComp->m_inSceneGraph = true;
+    CE_TransformComponent_setFlags(transformComp, CE_TransformComponent_Flags_InSceneGraph);
 
     // Adding a new component needs a redraw
     CE_Engine_SceneGraph_MarkDirty(context);
@@ -116,7 +116,7 @@ CE_Result CE_Scene_RemoveChild(INOUT CE_ECS_Context* context, IN CE_Id parentId,
     if (CE_Entity_FindFirstComponent(context, childId, CE_TRANSFORM_COMPONENT, &componentId, (void**)&transformComp, errorCode) != CE_OK) {
         return CE_ERROR;
     }
-    transformComp->m_inSceneGraph = false;
+    CE_TransformComponent_clearFlags(transformComp, CE_TransformComponent_Flags_InSceneGraph);
 
     // Removing a component needs a redraw
     CE_Engine_SceneGraph_MarkDirty(context);
@@ -200,9 +200,14 @@ CE_Result UpdateRenderListTraverseFunc(IN CE_ECS_Context* context, IN CE_Id enti
         return CE_ERROR;
     }
 
-    const int16_t parentX = parentId == CE_INVALID_ID ? -cameraComponent->m_x : parentRenderNode->m_x;
-    const int16_t parentY = parentId == CE_INVALID_ID ? -cameraComponent->m_y : parentRenderNode->m_y;
-
+    int16_t parentX = 0;
+    int16_t parentY = 0;
+    
+    if (!CE_TransformComponent_hasFixedPosition(transformComponent)) {
+        parentX = parentId == CE_INVALID_ID ? -cameraComponent->m_x : parentRenderNode->m_x;
+        parentY = parentId == CE_INVALID_ID ? -cameraComponent->m_y : parentRenderNode->m_y;
+    }
+    
     CE_SceneGraphRenderNode *renderNode = cc_get(&sceneGraph->m_renderList, CE_Id_getUniqueId(entityId));
 
     if (renderNode != NULL && (renderNode->m_z != transformComponent->m_z)) {
