@@ -12,7 +12,6 @@ TODOs:
 - fast internal access to systems
 - refactor storage cleanup to properly set the entity context
 - early opt out when there are no systems to tick
-- Better backend and main.c
 - Internal version of CE_ECS_MainStorage_getEntityData with less branches
 - reduce error handling on non debug builds
 

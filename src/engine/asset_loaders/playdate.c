@@ -81,6 +81,39 @@ CE_DEFINE_ASSET_LOADER_FREE_FUNCTION(CE_ASSET_TYPE_FONT)
     return CE_OK;
 }
 
+CE_DEFINE_ASSET_LOADER_LOAD_FUNCTION(CE_ASSET_TYPE_BITMAP_TABLE)
+{
+    PlaydateAPI* pd = CE_GetPlaydateAPI();
+    if (!pd || !assetPath)
+    {
+        CE_Error("Invalid parameters to load bitmap table asset");
+        return NULL;
+    }
+
+    const char *err;
+    LCDBitmapTable* table = pd->graphics->loadBitmapTable(assetPath, &err);
+    if (!table)
+    {
+        CE_Error("Failed to load bitmap table asset: %s. Error: %s", assetPath, err ? err : "unknown");
+        return NULL;
+    }
+
+    return table;
+}
+
+CE_DEFINE_ASSET_LOADER_FREE_FUNCTION(CE_ASSET_TYPE_BITMAP_TABLE)
+{
+    PlaydateAPI* pd = CE_GetPlaydateAPI();
+    if (!pd || !asset)
+    {
+        CE_Error("Invalid parameters to free bitmap table asset");
+        return CE_ERROR;
+    }
+
+    pd->graphics->freeBitmapTable(asset);
+    return CE_OK;
+}
+
 CE_GENERATE_ASSET_LOADER_STUB(CE_ASSET_TYPE_SOUND)
 CE_GENERATE_ASSET_LOADER_STUB(CE_ASSET_TYPE_MUSIC)
 

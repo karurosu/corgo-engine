@@ -22,6 +22,7 @@
 typedef enum CE_ASSET_TYPES {
     CE_ASSET_TYPE_INVALID,
     CE_ASSET_TYPE_BITMAP,
+    CE_ASSET_TYPE_BITMAP_TABLE,
     CE_ASSET_TYPE_SOUND,
     CE_ASSET_TYPE_MUSIC,
     CE_ASSET_TYPE_FONT,
@@ -45,14 +46,16 @@ typedef void CE_Asset_LoadParams_None; // Indicate the loader takes no parameter
     // Playdate backend asset loaders
     #define CE_ASSET_LOADERS_ENGINE(CE_ASSET_LOADER) \
         CE_ASSET_LOADER(CE_ASSET_TYPE_BITMAP, LCDBitmap, CE_Asset_LoadParams_None) \
+        CE_ASSET_LOADER(CE_ASSET_TYPE_BITMAP_TABLE, LCDBitmapTable, CE_Asset_LoadParams_None) \
         CE_ASSET_LOADER(CE_ASSET_TYPE_FONT, LCDFont, CE_Asset_LoadParams_None) \
         CE_ASSET_LOADER(CE_ASSET_TYPE_SOUND, void, void) \
-        CE_ASSET_LOADER(CE_ASSET_TYPE_MUSIC, void, void)
+        CE_ASSET_LOADER(CE_ASSET_TYPE_MUSIC, void, void) \
 
 #else 
     // Default loaders (stubs)
     #define CE_ASSET_LOADERS_ENGINE(CE_ASSET_LOADER) \
         CE_ASSET_LOADER(CE_ASSET_TYPE_BITMAP, void, void) \
+        CE_ASSET_LOADER(CE_ASSET_TYPE_BITMAP_TABLE, void, void) \
         CE_ASSET_LOADER(CE_ASSET_TYPE_SOUND, void, void) \
         CE_ASSET_LOADER(CE_ASSET_TYPE_MUSIC, void, void) \
         CE_ASSET_LOADER(CE_ASSET_TYPE_FONT, void, void)

@@ -23,11 +23,11 @@ https://github.com/karurosu/corgo-engine/blob/main/corgo_demo.gif?raw=true
 2. Asset loader: Done
 4. SceneGraph: Done
 5. Scene management: Done
-6. Engine Main loop: Mostly clean, will be updated as needed
-7. Graphics: **WIP**
+6. Engine Main loop: Done
+7. Graphics: Demo
 8. Audio: nothing yet
 9. Input: Done
-11. Playdate backend: minimal, just what is required for the demo
+11. Playdate backend: Demo
 12. PC backend: nothing yet
 13. Entity Streamer: nothing yet
 
